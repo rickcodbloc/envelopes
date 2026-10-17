@@ -794,15 +794,30 @@
 
         .history-item:last-child { border-bottom: none; }
 
-        .history-info { display: flex; flex-direction: column; gap: 4px; }
+        /* Ajustes robustos para evitar transbordamento horizontal e garantir quebra de linha */
+        .history-info { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 4px; 
+            min-width: 0; 
+            flex: 1; 
+        }
         .history-date { font-size: 0.75rem; color: var(--text-muted); }
-        .history-desc { font-size: 0.9rem; color: var(--text-main); font-weight: 500; }
+        .history-desc { 
+            font-size: 0.9rem; 
+            color: var(--text-main); 
+            font-weight: 500; 
+            word-break: break-word; 
+            overflow-wrap: break-word; 
+        }
         .history-amount { font-weight: bold; color: var(--text-main); }
 
         .history-actions {
             display: flex;
             gap: 11px;
             align-items: center;
+            flex-shrink: 0;
+            margin-left: 8px;
         }
 
         .btn-hist-action {
@@ -1454,7 +1469,8 @@
                     <span class="toggle-desc" id="toggle-desc-btn" onclick="toggleDescField()">+ Adicionar descrição</span>
                     <div id="desc-container">
                         <label>Descrição (Opcional)</label>
-                        <input type="text" id="expense-desc" placeholder="Ex: Posto Ipiranga">
+                        <!-- Adicionado maxlength para impedir textos infinitos e distorções -->
+                        <input type="text" id="expense-desc" placeholder="Ex: Posto Ipiranga" maxlength="50">
                     </div>
                 </div>
                 
@@ -4076,7 +4092,7 @@
                             name: env.name.trim(),
                             total: env.total,
                             icon: env.icon ? (env.icon.startsWith('<svg') ? sanitizeSvg(env.icon) : sanitizeHtml(env.icon)) : '📦',
-                            expenses: Array.isArray(env.expenses) ? env.expenses.filter(ex => ex && typeof ex.amount === 'number' && !isNaN(ex.amount)) : [],
+                            expenses: Array.isArray(env.expenses) ? env.expenses.filter(ex => ex && typeof ex === 'amount' && !isNaN(ex.amount)) : [],
                             history: Array.isArray(env.history) ? env.history.filter(h => h && typeof h === 'object' && Array.isArray(h.expenses)) : []
                         }));
 
