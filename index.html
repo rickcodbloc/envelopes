@@ -4092,7 +4092,7 @@
                             name: env.name.trim(),
                             total: env.total,
                             icon: env.icon ? (env.icon.startsWith('<svg') ? sanitizeSvg(env.icon) : sanitizeHtml(env.icon)) : '📦',
-                            expenses: Array.isArray(env.expenses) ? env.expenses.filter(ex => ex && typeof ex === 'amount' && !isNaN(ex.amount)) : [],
+                            expenses: Array.isArray(env.expenses) ? env.expenses.filter(ex => ex && typeof ex === 'object' && typeof ex.amount === 'number' && !isNaN(ex.amount)) : [],
                             history: Array.isArray(env.history) ? env.history.filter(h => h && typeof h === 'object' && Array.isArray(h.expenses)) : []
                         }));
 
