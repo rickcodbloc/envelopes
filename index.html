@@ -138,13 +138,12 @@
 
         html, body {
         height: 100%;
-        height: 100dvh; /* Seu toque excelente para telas mobile */
+        height: 100dvh;
         width: 100%;
         position: fixed;
         overflow: hidden;
         background-color: var(--bg);
 
-        /* Garantia extra para a raiz do navegador */
         -webkit-text-size-adjust: 100%;
         -ms-text-size-adjust: 100%;
         text-size-adjust: 100%;
@@ -330,7 +329,6 @@
         }
 
         .dash-main-value {
-            /* Tamanho clássico original preservado (1.8rem), garantindo a hierarquia visual soberana */
             font-size: 1.8rem;
             font-weight: 700;
             color: var(--text-main);
@@ -341,7 +339,6 @@
         .dash-main-value.danger { color: var(--danger); }
 
         .dash-progress-modern {
-            /* A barra moderna que enxuga o layout horizontalmente: fina (4px), curta (75%) e centralizada */
             width: 75%;
             max-width: 260px;
             height: 4px;
@@ -1326,6 +1323,21 @@
             </div>
         </div>
 
+        <!-- Modal de Confirmação Customizada -->
+        <div id="modal-custom-confirm" class="modal-overlay" style="z-index: 350;">
+            <div class="modal-content" style="max-width: 380px; text-align: center; padding: 24px 20px;">
+                <div id="custom-confirm-icon-container" style="width: 48px; height: 48px; border-radius: 50%; background: rgba(233, 28, 93, 0.12); color: var(--danger); display: flex; align-items: center; justify-content: center; margin: 0 auto 14px auto;">
+                    <svg id="custom-confirm-svg-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+                </div>
+                <h2 id="custom-confirm-title" style="font-size: 1.15rem; margin-bottom: 8px; text-align: center;">Confirmação</h2>
+                <p id="custom-confirm-message" style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 20px; line-height: 1.4; text-align: center;"></p>
+                <div class="modal-buttons" style="margin-top: 0; gap: 10px;">
+                    <button class="btn btn-cancel" onclick="closeCustomConfirm(false)">Cancelar</button>
+                    <button class="btn" id="custom-confirm-ok-btn" onclick="closeCustomConfirm(true)">Excluir</button>
+                </div>
+            </div>
+        </div>
+
         <div id="modal-new-envelope" class="modal-overlay">
             <div class="modal-content">
                 <h2 id="modal-env-title">Criar Novo Envelope</h2>
@@ -1338,52 +1350,52 @@
                     
                      <div class="icon-selector-grid" id="svg-icon-selector">
 
-                        <!-- Ícone 1 — Supermercado: carrinho de compras -->
+                        <!-- Ícone 1 — Supermercado -->
                         <div class="icon-option" onclick="selectSvgIcon('<svg width=\'20\' height=\'20\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.8\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><circle cx=\'9\' cy=\'21\' r=\'1\'/><circle cx=\'20\' cy=\'21\' r=\'1\'/><path d=\'M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6\'/></svg>', this)" title="Supermercado">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
                         </div>
 
-                        <!-- Ícone 2 — Transporte: carro visto de lado, com a base inferior conectada -->
+                        <!-- Ícone 2 — Transporte -->
                         <div class="icon-option" onclick="selectSvgIcon('<svg width=\'20\' height=\'20\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.8\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><path d=\'M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9L18 10l-3-4H9L6 10l-2.5 1.1C2.7 11.3 2 12.1 2 13v3c0 .6.4 1 1 1h2\'/><path d=\'M9 17h6\'/><circle cx=\'7\' cy=\'17\' r=\'2\'/><circle cx=\'17\' cy=\'17\' r=\'2\'/></svg>', this)" title="Transporte">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9L18 10l-3-4H9L6 10l-2.5 1.1C2.7 11.3 2 12.1 2 13v3c0 .6.4 1 1 1h2"/><path d="M9 17h6"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg>
                         </div>
 
-                        <!-- Ícone 3 — Alimentação: símbolo de comida -->
+                        <!-- Ícone 3 — Alimentação -->
                         <div class="icon-option" onclick="selectSvgIcon('<svg width=\'20\' height=\'20\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.8\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><path d=\'M12 2L2 20h20L12 2z\'/><circle cx=\'12\' cy=\'11\' r=\'1.5\'/><circle cx=\'9\' cy=\'15\' r=\'1\'/><circle cx=\'15\' cy=\'15\' r=\'1\'/><path d=\'M2 20c3 1.5 7 2 10 2s7-.5 10-2\'/></svg>', this)" title="Alimentação">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 20h20L12 2z"/><circle cx="12" cy="11" r="1.5"/><circle cx="9" cy="15" r="1"/><circle cx="15" cy="15" r="1"/><path d="M2 20c3 1.5 7 2 10 2s7-.5 10-2"/></svg>
                         </div>
 
-                        <!-- Ícone 4 — Educação e Leitura: livro com marcador -->
+                        <!-- Ícone 4 — Educação e Leitura -->
                         <div class="icon-option" onclick="selectSvgIcon('<svg width=\'20\' height=\'20\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.8\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><path d=\'M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z\'/><path d=\'M10 2v6l3-2 3 2V2\'/></svg>', this)" title="Educação e Leitura">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/><path d="M10 2v6l3-2 3 2V2"/></svg>
                         </div>
 
-                        <!-- Ícone 5 — Saúde: coração com sinal de adição -->
+                        <!-- Ícone 5 — Saúde -->
                         <div class="icon-option" onclick="selectSvgIcon('<svg width=\'20\' height=\'20\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.8\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><path d=\'M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z\'/><polyline points=\'12 9 12 15\'/><polyline points=\'9 12 15 12\'/></svg>', this)" title="Saúde">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/><polyline points="12 9 12 15"/><polyline points="9 12 15 12"/></svg>
                         </div>
 
-                        <!-- Ícone 6 — Compras e Lojas: sacola de compras -->
+                        <!-- Ícone 6 — Compras e Lojas -->
                         <div class="icon-option" onclick="selectSvgIcon('<svg width=\'20\' height=\'20\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.8\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><path d=\'M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z\'/><line x1=\'3\' y1=\'6\' x2=\'21\' y2=\'6\'/><path d=\'M16 10a4 4 0 0 1-8 0\'/></svg>', this)" title="Compras e Lojas">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
                         </div>
 
-                        <!-- Ícone 7 — Trabalho: maleta profissional -->
+                        <!-- Ícone 7 — Trabalho -->
                         <div class="icon-option" onclick="selectSvgIcon('<svg width=\'20\' height=\'20\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.8\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><rect x=\'2\' y=\'7\' width=\'20\' height=\'14\' rx=\'2\' ry=\'2\'/><path d=\'M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16\'/></svg>', this)" title="Trabalho">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
                         </div>
 
-                        <!-- Ícone 8 — Cosméticos: frasco de produto de beleza -->
+                        <!-- Ícone 8 — Cosméticos -->
                         <div class="icon-option" onclick="selectSvgIcon('<svg width=\'20\' height=\'20\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.8\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><path d=\'M7 10v10a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V10Z\'/><path d=\'M10 10V6a2 2 0 0 1 2-2v0a2 2 0 0 1 2 2v4\'/><path d=\'M10 2h4\'/></svg>', this)" title="Cosméticos">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10v10a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V10Z"/><path d="M10 10V6a2 2 0 0 1 2-2v0a2 2 0 0 1 2 2v4"/><path d="M10 2h4"/></svg>
                         </div>
 
-                        <!-- Ícone 9 — Cartão: cartão financeiro -->
+                        <!-- Ícone 9 — Cartão -->
                         <div class="icon-option" onclick="selectSvgIcon('<svg width=\'20\' height=\'20\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.8\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><rect x=\'1\' y=\'4\' width=\'22\' height=\'16\' rx=\'2\' ry=\'2\'/><line x1=\'1\' y1=\'10\' x2=\'23\' y2=\'10\'/></svg>', this)" title="Cartão">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
                         </div>
 
-                        <!-- Ícone 10 — Eletrônicos e Relógios: relógio de pulso -->
+                        <!-- Ícone 10 — Eletrônicos e Relógios -->
                         <div class="icon-option" onclick="selectSvgIcon('<svg width=\'20\' height=\'20\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.8\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><rect x=\'6\' y=\'5\' width=\'12\' height=\'14\' rx=\'3\'/><path d=\'M10 2h4v3h-4zM10 19h4v3h-4z\'/><path d=\'M18 10h1v4h-1\'/></svg>', this)" title="Eletrônicos e Relógios">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="5" width="12" height="14" rx="3"/><path d="M10 2h4v3h-4zM10 19h4v3h-4z"/><path d="M18 10h1v4h-1"/></svg>
                         </div>
@@ -1553,6 +1565,16 @@
     <script>
         const svgDefault = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4H3a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h18a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2Z"/><path d="M16 12h2"/><path d="M12 12h.01"/></svg>';
 
+        let envelopes = [];
+        let fixedExpenses = [];
+        let creditInstallments = [];
+        let tempEnvelopes = [];
+        let tempFixedExpenses = [];
+        let tempCreditInstallments = [];
+        let currentSelectedSvg = null;
+        let currentHistoryEnvId = null;
+        let pendingImportData = { envelopes: [], fixedExpenses: [], creditInstallments: [] };
+
         const sanitizeHtml = (str) => {
             if (!str || typeof str !== 'string') return '';
             return str.replace(/[&<>'"]/g, 
@@ -1560,13 +1582,11 @@
             );
         };
 
-        // Sanitização profissional: bloqueia vetores ativos de XSS sem engessar atributos visuais ou quebrar navegadores
         const sanitizeSvg = (svgStr) => {
             if (!svgStr || typeof svgStr !== 'string') return svgDefault;
             const trimmed = svgStr.trim();
             if (!trimmed.startsWith('<svg') || !trimmed.endsWith('</svg>')) return sanitizeHtml(svgStr);
             
-            // Bloqueio cirúrgico apenas de ameaças reais de execução de código
             if (
                 /<\s*script/i.test(trimmed) || 
                 /<\s*style/i.test(trimmed) ||
@@ -1582,8 +1602,7 @@
             return trimmed;
         };
 
-        // CARREGAMENTO SEGURO COM BACKUP DE DADOS CORROMPIDOS (Ponto 2)
-        let envelopes = [];
+        // CARREGAMENTO SEGURO
         try {
             const rawEnv = localStorage.getItem('myEnvelopes');
             if (rawEnv) {
@@ -1608,7 +1627,6 @@
             envelopes = [];
         }
 
-        let fixedExpenses = [];
         try {
             const rawFixed = localStorage.getItem('myFixedExpenses');
             if (rawFixed) {
@@ -1630,7 +1648,6 @@
             fixedExpenses = [];
         }
 
-        let creditInstallments = [];
         try {
             const rawCredit = localStorage.getItem('myCreditInstallments');
             if (rawCredit) {
@@ -1661,7 +1678,6 @@
         let appTheme = localStorage.getItem('myAppTheme') || 'purple';
         document.body.setAttribute('data-theme', appTheme);
 
-        // Configuração inicial e persistência do Modo de Exibição (Automático, Claro, Escuro)
         let savedColorMode = localStorage.getItem('myColorMode') || 'auto';
         if (savedColorMode !== 'auto') {
             document.body.setAttribute('data-color-mode', savedColorMode);
@@ -1690,7 +1706,6 @@
             });
         };
 
-        // CONFIGURAÇÕES E ZOOM (ACESSIBILIDADE)
         const applyZoomSetting = (allowZoom) => {
             const viewportMeta = document.querySelector('meta[name="viewport"]');
             if (viewportMeta) {
@@ -1727,7 +1742,6 @@
             localStorage.setItem('myAppTheme', theme);
         };
 
-        // CICLO DE PARCELAMENTOS E TEMPO SEGURO (Ponto 5)
         const processInstallmentsAutoUpdate = () => {
             const now = new Date();
             const curYear = now.getFullYear();
@@ -1819,7 +1833,6 @@
         });
         if (dataUpdated) localStorage.setItem('myEnvelopes', JSON.stringify(envelopes));
 
-        // PARSER MONETÁRIO RIGOROSO (Ponto 3): Rejeita prefixos arbitrários e valida formato completo brasileiro
         const parseBrNumber = (str) => {
             if (str === undefined || str === null) return NaN;
             const trimmed = str.toString().trim();
@@ -1858,7 +1871,6 @@
             return val;
         };
 
-        // 1. NORMALIZAÇÃO INTELIGENTE: Aceita bancos padrão, PicPay ou cria nomes personalizados limpos
         const normalizeBankName = (rawInput) => {
             if (!rawInput || typeof rawInput !== 'string') return 'Outros';
             
@@ -1889,7 +1901,6 @@
             return trimmed.charAt(0).toUpperCase() + trimmed.slice(1);
         };
 
-        // 2. LIMITADOR DE VALOR AO VIVO (MANTIDO OBRIGATORIAMENTE)
         const setupLiveValueLimit = (elementId) => {
             const el = document.getElementById(elementId);
             if (!el) return;
@@ -1901,7 +1912,6 @@
             });
         };
 
-        // 3. LISTA DINÂMICA: Combina os padrões (incluindo PicPay) + apenas os personalizados que EXISTEM em parcelamentos ativos
         const getAvailableBanks = () => {
             const defaults = [
                 "Nubank", "Itaú", "Bradesco", "Santander", "Banco do Brasil", 
@@ -1929,8 +1939,6 @@
                 }
 
                 const availableBanks = getAvailableBanks();
-
-                // BUSCA INTELIGENTE: Verifica se o banco começa com a query OU se alguma palavra interna relevante começa com ela
                 const matches = availableBanks.filter(bank => {
                     const normalizedBank = bank.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
                     const words = normalizedBank.split(' ');
@@ -1951,7 +1959,6 @@
                         item.onmouseover = () => item.style.background = 'var(--primary-light-bg)';
                         item.onmouseout = () => item.style.background = 'transparent';
                         
-                        // Ao clicar na sugestão, preenche o campo e fecha o menu instantaneamente
                         item.onclick = () => {
                             cardInput.value = bank;
                             cardDropdown.style.display = 'none';
@@ -1967,7 +1974,6 @@
                 }
             });
 
-            // Fecha o menu de sugestões se o usuário clicar fora dele
             document.addEventListener('click', (e) => {
                 if (!cardInput.contains(e.target) && !cardDropdown.contains(e.target)) {
                     cardDropdown.style.display = 'none';
@@ -1982,7 +1988,16 @@
         const formatDate = (isoString) => {
             const d = new Date(isoString);
             if (isNaN(d.getTime())) return '';
-            return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth()+1).toString().padStart(2, '0')} às ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+            const day = d.getDate().toString().padStart(2, '0');
+            const month = (d.getMonth() + 1).toString().padStart(2, '0');
+            const year = d.getFullYear();
+            const currentYear = new Date().getFullYear();
+            const timeStr = `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+
+            if (year !== currentYear) {
+                return `${day}/${month}/${year} às ${timeStr}`;
+            }
+            return `${day}/${month} às ${timeStr}`;
         };
 
         const updateApp = () => {
@@ -2262,11 +2277,11 @@
                 return;
             }
 
-            if (confirm(`Deseja realmente excluir os ${selectedIds.length} envelope(s) selecionado(s)? Os históricos associados serão removidos.`)) {
+            showCustomConfirm('Excluir Envelopes', `Deseja realmente excluir os ${selectedIds.length} envelope(s) selecionado(s)? Os históricos associados serão removidos.`, () => {
                 envelopes = envelopes.filter(env => !selectedIds.includes(env.id));
                 updateApp();
                 closeModal('modal-multi-delete');
-            }
+            });
         };
 
         const openRestoreModal = () => openModal('modal-restore');
@@ -2285,7 +2300,6 @@
             alert('O aplicativo foi restaurado aos padrões com sucesso.');
         };
 
-        // --- MÓDULO: DESPESAS FIXAS ---
         const setFixedFormVisible = (show) => {
             const container = document.getElementById('fixed-form-container');
             const btn = document.getElementById('toggle-fixed-form-btn');
@@ -2442,16 +2456,16 @@
         };
 
         const deleteFixedExpense = (id) => {
-            if (confirm('Deseja excluir esta despesa fixa?')) {
+            showCustomConfirm('Excluir Despesa', 'Deseja realmente excluir esta despesa fixa?', () => {
                 fixedExpenses = fixedExpenses.filter(item => item.id !== id);
                 localStorage.setItem('myFixedExpenses', JSON.stringify(fixedExpenses));
                 renderFixedExpensesList();
-                
+
                 const isSmallScreen = window.innerWidth <= 600;
                 if (isSmallScreen && fixedExpenses.length < 2) {
                     setFixedFormVisible(true);
                 }
-            }
+            });
         };
 
         const openFixedReorderModal = () => {
@@ -2528,7 +2542,6 @@
             openFixedExpensesModal();
         };
 
-        // --- MÓDULO: PARCELAMENTOS (Agrupamento com Map/Null-Prototype e ciclo seguro) ---
         const setCreditFormVisible = (show) => {
             const container = document.getElementById('credit-form-container');
             const btn = document.getElementById('toggle-credit-form-btn');
@@ -2547,23 +2560,9 @@
             setCreditFormVisible(isHidden);
         };
 
-        const onCreditCardSelectChange = () => {
-            const sel = document.getElementById('credit-item-card-select');
-            const customInput = document.getElementById('credit-item-card-custom');
-            if (sel.value === 'Outros') {
-                customInput.style.display = 'block';
-                customInput.focus();
-            } else {
-                customInput.style.display = 'none';
-                customInput.value = '';
-            }
-        };
-
         const openCreditInstallmentsModal = () => {
             renderCreditInstallmentsList();
             
-            // Regra nova: Se não tem nenhum parcelamento, abre o formulário. 
-            // Se já tiver 1 ou mais, oculta o formulário e mostra só o botão de adicionar.
             if (creditInstallments.length === 0) {
                 setCreditFormVisible(true);
             } else {
@@ -2578,7 +2577,6 @@
             document.getElementById('credit-item-total').value = '';
             document.getElementById('credit-item-card-input').value = '';
             
-            // Garante que o menu customizado de bancos comece fechado ao abrir a modal
             const dropdown = document.getElementById('custom-bank-dropdown');
             if (dropdown) dropdown.style.display = 'none';
 
@@ -2629,7 +2627,6 @@
                 activeCount++;
             });
 
-            // AGRUPAMENTO COM OBJETO SEM PROTÓTIPO (Ponto 6)
             const groupedActive = Object.create(null);
             activeItems.forEach(item => {
                 const rawCard = (item.cardName || 'Outros').trim();
@@ -2774,15 +2771,13 @@
             document.getElementById('credit-item-dueday').value = item.dueDateDay;
             document.getElementById('credit-item-current').value = item.currentInstallment;
             document.getElementById('credit-item-total').value = item.totalInstallments;
-            
-            // Define o banco no novo input de texto unificado com sugestões
             document.getElementById('credit-item-card-input').value = item.cardName || 'Outros';
 
             document.getElementById('credit-submit-btn').innerText = 'Salvar Alteração';
             setCreditFormVisible(true);
         };
 
-            const saveCreditInstallment = () => {
+        const saveCreditInstallment = () => {
             const editId = document.getElementById('edit-credit-id').value;
             const name = document.getElementById('credit-item-name').value.trim();
             const amountStr = document.getElementById('credit-item-amount').value.trim();
@@ -2791,7 +2786,6 @@
             const currentInstallment = parseInt(document.getElementById('credit-item-current').value, 10);
             const totalInstallments = parseInt(document.getElementById('credit-item-total').value, 10);
             
-            // Captura o texto do input unificado e aplica a normalização inteligente do banco
             const rawCardInput = document.getElementById('credit-item-card-input').value;
             const cardName = normalizeBankName(rawCardInput);
 
@@ -2845,7 +2839,7 @@
         };
 
         const deleteCreditInstallment = (id) => {
-            if (confirm('Deseja excluir este parcelamento?')) {
+            showCustomConfirm('Excluir Parcelamento', 'Deseja realmente excluir este parcelamento?', () => {
                 creditInstallments = creditInstallments.filter(item => item.id !== id);
                 localStorage.setItem('myCreditInstallments', JSON.stringify(creditInstallments));
                 renderCreditInstallmentsList();
@@ -2854,7 +2848,7 @@
                 if (isSmallScreen && creditInstallments.length < 2) {
                     setCreditFormVisible(true);
                 }
-            }
+            });
         };
 
         const openCreditReorderModal = () => {
@@ -2931,7 +2925,6 @@
             openCreditInstallmentsModal();
         };
 
-        // --- RELATÓRIO FINANCEIRO (Correção de escape duplicado e comparação equivalente - Pontos 4 e 5) ---
         const openFinancialReportModal = () => {
             const container = document.getElementById('financial-report-body');
             container.innerHTML = '';
@@ -3080,7 +3073,6 @@
                 });
 
                 Object.values(groupedActive).forEach(group => {
-                    // ALTERADO AQUI: Usando fundo e cor neutros em vez da cor do tema
                     creditBreakdownHtml += `
                         <div style="font-size: 0.85rem; font-weight: 700; color: var(--text-main); background: var(--border-color); padding: 6px 10px; border-radius: 6px; margin-top: 8px; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center;">
                             <span>💳 ${sanitizeHtml(group.displayName)} (${group.items.length})</span>
@@ -3305,7 +3297,6 @@
                 const grandPercentSpent = grandTotal > 0 ? (grandSpent / grandTotal) * 100 : 0;
                 const grandBarWidth = Math.min(grandPercentSpent, 100);
 
-                // Define a largura inicial em 0% e anima suavemente para a largura real
                 dashProgressFill.style.width = '0%';
                 requestAnimationFrame(() => {
                     requestAnimationFrame(() => {
@@ -3403,10 +3394,12 @@
 
         document.getElementById('expense-date').addEventListener('input', function(e) {
             let value = e.target.value.replace(/\D/g, '');
-            if (value.length > 2 && value.length <= 4) {
-                value = value.replace(/(\d{2})(\d+)/, '$1/$2');
-            } else if (value.length > 4) {
-                value = value.replace(/(\d{2})(\d{2})(\d+)/, '$1/$2/$3');
+            if (value.length > 8) value = value.slice(0, 8);
+            
+            if (value.length > 4) {
+                value = value.replace(/^(\d{2})(\d{2})(\d{1,4})$/, '$1/$2/$3');
+            } else if (value.length > 2) {
+                value = value.replace(/^(\d{2})(\d{1,2})$/, '$1/$2');
             }
             e.target.value = value;
         });
@@ -3498,20 +3491,26 @@
             let expDateIso = baseDate.toISOString();
             if (dateVal) {
                 const parts = dateVal.split('/');
-                if (parts.length === 3 && parts[2].length === 4) {
+                if (parts.length === 3 && parts[0].length === 2 && parts[1].length === 2 && parts[2].length === 4) {
                     const day = parseInt(parts[0], 10);
                     const month = parseInt(parts[1], 10) - 1;
                     const year = parseInt(parts[2], 10);
+
+                    if (year < 2000 || year > 2100 || month < 0 || month > 11 || day < 1 || day > 31) {
+                        alert('Data inválida. Verifique o dia, mês e ano informados.');
+                        return;
+                    }
+
                     const selectedDate = new Date(year, month, day, baseDate.getHours(), baseDate.getMinutes(), baseDate.getSeconds());
                     
                     if (!isNaN(selectedDate.getTime()) && selectedDate.getFullYear() === year && selectedDate.getMonth() === month && selectedDate.getDate() === day) {
                         expDateIso = selectedDate.toISOString();
                     } else {
-                        alert('Data inválida (verifique o dia e o mês informados).');
+                        alert('Data inválida (este dia não existe no mês informado).');
                         return;
                     }
                 } else {
-                    alert('Formato de data incompleto. Use DD/MM/AAAA');
+                    alert('Formato de data incompleto ou incorreto. Use DD/MM/AAAA');
                     return;
                 }
             }
@@ -3679,25 +3678,25 @@
             const periodVal = document.getElementById('history-period-select').value;
             if (periodVal === 'current' || !currentHistoryEnvId) return;
 
-            if (confirm('Deseja realmente apagar permanentemente este mês arquivado do histórico?')) {
+            showCustomConfirm('Excluir Histórico', 'Deseja realmente apagar permanentemente este mês arquivado do histórico?', () => {
                 const envIndex = envelopes.findIndex(e => e.id === currentHistoryEnvId);
                 if (envIndex !== -1 && Array.isArray(envelopes[envIndex].history)) {
                     envelopes[envIndex].history = envelopes[envIndex].history.filter(h => h && h.id != periodVal);
                     updateApp();
                     openHistoryModal(currentHistoryEnvId, 'current');
                 }
-            }
+            });
         };
 
         const deleteExpense = (envId, expenseId) => {
-            if (confirm('Deseja excluir este lançamento?')) {
+            showCustomConfirm('Excluir Lançamento', 'Deseja realmente excluir este lançamento?', () => {
                 const envIndex = envelopes.findIndex(e => e.id === envId);
                 if (envIndex !== -1 && Array.isArray(envelopes[envIndex].expenses)) {
                     envelopes[envIndex].expenses = envelopes[envIndex].expenses.filter(e => e && e.id !== expenseId);
                     updateApp();
                     openHistoryModal(envId, 'current');
                 }
-            }
+            });
         };
 
         const openEnvelopeModal = (envId = null) => {
@@ -3724,7 +3723,6 @@
                     currentSelectedSvg = sanitizeSvg(env.icon);
                     iconField.value = '📦';
                     
-                    // Normalização rigorosa: remove todas as aspas e barras para o match funcionar perfeitamente
                     const cleanEnvIcon = env.icon.replace(/['"\\]/g, '').trim();
                     document.querySelectorAll('.icon-option').forEach(el => {
                         const onclickAttr = el.getAttribute('onclick') || '';
@@ -3848,10 +3846,10 @@
         };
 
         const deleteEnvelope = (id) => {
-            if (confirm('Tem certeza que deseja excluir este envelope? O histórico dele será apagado.')) {
+            showCustomConfirm('Excluir Envelope', 'Tem certeza que deseja excluir este envelope? O histórico dele será apagado.', () => {
                 envelopes = envelopes.filter(env => env.id !== id);
                 updateApp();
-            }
+            });
         };
 
         const updateExportFormatView = () => {
@@ -4254,16 +4252,48 @@
             pendingImportData = { envelopes: [], fixedExpenses: [], creditInstallments: [] };
         };
 
+        let customConfirmCallback = null;
+
+        const showCustomConfirm = (title, message, callback, btnText = 'Excluir', isDanger = true) => {
+            document.getElementById('custom-confirm-title').innerText = title;
+            document.getElementById('custom-confirm-message').innerText = message;
+            
+            const okBtn = document.getElementById('custom-confirm-ok-btn');
+            okBtn.innerText = btnText;
+            
+            const iconContainer = document.getElementById('custom-confirm-icon-container');
+            if (isDanger) {
+                iconContainer.style.background = 'rgba(233, 28, 93, 0.12)';
+                iconContainer.style.color = 'var(--danger)';
+                okBtn.className = 'btn btn-danger';
+            } else {
+                iconContainer.style.background = 'var(--primary-light-bg)';
+                iconContainer.style.color = 'var(--primary)';
+                okBtn.className = 'btn btn-confirm';
+            }
+
+            customConfirmCallback = callback;
+            openModal('modal-custom-confirm');
+        };
+
+        const closeCustomConfirm = (confirmed) => {
+            closeModal('modal-custom-confirm');
+            if (confirmed && typeof customConfirmCallback === 'function') {
+                customConfirmCallback();
+            }
+            customConfirmCallback = null;
+        };
+
+        // Renderização inicial e registro do Service Worker
         renderEnvelopes();
 
         if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('./sw.js') // <- Correto: caminho relativo universal
-                .then(reg => console.log('Service Worker registrado:', reg.scope))
-                .catch(err => console.error('Erro ao registrar Service Worker:', err));
-        });
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('Service Worker registrado:', reg.scope))
+                    .catch(err => console.error('Erro ao registrar Service Worker:', err));
+            });
         }
-
     </script>
 </body>
 </html>
