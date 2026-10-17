@@ -1315,7 +1315,7 @@
                     <p>Funciona 100% offline, sem servidores externos ou cadastro. Seus dados ficam armazenados localmente no dispositivo, com opções de exportação e importação de backups.</p>
 
                     <div style="border-top: 1px solid var(--border-color); padding-top: 10px; margin-top: 4px; font-size: 0.85rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 4px;">
-                        <span><strong>Versão:</strong> 3.0</span>
+                        <span><strong>Versão:</strong> 3.6</span>
                         <span><strong>Desenvolvedor:</strong> Ricardo Soares</span>
                         <span>© 2026 | Todos os direitos reservados.</span>
                     </div>
@@ -3287,7 +3287,13 @@
                 const grandPercentSpent = grandTotal > 0 ? (grandSpent / grandTotal) * 100 : 0;
                 const grandBarWidth = Math.min(grandPercentSpent, 100);
 
-                dashProgressFill.style.width = `${grandBarWidth}%`;
+                // Define a largura inicial em 0% e anima suavemente para a largura real
+                dashProgressFill.style.width = '0%';
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        dashProgressFill.style.width = `${grandBarWidth}%`;
+                    });
+                });
 
                 if (grandAvailable >= 0 || grandTotal === 0) {
                     dashAvailableEl.innerText = formatCurrency(grandAvailable);
