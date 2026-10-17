@@ -3207,7 +3207,25 @@
 
             if (envelopes.length === 0) {
                 dashboard.style.display = 'none';
-                list.innerHTML = '<p style="text-align:center; color:var(--text-muted); margin-top:40px; grid-column: 1 / -1;">Você ainda não tem envelopes.<br>Clique no + para criar.</p>';
+                list.innerHTML = `
+                    <div style="grid-column: 1 / -1; max-width: 360px; margin: 10px auto 16px auto; padding: 0 12px; color: var(--text-muted); font-size: 0.83rem; line-height: 1.45;">
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <div style="display: flex; gap: 8px; align-items: flex-start;">
+                                <span style="font-weight: 600; color: var(--text-muted); flex-shrink: 0;">1.</span>
+                                <span>Crie envelopes virtuais para separar seu orçamento e registrar gastos diários (dinheiro, cartão, Pix).</span>
+                            </div>
+                            <div style="display: flex; gap: 8px; align-items: flex-start;">
+                                <span style="font-weight: 600; color: var(--text-muted); flex-shrink: 0;">2.</span>
+                                <span>Controle despesas fixas, compras parceladas e faça backups por exportação/importação.</span>
+                            </div>
+                            <div style="display: flex; gap: 8px; align-items: flex-start;">
+                                <span style="font-weight: 600; color: var(--text-muted); flex-shrink: 0;">3.</span>
+                                <span>Acompanhe insights financeiros e o término automático de parcelamentos.</span>
+                            </div>
+                        </div>
+                    </div>
+                    <p style="text-align:center; color:var(--text-muted); margin-top:10px; grid-column: 1 / -1;">Você ainda não tem envelopes.<br>Clique no + para criar.</p>
+                `;
             } else {
                 dashboard.style.display = 'flex';
                 let grandTotal = 0;
