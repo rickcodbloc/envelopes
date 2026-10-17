@@ -172,11 +172,15 @@
         }
 
         @media (min-width: 600px) {
-            #app-container { max-width: 768px; }
+            #app-container { max-width: 780px; } /* Espaço para 2 colunas */
         }
 
         @media (min-width: 900px) {
-            #app-container { max-width: 960px; }
+            #app-container { max-width: 1200px; } /* Espaço para 3 colunas */
+        }
+
+        @media (min-width: 1280px) {
+            #app-container { max-width: 1620px; } /* Espaço para até 4 colunas confortáveis */
         }
 
         header {
@@ -371,17 +375,17 @@
             padding-right: max(14px, calc(10px + env(safe-area-inset-right)));
             padding-bottom: max(32px, calc(20px + env(safe-area-inset-bottom))); 
             display: grid;
-            grid-template-columns: 1fr;
-            gap: 12px;
+            grid-template-columns: 1fr; /* 1 coluna padrão (telemóvel / iPhone) */
+            gap: 16px;
             align-content: start;
+            justify-content: center;
         }
 
-        @media (min-width: 600px) {
-            #envelope-list { grid-template-columns: repeat(2, 1fr); }
-        }
-
-        @media (min-width: 900px) {
-            #envelope-list { grid-template-columns: repeat(3, 1fr); }
+        @media (min-width: 768px) {
+            #envelope-list {
+                grid-template-columns: repeat(auto-fit, 380px);
+                justify-content: center;
+            }
         }
 
         .envelope-card {
