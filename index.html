@@ -424,6 +424,16 @@
             flex: 1;
         }
 
+        @media (max-width: 600px) {
+            .full-view-container {
+                padding: 8px !important;
+            }
+            .full-view-content {
+                padding: 14px !important;
+                border-radius: 12px !important;
+            }
+        }
+
         .envelope-card {
             background-color: var(--card-bg);
             border-radius: 16px;
@@ -1422,33 +1432,43 @@
                     <span class="icon-selector-toggle" onclick="toggleIconGrid()">✨ Escolher ícones do sistema</span>
                     
                      <div class="icon-selector-grid" id="svg-icon-selector">
+                        <!-- Supermercado -->
                         <div class="icon-option" onclick="selectSvgIcon('<svg width=\'20\' height=\'20\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.8\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><circle cx=\'9\' cy=\'21\' r=\'1\'/><circle cx=\'20\' cy=\'21\' r=\'1\'/><path d=\'M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6\'/></svg>', this)" title="Supermercado">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
                         </div>
+                        <!-- Transporte -->
                         <div class="icon-option" onclick="selectSvgIcon('<svg width=\'20\' height=\'20\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.8\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><path d=\'M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9L18 10l-3-4H9L6 10l-2.5 1.1C2.7 11.3 2 12.1 2 13v3c0 .6.4 1 1 1h2\'/><path d=\'M9 17h6\'/><circle cx=\'7\' cy=\'17\' r=\'2\'/><circle cx=\'17\' cy=\'17\' r=\'2\'/></svg>', this)" title="Transporte">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9L18 10l-3-4H9L6 10l-2.5 1.1C2.7 11.3 2 12.1 2 13v3c0 .6.4 1 1 1h2"/><path d="M9 17h6"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg>
                         </div>
+                        <!-- Alimentação -->
                         <div class="icon-option" onclick="selectSvgIcon('<svg width=\'20\' height=\'20\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.8\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><path d=\'M12 2L2 20h20L12 2z\'/><circle cx=\'12\' cy=\'11\' r=\'1.5\'/><circle cx=\'9\' cy=\'15\' r=\'1\'/><circle cx=\'15\' cy=\'15\' r=\'1\'/><path d=\'M2 20c3 1.5 7 2 10 2s7-.5 10-2\'/></svg>', this)" title="Alimentação">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 20h20L12 2z"/><circle cx="12" cy="11" r="1.5"/><circle cx="9" cy="15" r="1"/><circle cx="15" cy="15" r="1"/><path d="M2 20c3 1.5 7 2 10 2s7-.5 10-2"/></svg>
                         </div>
+                        <!-- Educação e Leitura -->
                         <div class="icon-option" onclick="selectSvgIcon('<svg width=\'20\' height=\'20\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.8\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><path d=\'M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z\'/><path d=\'M10 2v6l3-2 3 2V2\'/></svg>', this)" title="Educação e Leitura">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/><path d="M10 2v6l3-2 3 2V2"/></svg>
                         </div>
-                        <div class="icon-option" onclick="selectSvgIcon('<svg width=\'20\' height=\'20\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.8\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><path d=\'M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z\'/><polyline points=\'12 9 12 15\'/><polyline points=\'9 12 15 12\'/></svg>', this)" title="Saúde">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/><polyline points="12 9 12 15"/><polyline points="9 12 15 12"/></svg>
+                        <!-- Saúde -->
+                        <div class="icon-option" onclick="selectSvgIcon('<svg width=\'20\' height=\'20\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.8\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><path d=\'M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z\'/></svg>', this)" title="Saúde">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
                         </div>
+                        <!-- Compras e Lojas -->
                         <div class="icon-option" onclick="selectSvgIcon('<svg width=\'20\' height=\'20\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.8\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><path d=\'M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z\'/><line x1=\'3\' y1=\'6\' x2=\'21\' y2=\'6\'/><path d=\'M16 10a4 4 0 0 1-8 0\'/></svg>', this)" title="Compras e Lojas">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
                         </div>
+                        <!-- Trabalho -->
                         <div class="icon-option" onclick="selectSvgIcon('<svg width=\'20\' height=\'20\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.8\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><rect x=\'2\' y=\'7\' width=\'20\' height=\'14\' rx=\'2\' ry=\'2\'/><path d=\'M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16\'/></svg>', this)" title="Trabalho">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
                         </div>
+                        <!-- Cosméticos -->
                         <div class="icon-option" onclick="selectSvgIcon('<svg width=\'20\' height=\'20\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.8\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><path d=\'M7 10v10a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V10Z\'/><path d=\'M10 10V6a2 2 0 0 1 2-2v0a2 2 0 0 1 2 2v4\'/><path d=\'M10 2h4\'/></svg>', this)" title="Cosméticos">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10v10a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V10Z"/><path d="M10 10V6a2 2 0 0 1 2-2v0a2 2 0 0 1 2 2v4"/><path d="M10 2h4"/></svg>
                         </div>
+                        <!-- Cartão -->
                         <div class="icon-option" onclick="selectSvgIcon('<svg width=\'20\' height=\'20\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.8\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><rect x=\'1\' y=\'4\' width=\'22\' height=\'16\' rx=\'2\' ry=\'2\'/><line x1=\'1\' y1=\'10\' x2=\'23\' y2=\'10\'/></svg>', this)" title="Cartão">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
                         </div>
+                        <!-- Eletrônicos e Relógios -->
                         <div class="icon-option" onclick="selectSvgIcon('<svg width=\'20\' height=\'20\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.8\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><rect x=\'6\' y=\'5\' width=\'12\' height=\'14\' rx=\'3\'/><path d=\'M10 2h4v3h-4zM10 19h4v3h-4z\'/><path d=\'M18 10h1v4h-1\'/></svg>', this)" title="Eletrônicos e Relógios">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="5" width="12" height="14" rx="3"/><path d="M10 2h4v3h-4zM10 19h4v3h-4z"/><path d="M18 10h1v4h-1"/></svg>
                         </div>
@@ -1892,6 +1912,14 @@
         };
 
         processInstallmentsAutoUpdate();
+
+        // Ouvir quando usuarios ir em parcelamento para que seja atualizado em tempo real 
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+                processInstallmentsAutoUpdate();
+                updateApp();
+            }
+        });
 
         const parseBrNumber = (str) => {
             if (str === undefined || str === null) return NaN;
