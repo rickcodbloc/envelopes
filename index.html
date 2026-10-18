@@ -424,6 +424,11 @@
             flex: 1;
         }
 
+        /* Garante que todos os títulos das telas cheias fiquem com a cor correta no Dark Mode */
+        .full-view-content h2 {
+            color: var(--text-main) !important;
+        }
+
         @media (max-width: 600px) {
             .full-view-container {
                 padding: 8px !important;
@@ -4473,7 +4478,7 @@
                 headerEl.addEventListener('click', scrollToTop);
             }
         });
-        
+
     </script>
 </body>
 </html>
