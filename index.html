@@ -2744,7 +2744,7 @@
                 completedItems.forEach(item => {
                     const compRow = document.createElement('div');
                     compRow.className = 'history-item';
-                    compRow.style.cssText = 'padding: 8px 4px; opacity: 0.75;';
+                    compRow.style.cssText = 'padding: 8px 4px; opacity: 0.85;';
                     
                     const compInfo = document.createElement('div');
                     compInfo.className = 'history-info';
@@ -2757,10 +2757,23 @@
 
                     const subC = document.createElement('span');
                     subC.style.cssText = 'font-size: 0.75rem; color: var(--text-muted);';
-                    subC.textContent = `Concluído (${item.totalInstallments}/${item.totalInstallments}) - ${item.cardName || 'Geral'}`;
+                    subC.textContent = `Concluído (${item.totalInstallments}/${item.totalInstallments}) - ${item.cardName || 'Geral'} • ${formatCurrency(item.amount)}`;
 
                     compInfo.appendChild(descC);
                     compInfo.appendChild(subC);
+
+                    // Container de ações para itens concluídos (Editar + Excluir)
+                    const actionsC = document.createElement('div');
+                    actionsC.style.cssText = 'display: flex; gap: 6px; align-items: center; flex-shrink: 0; margin-left: 8px;';
+
+                    const editC = document.createElement('button');
+                    editC.className = 'card-btn edit-btn';
+                    editC.title = 'Editar';
+                    editC.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>';
+                    editC.onclick = () => openEditCreditInstallment(item.id);
+
+                    const sepC = document.createElement('div');
+                    sepC.style.cssText = 'width: 1px; height: 14px; background-color: var(--border-color); margin: 0 2px;';
 
                     const delC = document.createElement('button');
                     delC.className = 'card-btn delete-btn';
@@ -2768,8 +2781,12 @@
                     delC.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>';
                     delC.onclick = () => deleteCreditInstallment(item.id);
 
+                    actionsC.appendChild(editC);
+                    actionsC.appendChild(sepC);
+                    actionsC.appendChild(delC);
+
                     compRow.appendChild(compInfo);
-                    compRow.appendChild(delC);
+                    compRow.appendChild(actionsC);
                     innerContainer.appendChild(compRow);
                 });
 
