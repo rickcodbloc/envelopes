@@ -1771,8 +1771,26 @@
             creditInstallments = [];
         }
 
+        // Mapeamento das cores primárias oficiais de cada tema
+        const themeColors = {
+            purple: '#8A05BE',
+            blue: '#007AFF',
+            pink: '#E91C5D'
+        };
+
         let appTheme = localStorage.getItem('myAppTheme') || 'purple';
         document.body.setAttribute('data-theme', appTheme);
+
+        // Função para atualizar dinamicamente a cor da barra de status (tema do navegador/PWA)
+        const updateThemeColorMeta = (theme) => {
+            const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+            if (metaThemeColor && themeColors[theme]) {
+                metaThemeColor.setAttribute('content', themeColors[theme]);
+            }
+        };
+
+        // Aplica a cor correta na barra de status logo no carregamento inicial
+        updateThemeColorMeta(appTheme);
 
         let savedColorMode = localStorage.getItem('myColorMode') || 'auto';
         if (savedColorMode !== 'auto') {
@@ -1836,6 +1854,7 @@
             appTheme = theme;
             document.body.setAttribute('data-theme', theme);
             localStorage.setItem('myAppTheme', theme);
+            updateThemeColorMeta(theme); // <-- ADICIONE ESTA LINHA AQUI
         };
 
         const processInstallmentsAutoUpdate = () => {
