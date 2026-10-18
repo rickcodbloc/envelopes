@@ -4419,6 +4419,42 @@
                     .catch(err => console.error('Erro ao registrar Service Worker:', err));
             });
         }
+
+        // Função para rolar a tela atual suavemente para o topo ao tocar no cabeçalho
+        const scrollToTop = (e) => {
+            // Evita disparar se o usuário clicou em botões do cabeçalho (voltar, adicionar, opções)
+            if (e.target.closest('button') || e.target.closest('#options-drawer')) return;
+
+            let targetContainer = null;
+
+            // Identifica qual container de rolagem está ativo no momento
+            if (currentView === 'home') {
+                targetContainer = document.getElementById('envelope-list');
+            } else if (currentView === 'despesas-fixas') {
+                targetContainer = document.getElementById('view-fixed-expenses');
+            } else if (currentView === 'parcelamentos') {
+                targetContainer = document.getElementById('view-credit-installments');
+            } else if (currentView === 'relatorio') {
+                targetContainer = document.getElementById('view-financial-report');
+            }
+
+            // Executa a rolagem suave para o topo se o container existir
+            if (targetContainer) {
+                targetContainer.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            }
+        };
+
+        // Vincula o evento de clique/toque no cabeçalho principal do aplicativo
+        document.addEventListener('DOMContentLoaded', () => {
+            const headerEl = document.querySelector('header');
+            if (headerEl) {
+                headerEl.addEventListener('click', scrollToTop);
+            }
+        });
+        
     </script>
 </body>
 </html>
