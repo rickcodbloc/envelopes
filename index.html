@@ -2850,13 +2850,14 @@
             localStorage.setItem('myCreditInstallments', JSON.stringify(creditInstallments));
             renderCreditInstallmentsList();
 
-            const isSmallScreen = window.innerWidth <= 600;
-            if (isSmallScreen && creditInstallments.length >= 2) {
+            // 1. Reseta os campos obrigatoriamente para ficarem em branco
+            resetCreditForm(); 
+
+            // 2. Recolhe o formulário automaticamente após o cadastro (tanto no celular quanto no computador)
+            if (creditInstallments.length >= 1) {
                 setCreditFormVisible(false);
-            } else {
-                resetCreditForm();
             }
-        };
+        }; // Fim da função saveCreditInstallment
 
         const deleteCreditInstallment = (id) => {
             showCustomConfirm('Excluir Parcelamento', 'Deseja realmente excluir este parcelamento?', () => {
@@ -3217,6 +3218,16 @@
             const dashboard = document.getElementById('dashboard');
             list.innerHTML = '';
 
+            // Cabeçalho Dinâmico: "Meus Envelopes" na tela inicial (vazia) e com contador quando houver itens
+            const headerTitleEl = document.querySelector('header .header-title');
+            if (headerTitleEl) {
+                if (envelopes.length === 0) {
+                    headerTitleEl.textContent = 'Meus Envelopes';
+                } else {
+                    headerTitleEl.innerHTML = `Meus Envelopes <span style="font-size: 0.72rem; font-weight: 500; opacity: 0.85; background: rgba(255,255,255,0.22); padding: 1px 7px; border-radius: 12px; margin-left: 6px; vertical-align: middle;">${envelopes.length}</span>`;
+                }
+            }
+
             if (envelopes.length === 0) {
                 dashboard.style.display = 'none';
                 list.innerHTML = `
@@ -3483,84 +3494,95 @@
         };
 
         const saveExpense = () => {
-            const envId = parseInt(document.getElementById('expense-env-id').value);
-            const expenseId = document.getElementById('expense-item-id').value;
-            const amountStr = document.getElementById('expense-amount').value.trim();
-            const amount = parseBrNumber(amountStr);
-            const paymentMethod = document.getElementById('expense-payment-method').value;
-            const desc = document.getElementById('expense-desc').value.trim();
-            const dateVal = document.getElementById('expense-date').value;
+        const envId = parseInt(document.getElementById('expense-env-id').value);
+        const expenseId = document.getElementById('expense-item-id').value;
+        const amountStr = document.getElementById('expense-amount').value.trim();
+        const amount = parseBrNumber(amountStr);
+        const paymentMethod = document.getElementById('expense-payment-method').value;
+        const desc = document.getElementById('expense-desc').value.trim();
+        const dateVal = document.getElementById('expense-date').value;
 
-            if (isNaN(amount) || amount <= 0) {
-                alert('Insira um valor de gasto válido.');
-                return;
+        if (isNaN(amount) || amount <= 0) {
+            alert('Insira um valor de gasto válido.');
+            return;
+        }
+
+        const envIndex = envelopes.findIndex(env => env.id === envId);
+        if (envIndex === -1) return; 
+
+        let baseDate = new Date(); 
+        if (expenseId) {
+            const existingExp = (envelopes[envIndex].expenses || []).find(e => e.id == expenseId);
+            if (existingExp && existingExp.date) {
+                const parsedDate = new Date(existingExp.date);
+                if (!isNaN(parsedDate.getTime())) baseDate = parsedDate; 
             }
+        }
 
-            const envIndex = envelopes.findIndex(env => env.id === envId);
-            if (envIndex === -1) return; 
+        let expDateIso = baseDate.toISOString();
+        let selectedDate = new Date(baseDate); // CORREÇÃO: Inicializa com a data base para evitar erro se estiver em branco
 
-            let baseDate = new Date(); 
-            if (expenseId) {
-                const existingExp = (envelopes[envIndex].expenses || []).find(e => e.id == expenseId);
-                if (existingExp && existingExp.date) {
-                    const parsedDate = new Date(existingExp.date);
-                    if (!isNaN(parsedDate.getTime())) baseDate = parsedDate; 
-                }
-            }
+        if (dateVal) {
+            const parts = dateVal.split('/');
+            if (parts.length === 3 && parts[0].length === 2 && parts[1].length === 2 && parts[2].length === 4) {
+                const day = parseInt(parts[0], 10);
+                const month = parseInt(parts[1], 10) - 1;
+                const year = parseInt(parts[2], 10);
 
-            let expDateIso = baseDate.toISOString();
-            if (dateVal) {
-                const parts = dateVal.split('/');
-                if (parts.length === 3 && parts[0].length === 2 && parts[1].length === 2 && parts[2].length === 4) {
-                    const day = parseInt(parts[0], 10);
-                    const month = parseInt(parts[1], 10) - 1;
-                    const year = parseInt(parts[2], 10);
-
-                    if (year < 2000 || year > 2100 || month < 0 || month > 11 || day < 1 || day > 31) {
-                        alert('Data inválida. Verifique o dia, mês e ano informados.');
-                        return;
-                    }
-
-                    const selectedDate = new Date(year, month, day, baseDate.getHours(), baseDate.getMinutes(), baseDate.getSeconds());
-                    
-                    if (!isNaN(selectedDate.getTime()) && selectedDate.getFullYear() === year && selectedDate.getMonth() === month && selectedDate.getDate() === day) {
-                        expDateIso = selectedDate.toISOString();
-                    } else {
-                        alert('Data inválida (este dia não existe no mês informado).');
-                        return;
-                    }
-                } else {
-                    alert('Formato de data incompleto ou incorreto. Use DD/MM/AAAA');
+                if (year < 2000 || year > 2100 || month < 0 || month > 11 || day < 1 || day > 31) {
+                    alert('Data inválida. Verifique o dia, mês e ano informados.');
                     return;
                 }
-            }
 
-            envelopes[envIndex].expenses = envelopes[envIndex].expenses || [];
-            if (expenseId) {
-                const expIndex = envelopes[envIndex].expenses.findIndex(e => e.id == expenseId);
-                if(expIndex !== -1) {
-                    envelopes[envIndex].expenses[expIndex].amount = amount;
-                    envelopes[envIndex].expenses[expIndex].paymentMethod = paymentMethod;
-                    envelopes[envIndex].expenses[expIndex].desc = desc;
-                    envelopes[envIndex].expenses[expIndex].date = expDateIso;
+                selectedDate = new Date(year, month, day, baseDate.getHours(), baseDate.getMinutes(), baseDate.getSeconds());
+                
+                if (!isNaN(selectedDate.getTime()) && selectedDate.getFullYear() === year && selectedDate.getMonth() === month && selectedDate.getDate() === day) {
+                    expDateIso = selectedDate.toISOString();
+                } else {
+                    alert('Data inválida (este dia não existe no mês informado).');
+                    return;
                 }
             } else {
-                envelopes[envIndex].expenses.push({
-                    id: Date.now(),
-                    amount: amount,
-                    paymentMethod: paymentMethod,
-                    desc: desc,
-                    date: expDateIso
-                });
+                alert('Formato de data incompleto ou incorreto. Use DD/MM/AAAA');
+                return;
             }
-            
-            closeModal('modal-expense');
-            updateApp();
-            
-            if(document.getElementById('modal-history').classList.contains('active-modal')) {
-                openHistoryModal(envId, 'current');
+        }
+
+        // Validação de data futura
+        const today = new Date();
+        today.setHours(23, 59, 59, 999); // Final do dia atual
+
+        if (selectedDate > today) {
+            alert('Não é permitido registrar gastos com data futura nos envelopes. O sistema de envelopes controla o mês atual. Para despesas futuras, utilize o módulo de Despesas Fixas ou Parcelamentos.');
+            return;
+        }
+
+        envelopes[envIndex].expenses = envelopes[envIndex].expenses || [];
+        if (expenseId) {
+            const expIndex = envelopes[envIndex].expenses.findIndex(e => e.id == expenseId);
+            if(expIndex !== -1) {
+                envelopes[envIndex].expenses[expIndex].amount = amount;
+                envelopes[envIndex].expenses[expIndex].paymentMethod = paymentMethod;
+                envelopes[envIndex].expenses[expIndex].desc = desc;
+                envelopes[envIndex].expenses[expIndex].date = expDateIso;
             }
-        };
+        } else {
+            envelopes[envIndex].expenses.push({
+                id: Date.now(),
+                amount: amount,
+                paymentMethod: paymentMethod,
+                desc: desc,
+                date: expDateIso
+            });
+        }
+        
+        closeModal('modal-expense');
+        updateApp();
+        
+        if(document.getElementById('modal-history').classList.contains('active-modal')) {
+            openHistoryModal(envId, 'current');
+        }
+    };
 
         const openHistoryModal = (envId, periodId = 'current') => {
             const env = envelopes.find(e => e.id === envId);
