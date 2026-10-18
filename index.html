@@ -4,21 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
     
-    <!-- Configurações para iPhone e PWA[cite: 1] -->
+    <!-- Configurações para iPhone e PWA -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="theme-color" content="#8A05BE">
     <meta name="apple-mobile-web-app-title" content="Envelopes">
     <meta name="robots" content="noindex, nofollow">
 
-    <!-- LINKS DOS ÍCONES E MANIFESTO PWA[cite: 1] -->
+    <!-- LINKS DOS ÍCONES E MANIFESTO PWA -->
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <link rel="icon" type="image/png" href="apple-touch-icon.png">
     <link rel="manifest" href="manifest.json">
 
     <title>Meus Envelopes</title>
 <style>
-        /* Temas de Cores Oficiais[cite: 1] */
+        /* Temas de Cores Oficiais */
         :root, body[data-theme="purple"] {
             --primary: #8A05BE;
             --primary-dark: #690491;
@@ -125,8 +125,6 @@
         padding: 0;
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         -webkit-tap-highlight-color: transparent;
-        
-        /* Blindagem universal contra texto gigante no Safari/iPhone */
         -webkit-text-size-adjust: 100%;
         -ms-text-size-adjust: 100%;
         text-size-adjust: 100%;
@@ -143,7 +141,6 @@
         position: fixed;
         overflow: hidden;
         background-color: var(--bg);
-
         -webkit-text-size-adjust: 100%;
         -ms-text-size-adjust: 100%;
         text-size-adjust: 100%;
@@ -172,15 +169,15 @@
         }
 
         @media (min-width: 600px) {
-            #app-container { max-width: 780px; } /* Espaço para 2 colunas */
+            #app-container { max-width: 780px; }
         }
 
         @media (min-width: 900px) {
-            #app-container { max-width: 1200px; } /* Espaço para 3 colunas */
+            #app-container { max-width: 1200px; }
         }
 
         @media (min-width: 1280px) {
-            #app-container { max-width: 1620px; } /* Espaço para até 4 colunas confortáveis */
+            #app-container { max-width: 1620px; }
         }
 
         header {
@@ -205,7 +202,7 @@
             text-shadow: 0 1px 2px rgba(0,0,0,0.15);
             flex: 1;
             text-align: center;
-            margin-left: 72px;
+            margin-left: 0;
         }
 
         .header-actions {
@@ -311,7 +308,7 @@
             padding: 16px 20px;
             padding-left: max(20px, calc(14px + env(safe-area-inset-left)));
             padding-right: max(20px, calc(14px + env(safe-area-inset-right)));
-            display: none; 
+            display: flex; 
             flex-direction: column;
             border-bottom: 1px solid var(--border-color);
             z-index: 5;
@@ -375,7 +372,7 @@
             padding-right: max(14px, calc(10px + env(safe-area-inset-right)));
             padding-bottom: max(32px, calc(20px + env(safe-area-inset-bottom))); 
             display: grid;
-            grid-template-columns: 1fr; /* 1 coluna padrão (telemóvel / iPhone) */
+            grid-template-columns: 1fr;
             gap: 16px;
             align-content: start;
             justify-content: center;
@@ -386,6 +383,33 @@
                 grid-template-columns: repeat(auto-fit, 380px);
                 justify-content: center;
             }
+        }
+
+        /* Container de Telas de Visualização Cheia (SPA) */
+        .full-view-container {
+            display: none;
+            flex: 1;
+            overflow-y: auto;
+            background-color: var(--bg);
+            padding: 16px;
+            padding-left: max(16px, calc(12px + env(safe-area-inset-left)));
+            padding-right: max(16px, calc(12px + env(safe-area-inset-right)));
+            padding-bottom: max(32px, calc(20px + env(safe-area-inset-bottom)));
+            flex-direction: column;
+        }
+
+        .full-view-content {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--border-color);
+            max-width: 720px;
+            width: 100%;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
         }
 
         .envelope-card {
@@ -597,9 +621,8 @@
             pointer-events: auto;
         }
 
-        #modal-expense { z-index: 250; }
+        #modal-expense, #modal-fixed-expense, #modal-credit-installment { z-index: 250; }
         #modal-fixed-reorder, #modal-credit-reorder { z-index: 260; }
-        #modal-credit-installments { z-index: 255; }
 
         .modal-content {
             background-color: var(--card-bg);
@@ -798,7 +821,6 @@
 
         .history-item:last-child { border-bottom: none; }
 
-        /* Ajustes robustos para evitar transbordamento horizontal e garantir quebra de linha */
         .history-info { 
             display: flex; 
             flex-direction: column; 
@@ -841,7 +863,7 @@
         .btn-hist-edit:active { color: var(--primary); background-color: var(--primary-light-bg); }
         .btn-hist-delete:active { color: var(--danger); background-color: rgba(233, 28, 93, 0.1); }
 
-        .toggle-desc, .toggle-date, .toggle-fixed-form, .toggle-credit-form {
+        .toggle-desc, .toggle-date {
             font-size: 0.85rem;
             color: var(--primary);
             cursor: pointer;
@@ -850,19 +872,20 @@
             font-weight: 600;
         }
         
-        #desc-container, #date-container, #fixed-form-container, #credit-form-container {
+        #desc-container, #date-container {
             display: none;
             margin-top: 12px;
         }
 
         .checkbox-list {
-            max-height: 40vh;
+            flex: 1;
             overflow-y: auto;
             border: 1px solid var(--input-border);
             border-radius: 10px;
             padding: 4px 8px;
-            margin-bottom: 16px;
+            margin-bottom: 0;
             background-color: var(--card-bg);
+            min-height: 140px;
         }
 
         .checkbox-item {
@@ -922,7 +945,6 @@
             align-items: center;
         }
 
-        /* Estilo da Chavinha / Toggle Switch (Estilo iOS) */
         .switch {
             position: relative;
             display: inline-block;
@@ -973,10 +995,15 @@
 <body data-theme="purple">
 
     <div id="app-container">
-        <!-- Cabeçalho -->
+        <!-- Cabeçalho Dinâmico -->
         <header>
-            <span class="header-title">Meus Envelopes</span>
-            <div class="header-actions">
+            <button class="header-icon-btn" id="header-back-btn" onclick="goHome()" title="Voltar" style="display: none;" aria-label="Voltar">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+            </button>
+            <span class="header-title" id="main-header-title">Meus Envelopes</span>
+            <div class="header-actions" id="header-actions-container">
                 <button class="header-icon-btn" onclick="toggleOptionsDrawer()" title="Organizar Ordem e Opções" id="header-options-btn" aria-label="Opções">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                         <line x1="8" y1="6" x2="21" y2="6"></line>
@@ -987,7 +1014,7 @@
                         <line x1="3" y1="18" x2="3.01" y2="18"></line>
                     </svg>
                 </button>
-                <button class="header-icon-btn" onclick="openEnvelopeModal()" title="Novo Envelope" aria-label="Novo Envelope">
+                <button class="header-icon-btn" id="header-add-envelope-btn" onclick="openEnvelopeModal()" title="Novo Envelope" aria-label="Novo Envelope">
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <line x1="12" y1="5" x2="12" y2="19"></line>
                         <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -1019,15 +1046,15 @@
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
                             Redefinir aplicativo
                         </button>
-                        <button class="drawer-item" onclick="toggleOptionsDrawer(); openFinancialReportModal()">
+                        <button class="drawer-item" onclick="toggleOptionsDrawer(); showFullView('relatorio')">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
                             Relatório Financeiro
                         </button>
-                        <button class="drawer-item" onclick="toggleOptionsDrawer(); openFixedExpensesModal()">
+                        <button class="drawer-item" onclick="toggleOptionsDrawer(); showFullView('despesas-fixas')">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
                             Despesas fixas
                         </button>
-                        <button class="drawer-item" onclick="toggleOptionsDrawer(); openCreditInstallmentsModal()">
+                        <button class="drawer-item" onclick="toggleOptionsDrawer(); showFullView('parcelamentos')">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
                             Parcelamentos
                         </button>
@@ -1044,7 +1071,7 @@
             </div>
         </header>
 
-        <!-- Dashboard Geral -->
+        <!-- Dashboard Geral (Tela Inicial) -->
         <div id="dashboard">
             <div class="dash-header-modern">
                 <span class="dash-title-modern" id="dash-status-label">Disponível no Mês</span>
@@ -1059,9 +1086,137 @@
             </div>
         </div>
 
+        <!-- Tela Principal de Envelopes -->
         <div id="envelope-list"></div>
 
-        <!-- Modais -->
+        <!-- Telas de Visualização Cheia (SPA) -->
+        <!-- 1. Tela de Despesas Fixas -->
+        <div id="view-fixed-expenses" class="full-view-container">
+            <div class="full-view-content">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <div style="width:20px; height:20px; display:flex; align-items:center; justify-content:center; color:var(--primary);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg></div>
+                        <h2 style="margin: 0; font-size: 1.25rem;">Despesas fixas</h2>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="card-btn" onclick="openFixedExpenseModal()" title="Adicionar Despesa Fixa" style="background: var(--primary-light-bg); padding: 7px; border-radius: 8px; color: var(--primary); display: flex; align-items: center; justify-content: center;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    </button>
+                    <button class="card-btn" onclick="openFixedReorderModal()" title="Reordenar Despesas" style="background: var(--border-color); padding: 7px; border-radius: 8px; color: var(--primary); display: flex; align-items: center; justify-content: center;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+                    </button>
+                    </div>
+                </div>
+                <p class="modal-subtitle">Registre aluguel, academia, assinaturas e outras despesas fixas.</p>
+                
+                <div style="background: var(--border-color); padding: 10px 14px; border-radius: 10px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">Total Fixo Mensal:</span>
+                    <strong id="fixed-total-value" style="font-size: 1.1rem; color: var(--text-main);">R$ 0,00</strong>
+                </div>
+
+                <div id="fixed-expenses-list" class="checkbox-list" style="margin-bottom: 0; flex: 1;"></div>
+            </div>
+        </div>
+
+        <!-- 2. Tela de Parcelamentos -->
+        <div id="view-credit-installments" class="full-view-container">
+            <div class="full-view-content">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                    <h2 style="margin: 0; font-size: 1.25rem; display: flex; align-items: center; gap: 8px;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                        Parcelamentos
+                    </h2>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="card-btn" onclick="openCreditInstallmentModal()" title="Adicionar Compra Parcelada" style="background: var(--primary-light-bg); padding: 7px; border-radius: 8px; color: var(--primary); display: flex; align-items: center; justify-content: center;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                </button>
+                <button class="card-btn" onclick="openCreditReorderModal()" title="Reordenar Parcelamentos" style="background: var(--border-color); padding: 7px; border-radius: 8px; color: var(--primary); display: flex; align-items: center; justify-content: center;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+                </button>
+                    </div>
+                </div>
+                <p class="modal-subtitle">Compras parceladas agrupadas por instituição financeira.</p>
+                
+                <div style="background: var(--border-color); padding: 10px 14px; border-radius: 10px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">Total Mês (<span id="credit-active-count">0</span> ativas):</span>
+                    <strong id="credit-total-value" style="font-size: 1.1rem; color: var(--text-main);">R$ 0,00</strong>
+                </div>
+
+                <div id="credit-installments-list" class="checkbox-list" style="margin-bottom: 0; flex: 1;"></div>
+            </div>
+        </div>
+
+        <!-- 3. Tela de Relatório Financeiro -->
+        <div id="view-financial-report" class="full-view-container">
+            <div class="full-view-content">
+                <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+                    <div style="width:20px; height:20px; display:flex; align-items:center; justify-content:center; color:var(--primary);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg></div>
+                    <h2 style="margin:0; font-size: 1.25rem;">RESUMO TOTAL DO MÊS</h2>
+                </div>
+                <div id="financial-report-body" style="font-size: 0.9rem; color: var(--text-main); display: flex; flex-direction: column; gap: 12px; max-height: 68vh; overflow-y: auto; padding-right: 4px; margin-top: 8px;"></div>
+            </div>
+        </div>
+
+        <!-- Modais de Ações -->
+        <div id="modal-fixed-expense" class="modal-overlay">
+            <div class="modal-content">
+                <h2 id="fixed-modal-title">Adicionar Despesa Fixa</h2>
+                <input type="hidden" id="edit-fixed-id">
+                <div class="form-group">
+                    <label>Nome da Despesa</label>
+                    <input type="text" id="fixed-item-name" placeholder="Ex: Aluguel" maxlength="35">
+                </div>
+                <div class="form-group">
+                    <label>Valor (R$)</label>
+                    <input type="text" id="fixed-item-amount" inputmode="decimal" placeholder="Ex: 150,00" maxlength="15">
+                </div>
+                <div class="modal-buttons">
+                    <button class="btn btn-cancel" onclick="closeModal('modal-fixed-expense')">Cancelar</button>
+                    <button class="btn btn-confirm" id="fixed-submit-btn" onclick="saveFixedExpense()">Adicionar</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="modal-credit-installment" class="modal-overlay">
+            <div class="modal-content">
+                <h2 id="credit-modal-title">Adicionar Compra Parcelada</h2>
+                <input type="hidden" id="edit-credit-id">
+                <div class="form-group">
+                    <label>Nome da Compra</label>
+                    <input type="text" id="credit-item-name" placeholder="Smartphone" maxlength="35">
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <div class="form-group" style="flex: 1.3; min-width: 0;">
+                        <label>Valor da Parcela (R$)</label>
+                        <input type="text" id="credit-item-amount" inputmode="decimal" placeholder="150,00" maxlength="15">
+                    </div>
+                    <div class="form-group" style="width: 100px; flex-shrink: 0;">
+                        <label>Vencimento</label>
+                        <input type="number" id="credit-item-dueday" inputmode="numeric" placeholder="10" min="1" max="31">
+                    </div>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <div class="form-group" style="flex: 1; min-width: 0;">
+                        <label>Parcela Atual</label>
+                        <input type="number" id="credit-item-current" inputmode="numeric" placeholder="1" min="1" max="99">
+                    </div>
+                    <div class="form-group" style="flex: 1; min-width: 0;">
+                        <label>Total de Parcelas</label>
+                        <input type="number" id="credit-item-total" inputmode="numeric" placeholder="10" min="1" max="99">
+                    </div>
+                </div>
+                <div class="form-group" style="position: relative;">
+                    <label>Banco / Cartão</label>
+                    <input type="text" id="credit-item-card-input" placeholder="Ex: Nubank" maxlength="25" autocomplete="off">
+                    <div id="custom-bank-dropdown" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: var(--card-bg); border: 1px solid var(--input-border); border-radius: 8px; max-height: 160px; overflow-y: auto; z-index: 100; box-shadow: var(--card-shadow); margin-top: 4px;"></div>
+                </div>
+                <div class="modal-buttons">
+                    <button class="btn btn-cancel" onclick="closeModal('modal-credit-installment')">Cancelar</button>
+                    <button class="btn btn-confirm" id="credit-submit-btn" onclick="saveCreditInstallment()">Adicionar</button>
+                </div>
+            </div>
+        </div>
+        <!-- Modais de Ações Rápidas -->
         <div id="modal-reorder" class="modal-overlay">
             <div class="modal-content">
                 <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
@@ -1086,7 +1241,7 @@
                 <p class="modal-subtitle">Ajuste a ordem das suas despesas fixas:</p>
                 <div id="fixed-reorder-list" class="checkbox-list" style="padding: 8px;"></div>
                 <div class="modal-buttons">
-                    <button class="btn btn-cancel" onclick="closeModal('modal-fixed-reorder'); openFixedExpensesModal();">Cancelar</button>
+                    <button class="btn btn-cancel" onclick="closeModal('modal-fixed-reorder')">Cancelar</button>
                     <button class="btn btn-confirm" onclick="saveFixedReorderModal()">OK</button>
                 </div>
             </div>
@@ -1101,7 +1256,7 @@
                 <p class="modal-subtitle">Ajuste a ordem dos seus parcelamentos:</p>
                 <div id="credit-reorder-list" class="checkbox-list" style="padding: 8px;"></div>
                 <div class="modal-buttons">
-                    <button class="btn btn-cancel" onclick="closeModal('modal-credit-reorder'); openCreditInstallmentsModal();">Cancelar</button>
+                    <button class="btn btn-cancel" onclick="closeModal('modal-credit-reorder')">Cancelar</button>
                     <button class="btn btn-confirm" onclick="saveCreditReorderModal()">OK</button>
                 </div>
             </div>
@@ -1151,19 +1306,6 @@
             </div>
         </div>
 
-        <div id="modal-financial-report" class="modal-overlay">
-            <div class="modal-content">
-                <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
-                    <div style="width:20px; height:20px; display:flex; align-items:center; justify-content:center; color:var(--primary);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg></div>
-                    <h2 style="margin:0;">RESUMO TOTAL DO MÊS</h2>
-                </div>
-                <div id="financial-report-body" style="font-size: 0.9rem; color: var(--text-main); display: flex; flex-direction: column; gap: 12px; max-height: 58vh; overflow-y: auto; padding-right: 4px; margin-top: 8px;"></div>
-                <div class="modal-buttons" style="margin-top: 16px;">
-                    <button class="btn btn-cancel" onclick="closeModal('modal-financial-report')">Fechar</button>
-                </div>
-            </div>
-        </div>
-
         <div id="modal-settings" class="modal-overlay">
             <div class="modal-content">
                 <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
@@ -1172,7 +1314,6 @@
                 </div>
                 <p class="modal-subtitle">Personalize a aparência e o comportamento do aplicativo:</p>
                 
-                <!-- Seção 1: Tema de Cores -->
                 <div class="settings-section">
                     <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">Tema de Cores</label>
                     <div style="display: flex; flex-direction: column; gap: 8px;">
@@ -1182,7 +1323,6 @@
                     </div>
                 </div>
 
-                <!-- Seção 2: Acessibilidade (Zoom) -->
                 <div class="settings-section">
                     <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">Acessibilidade</label>
                     <div class="settings-label-group">
@@ -1197,7 +1337,6 @@
                     </div>
                 </div>
 
-                <!-- Seção 3: Modo de Exibição (Tema Escuro/Claro) -->
                 <div class="settings-section">
                     <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">Modo de Exibição</label>
                     <div style="display: flex; gap: 8px;">
@@ -1213,113 +1352,6 @@
             </div>
         </div>
 
-        <div id="modal-fixed-expenses" class="modal-overlay">
-            <div class="modal-content">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                    <div style="display:flex; align-items:center; gap:8px;">
-                        <div style="width:20px; height:20px; display:flex; align-items:center; justify-content:center; color:var(--primary);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg></div>
-                        <h2 style="margin: 0;">Despesas fixas</h2>
-                    </div>
-                    <button class="card-btn" onclick="openFixedReorderModal()" title="Reordenar Despesas" style="background: var(--border-color); padding: 6px 10px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; color: var(--primary); display: flex; align-items: center; gap: 4px;">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
-                        Reordenar
-                    </button>
-                </div>
-                <p class="modal-subtitle">Registre aluguel, academia, assinaturas e outras despesas fixas.</p>
-                
-                <div style="background: var(--border-color); padding: 10px 14px; border-radius: 10px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center;">
-                    <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">Total Fixo Mensal:</span>
-                    <strong id="fixed-total-value" style="font-size: 1.1rem; color: var(--text-main);">R$ 0,00</strong>
-                </div>
-
-                <div id="fixed-expenses-list" class="checkbox-list" style="margin-bottom: 8px; max-height: 48vh;"></div>
-
-                <div>
-                    <span class="toggle-desc" id="toggle-fixed-form-btn" onclick="toggleFixedForm()">+ Adicionar nova despesa fixa</span>
-                    <div id="fixed-form-container" style="border-top: 1px solid var(--border-color); padding-top: 12px; margin-top: 4px;">
-                        <input type="hidden" id="edit-fixed-id">
-                        <div class="form-group" style="margin-bottom: 10px;">
-                            <label>Nome da Despesa</label>
-                            <input type="text" id="fixed-item-name" placeholder="Ex: Aluguel" maxlength="35">
-                        </div>
-                        <div class="form-group" style="margin-bottom: 12px;">
-                            <label>Valor (R$)</label>
-                            <input type="text" id="fixed-item-amount" inputmode="decimal" placeholder="Ex: 150,00" maxlength="15">
-                        </div>
-                        <button class="btn btn-confirm" id="fixed-submit-btn" onclick="saveFixedExpense()" style="width: 100%;">Adicionar Despesa</button>
-                    </div>
-                </div>
-
-                <div class="modal-buttons" style="margin-top: 16px;">
-                    <button class="btn btn-cancel" onclick="closeModal('modal-fixed-expenses')">Fechar</button>
-                </div>
-            </div>
-        </div>
-
-        <div id="modal-credit-installments" class="modal-overlay">
-            <div class="modal-content">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                    <h2 style="margin: 0; display: flex; align-items: center; gap: 8px;">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-                        Parcelamentos
-                    </h2>
-                    <button class="card-btn" onclick="openCreditReorderModal()" title="Reordenar Parcelamentos" style="background: var(--border-color); padding: 6px 10px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; color: var(--primary); display: flex; align-items: center; gap: 4px;">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
-                        Reordenar
-                    </button>
-                </div>
-                <p class="modal-subtitle">Compras parceladas agrupadas por instituição financeira.</p>
-                
-                <div style="background: var(--border-color); padding: 10px 14px; border-radius: 10px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center;">
-                    <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">Total Mês (<span id="credit-active-count">0</span> ativas):</span>
-                    <strong id="credit-total-value" style="font-size: 1.1rem; color: var(--text-main);">R$ 0,00</strong>
-                </div>
-
-                <div id="credit-installments-list" class="checkbox-list" style="margin-bottom: 8px; max-height: 42vh;"></div>
-
-                <div>
-                    <span class="toggle-credit-form" id="toggle-credit-form-btn" onclick="toggleCreditForm()">+ Adicionar compra parcelada</span>
-                    <div id="credit-form-container" style="border-top: 1px solid var(--border-color); padding-top: 12px; margin-top: 4px;">
-                        <input type="hidden" id="edit-credit-id">
-                        <div class="form-group" style="margin-bottom: 10px;">
-                            <label>Nome da Compra</label>
-                            <input type="text" id="credit-item-name" placeholder="Smartphone" maxlength="35">
-                        </div>
-                        <div style="display: flex; gap: 8px;">
-                            <div class="form-group" style="margin-bottom: 10px; flex: 1.3; min-width: 0;">
-                                <label>Valor da Parcela (R$)</label>
-                                <input type="text" id="credit-item-amount" inputmode="decimal" placeholder="150,00" maxlength="15">
-                            </div>
-                            <div class="form-group" style="margin-bottom: 10px; width: 100px; flex-shrink: 0;">
-                                <label>Vencimento</label>
-                                <input type="number" id="credit-item-dueday" inputmode="numeric" placeholder="10" min="1" max="31">
-                            </div>
-                        </div>
-                        <div style="display: flex; gap: 8px;">
-                            <div class="form-group" style="margin-bottom: 12px; flex: 1; min-width: 0;">
-                                <label>Parcela Atual</label>
-                                <input type="number" id="credit-item-current" inputmode="numeric" placeholder="1" min="1" max="99">
-                            </div>
-                            <div class="form-group" style="margin-bottom: 12px; flex: 1; min-width: 0;">
-                                <label>Total de Parcelas</label>
-                                <input type="number" id="credit-item-total" inputmode="numeric" placeholder="10" min="1" max="99">
-                            </div>
-                        </div>
-                        <div class="form-group" style="margin-bottom: 12px; position: relative;">
-                            <label>Banco / Cartão</label>
-                            <input type="text" id="credit-item-card-input" placeholder="Ex: Nubank" maxlength="25" autocomplete="off">
-                            <div id="custom-bank-dropdown" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: var(--card-bg); border: 1px solid var(--input-border); border-radius: 8px; max-height: 160px; overflow-y: auto; z-index: 100; box-shadow: var(--card-shadow); margin-top: 4px;"></div>
-                        </div>
-                        <button class="btn btn-confirm" id="credit-submit-btn" onclick="saveCreditInstallment()" style="width: 100%;">Adicionar Parcelamento</button>
-                    </div>
-                </div>
-
-                <div class="modal-buttons" style="margin-top: 16px;">
-                    <button class="btn btn-cancel" onclick="closeModal('modal-credit-installments')">Fechar</button>
-                </div>
-            </div>
-        </div>
-
         <div id="modal-app-info" class="modal-overlay">
             <div class="modal-content">
                 <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
@@ -1331,7 +1363,7 @@
                     <p>Funciona 100% offline, sem servidores externos ou cadastro. Seus dados ficam armazenados localmente no dispositivo, com opções de exportação e importação de backups.</p>
 
                     <div style="border-top: 1px solid var(--border-color); padding-top: 10px; margin-top: 4px; font-size: 0.85rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 4px;">
-                        <span><strong>Versão:</strong> 3.6</span>
+                        <span><strong>Versão:</strong> 3.7</span>
                         <span><strong>Desenvolvedor:</strong> Ricardo Soares</span>
                         <span>© 2026 | Todos os direitos reservados.</span>
                     </div>
@@ -1368,53 +1400,33 @@
                     <span class="icon-selector-toggle" onclick="toggleIconGrid()">✨ Escolher ícones do sistema</span>
                     
                      <div class="icon-selector-grid" id="svg-icon-selector">
-
-                        <!-- Ícone 1 — Supermercado -->
                         <div class="icon-option" onclick="selectSvgIcon('<svg width=\'20\' height=\'20\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.8\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><circle cx=\'9\' cy=\'21\' r=\'1\'/><circle cx=\'20\' cy=\'21\' r=\'1\'/><path d=\'M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6\'/></svg>', this)" title="Supermercado">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
                         </div>
-
-                        <!-- Ícone 2 — Transporte -->
                         <div class="icon-option" onclick="selectSvgIcon('<svg width=\'20\' height=\'20\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.8\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><path d=\'M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9L18 10l-3-4H9L6 10l-2.5 1.1C2.7 11.3 2 12.1 2 13v3c0 .6.4 1 1 1h2\'/><path d=\'M9 17h6\'/><circle cx=\'7\' cy=\'17\' r=\'2\'/><circle cx=\'17\' cy=\'17\' r=\'2\'/></svg>', this)" title="Transporte">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9L18 10l-3-4H9L6 10l-2.5 1.1C2.7 11.3 2 12.1 2 13v3c0 .6.4 1 1 1h2"/><path d="M9 17h6"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg>
                         </div>
-
-                        <!-- Ícone 3 — Alimentação -->
                         <div class="icon-option" onclick="selectSvgIcon('<svg width=\'20\' height=\'20\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.8\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><path d=\'M12 2L2 20h20L12 2z\'/><circle cx=\'12\' cy=\'11\' r=\'1.5\'/><circle cx=\'9\' cy=\'15\' r=\'1\'/><circle cx=\'15\' cy=\'15\' r=\'1\'/><path d=\'M2 20c3 1.5 7 2 10 2s7-.5 10-2\'/></svg>', this)" title="Alimentação">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 20h20L12 2z"/><circle cx="12" cy="11" r="1.5"/><circle cx="9" cy="15" r="1"/><circle cx="15" cy="15" r="1"/><path d="M2 20c3 1.5 7 2 10 2s7-.5 10-2"/></svg>
                         </div>
-
-                        <!-- Ícone 4 — Educação e Leitura -->
                         <div class="icon-option" onclick="selectSvgIcon('<svg width=\'20\' height=\'20\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.8\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><path d=\'M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z\'/><path d=\'M10 2v6l3-2 3 2V2\'/></svg>', this)" title="Educação e Leitura">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/><path d="M10 2v6l3-2 3 2V2"/></svg>
                         </div>
-
-                        <!-- Ícone 5 — Saúde -->
                         <div class="icon-option" onclick="selectSvgIcon('<svg width=\'20\' height=\'20\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.8\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><path d=\'M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z\'/><polyline points=\'12 9 12 15\'/><polyline points=\'9 12 15 12\'/></svg>', this)" title="Saúde">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/><polyline points="12 9 12 15"/><polyline points="9 12 15 12"/></svg>
                         </div>
-
-                        <!-- Ícone 6 — Compras e Lojas -->
                         <div class="icon-option" onclick="selectSvgIcon('<svg width=\'20\' height=\'20\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.8\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><path d=\'M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z\'/><line x1=\'3\' y1=\'6\' x2=\'21\' y2=\'6\'/><path d=\'M16 10a4 4 0 0 1-8 0\'/></svg>', this)" title="Compras e Lojas">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
                         </div>
-
-                        <!-- Ícone 7 — Trabalho -->
                         <div class="icon-option" onclick="selectSvgIcon('<svg width=\'20\' height=\'20\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.8\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><rect x=\'2\' y=\'7\' width=\'20\' height=\'14\' rx=\'2\' ry=\'2\'/><path d=\'M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16\'/></svg>', this)" title="Trabalho">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
                         </div>
-
-                        <!-- Ícone 8 — Cosméticos -->
                         <div class="icon-option" onclick="selectSvgIcon('<svg width=\'20\' height=\'20\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.8\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><path d=\'M7 10v10a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V10Z\'/><path d=\'M10 10V6a2 2 0 0 1 2-2v0a2 2 0 0 1 2 2v4\'/><path d=\'M10 2h4\'/></svg>', this)" title="Cosméticos">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10v10a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V10Z"/><path d="M10 10V6a2 2 0 0 1 2-2v0a2 2 0 0 1 2 2v4"/><path d="M10 2h4"/></svg>
                         </div>
-
-                        <!-- Ícone 9 — Cartão -->
                         <div class="icon-option" onclick="selectSvgIcon('<svg width=\'20\' height=\'20\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.8\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><rect x=\'1\' y=\'4\' width=\'22\' height=\'16\' rx=\'2\' ry=\'2\'/><line x1=\'1\' y1=\'10\' x2=\'23\' y2=\'10\'/></svg>', this)" title="Cartão">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
                         </div>
-
-                        <!-- Ícone 10 — Eletrônicos e Relógios -->
                         <div class="icon-option" onclick="selectSvgIcon('<svg width=\'20\' height=\'20\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.8\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><rect x=\'6\' y=\'5\' width=\'12\' height=\'14\' rx=\'3\'/><path d=\'M10 2h4v3h-4zM10 19h4v3h-4z\'/><path d=\'M18 10h1v4h-1\'/></svg>', this)" title="Eletrônicos e Relógios">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="5" width="12" height="14" rx="3"/><path d="M10 2h4v3h-4zM10 19h4v3h-4z"/><path d="M18 10h1v4h-1"/></svg>
                         </div>
@@ -1473,7 +1485,6 @@
                     <span class="toggle-desc" id="toggle-desc-btn" onclick="toggleDescField()">+ Adicionar descrição</span>
                     <div id="desc-container">
                         <label>Descrição (Opcional)</label>
-                        <!-- Adicionado maxlength para impedir textos infinitos e distorções -->
                         <input type="text" id="expense-desc" placeholder="Ex: Posto Ipiranga" maxlength="50">
                     </div>
                 </div>
@@ -1594,6 +1605,7 @@
         let currentSelectedSvg = null;
         let currentHistoryEnvId = null;
         let pendingImportData = { envelopes: [], fixedExpenses: [], creditInstallments: [] };
+        let currentView = 'home'; // 'home', 'despesas-fixas', 'parcelamentos', 'relatorio'
 
         const sanitizeHtml = (str) => {
             if (!str || typeof str !== 'string') return '';
@@ -1638,12 +1650,9 @@
                             expenses: Array.isArray(env.expenses) ? env.expenses.filter(ex => ex && typeof ex === 'object' && typeof ex.amount === 'number' && !isNaN(ex.amount)) : [],
                             history: Array.isArray(env.history) ? env.history.filter(h => h && typeof h === 'object' && Array.isArray(h.expenses)) : []
                         }));
-                } else {
-                    try { localStorage.setItem('myEnvelopes_corrupted_backup', rawEnv); } catch(err) {}
                 }
             }
         } catch (e) {
-            try { localStorage.setItem('myEnvelopes_corrupted_backup', localStorage.getItem('myEnvelopes')); } catch(err) {}
             envelopes = [];
         }
 
@@ -1659,12 +1668,9 @@
                             name: item.name.trim(),
                             amount: item.amount
                         }));
-                } else {
-                    try { localStorage.setItem('myFixedExpenses_corrupted_backup', rawFixed); } catch(err) {}
                 }
             }
         } catch (e) {
-            try { localStorage.setItem('myFixedExpenses_corrupted_backup', localStorage.getItem('myFixedExpenses')); } catch(err) {}
             fixedExpenses = [];
         }
 
@@ -1686,12 +1692,9 @@
                             lastYear: typeof item.lastYear === 'number' ? item.lastYear : undefined,
                             lastMonth: typeof item.lastMonth === 'number' ? item.lastMonth : undefined
                         }));
-                } else {
-                    try { localStorage.setItem('myCreditInstallments_corrupted_backup', rawCredit); } catch(err) {}
                 }
             }
         } catch (e) {
-            try { localStorage.setItem('myCreditInstallments_corrupted_backup', localStorage.getItem('myCreditInstallments')); } catch(err) {}
             creditInstallments = [];
         }
 
@@ -1836,22 +1839,6 @@
         };
 
         processInstallmentsAutoUpdate();
-        setInterval(processInstallmentsAutoUpdate, 60 * 60 * 1000);
-
-        let dataUpdated = false;
-        envelopes.forEach(env => {
-            if (env.spent !== undefined && !env.expenses) {
-                env.expenses = env.spent > 0 ? [{
-                    id: Date.now() + Math.floor(Math.random() * 1000),
-                    amount: env.spent,
-                    desc: 'Lançamentos anteriores',
-                    date: new Date().toISOString()
-                }] : [];
-                delete env.spent;
-                dataUpdated = true;
-            }
-        });
-        if (dataUpdated) localStorage.setItem('myEnvelopes', JSON.stringify(envelopes));
 
         const parseBrNumber = (str) => {
             if (str === undefined || str === null) return NaN;
@@ -1893,29 +1880,14 @@
 
         const normalizeBankName = (rawInput) => {
             if (!rawInput || typeof rawInput !== 'string') return 'Outros';
-            
             const cleaned = rawInput.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '');
-            
             const bankMap = {
-                'nubank': 'Nubank',
-                'itau': 'Itaú',
-                'bradesco': 'Bradesco',
-                'santander': 'Santander',
-                'bancodobrasil': 'Banco do Brasil',
-                'bb': 'Banco do Brasil',
-                'caixa': 'Caixa',
-                'inter': 'Inter',
-                'c6': 'C6 Bank',
-                'c6bank': 'C6 Bank',
-                'xp': 'XP',
-                'mercadopago': 'Mercado Pago',
-                'btg': 'BTG Pactual',
-                'btgpactual': 'BTG Pactual',
-                'picpay': 'PicPay'
+                'nubank': 'Nubank', 'itau': 'Itaú', 'bradesco': 'Bradesco', 'santander': 'Santander',
+                'bancodobrasil': 'Banco do Brasil', 'bb': 'Banco do Brasil', 'caixa': 'Caixa',
+                'inter': 'Inter', 'c6': 'C6 Bank', 'c6bank': 'C6 Bank', 'xp': 'XP',
+                'mercadopago': 'Mercado Pago', 'btg': 'BTG Pactual', 'btgpactual': 'BTG Pactual', 'picpay': 'PicPay'
             };
-
             if (bankMap[cleaned]) return bankMap[cleaned];
-            
             const trimmed = rawInput.trim();
             if (!trimmed) return 'Outros';
             return trimmed.charAt(0).toUpperCase() + trimmed.slice(1);
@@ -1937,11 +1909,9 @@
                 "Nubank", "Itaú", "Bradesco", "Santander", "Banco do Brasil", 
                 "Caixa", "Inter", "C6 Bank", "XP", "Mercado Pago", "BTG Pactual", "PicPay"
             ];
-            
             const customCards = creditInstallments
                 .map(i => i.cardName)
                 .filter(name => name && name !== 'Outros' && !defaults.includes(name));
-            
             return Array.from(new Set([...defaults, ...customCards]));
         };
 
@@ -1951,18 +1921,15 @@
         if (cardInput && cardDropdown) {
             cardInput.addEventListener('input', (e) => {
                 const query = e.target.value.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-                
                 if (query.length === 0) {
                     cardDropdown.style.display = 'none';
                     cardDropdown.innerHTML = '';
                     return;
                 }
-
                 const availableBanks = getAvailableBanks();
                 const matches = availableBanks.filter(bank => {
                     const normalizedBank = bank.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
                     const words = normalizedBank.split(' ');
-                    
                     return words.some((word, index) => {
                         if (word.length <= 2 && index > 0) return false;
                         return word.startsWith(query);
@@ -1975,16 +1942,13 @@
                         const item = document.createElement('div');
                         item.style.cssText = 'padding: 10px 12px; font-size: 0.9rem; color: var(--text-main); cursor: pointer; transition: background 0.15s; border-bottom: 1px solid var(--border-color);';
                         item.textContent = bank;
-                        
                         item.onmouseover = () => item.style.background = 'var(--primary-light-bg)';
                         item.onmouseout = () => item.style.background = 'transparent';
-                        
                         item.onclick = () => {
                             cardInput.value = bank;
                             cardDropdown.style.display = 'none';
                             cardDropdown.innerHTML = '';
                         };
-                        
                         cardDropdown.appendChild(item);
                     });
                     cardDropdown.style.display = 'block';
@@ -2013,16 +1977,16 @@
             const year = d.getFullYear();
             const currentYear = new Date().getFullYear();
             const timeStr = `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
-
-            if (year !== currentYear) {
-                return `${day}/${month}/${year} às ${timeStr}`;
-            }
+            if (year !== currentYear) return `${day}/${month}/${year} às ${timeStr}`;
             return `${day}/${month} às ${timeStr}`;
         };
 
         const updateApp = () => {
             localStorage.setItem('myEnvelopes', JSON.stringify(envelopes));
-            renderEnvelopes();
+            if (currentView === 'home') renderEnvelopes();
+            else if (currentView === 'despesas-fixas') renderFixedExpensesList();
+            else if (currentView === 'parcelamentos') renderCreditInstallmentsList();
+            else if (currentView === 'relatorio') renderFinancialReport();
         };
 
         const getEnvSpent = (env) => (env.expenses || []).reduce((acc, curr) => acc + curr.amount, 0);
@@ -2041,6 +2005,52 @@
                 }
             }
         });
+
+        // Gestão de Telas Dinâmicas (SPA)
+        const showFullView = (viewName) => {
+            currentView = viewName;
+            
+            document.getElementById('dashboard').style.display = 'none';
+            document.getElementById('envelope-list').style.display = 'none';
+            
+            document.getElementById('view-fixed-expenses').style.display = 'none';
+            document.getElementById('view-credit-installments').style.display = 'none';
+            document.getElementById('view-financial-report').style.display = 'none';
+
+            document.getElementById('header-back-btn').style.display = 'flex';
+            document.getElementById('header-add-envelope-btn').style.display = 'none';
+
+            const titleEl = document.getElementById('main-header-title');
+
+            if (viewName === 'despesas-fixas') {
+                titleEl.textContent = 'Despesas Fixas';
+                document.getElementById('view-fixed-expenses').style.display = 'flex';
+                openFixedExpensesScreen();
+            } else if (viewName === 'parcelamentos') {
+                titleEl.textContent = 'Parcelamentos';
+                document.getElementById('view-credit-installments').style.display = 'flex';
+                openCreditInstallmentsScreen();
+            } else if (viewName === 'relatorio') {
+                titleEl.textContent = 'Relatório Financeiro';
+                document.getElementById('view-financial-report').style.display = 'flex';
+                renderFinancialReport();
+            }
+        };
+
+        const goHome = () => {
+            currentView = 'home';
+            document.getElementById('view-fixed-expenses').style.display = 'none';
+            document.getElementById('view-credit-installments').style.display = 'none';
+            document.getElementById('view-financial-report').style.display = 'none';
+
+            document.getElementById('header-back-btn').style.display = 'none';
+            document.getElementById('header-add-envelope-btn').style.display = 'flex';
+            document.getElementById('main-header-title').textContent = 'Meus Envelopes';
+
+            document.getElementById('dashboard').style.display = 'flex';
+            document.getElementById('envelope-list').style.display = 'grid';
+            renderEnvelopes();
+        };
 
         const toggleIconGrid = () => {
             const grid = document.getElementById('svg-icon-selector');
@@ -2126,11 +2136,9 @@
             if (index === -1) return;
             const newIndex = index + direction;
             if (newIndex < 0 || newIndex >= tempEnvelopes.length) return;
-            
             const temp = tempEnvelopes[index];
             tempEnvelopes[index] = tempEnvelopes[newIndex];
             tempEnvelopes[newIndex] = temp;
-            
             renderReorderList();
         };
 
@@ -2218,7 +2226,6 @@
         const confirmMultiReset = () => {
             const checkboxes = document.querySelectorAll('.multi-reset-cb:checked');
             const selectedIds = Array.from(checkboxes).map(cb => parseInt(cb.value));
-            
             if (selectedIds.length === 0) {
                 alert('Selecione pelo menos um envelope.');
                 return;
@@ -2291,7 +2298,6 @@
         const confirmMultiDelete = () => {
             const checkboxes = document.querySelectorAll('.multi-delete-cb:checked');
             const selectedIds = Array.from(checkboxes).map(cb => parseInt(cb.value));
-
             if (selectedIds.length === 0) {
                 alert('Selecione pelo menos um envelope.');
                 return;
@@ -2320,53 +2326,34 @@
             alert('O aplicativo foi restaurado aos padrões com sucesso.');
         };
 
-        const setFixedFormVisible = (show) => {
-            const container = document.getElementById('fixed-form-container');
-            const btn = document.getElementById('toggle-fixed-form-btn');
-            if (show) {
-                container.style.display = 'block';
-                btn.style.display = 'none';
-            } else {
-                container.style.display = 'none';
-                btn.style.display = 'inline-block';
-            }
-        };
-
-        const toggleFixedForm = () => {
-            const container = document.getElementById('fixed-form-container');
-            const isHidden = container.style.display === 'none' || container.style.display === '';
-            setFixedFormVisible(isHidden);
-        };
-
-        const openFixedExpensesModal = () => {
+        const openFixedExpensesScreen = () => {
             renderFixedExpensesList();
-            const isSmallScreen = window.innerWidth <= 600;
-            if (isSmallScreen && fixedExpenses.length >= 2) {
-                setFixedFormVisible(false);
-            } else {
-                setFixedFormVisible(true);
-            }
-
-            document.getElementById('edit-fixed-id').value = '';
-            document.getElementById('fixed-item-name').value = '';
-            document.getElementById('fixed-item-amount').value = '';
-            document.getElementById('fixed-submit-btn').innerText = 'Adicionar Despesa';
-
-            openModal('modal-fixed-expenses');
         };
 
-        const resetFixedForm = () => {
-            document.getElementById('edit-fixed-id').value = '';
-            document.getElementById('fixed-item-name').value = '';
-            document.getElementById('fixed-item-amount').value = '';
-            document.getElementById('fixed-submit-btn').innerText = 'Adicionar Despesa';
-            
-            const isSmallScreen = window.innerWidth <= 600;
-            if (isSmallScreen && fixedExpenses.length >= 2) {
-                setFixedFormVisible(false);
+        const openFixedExpenseModal = (id = null) => {
+            const titleEl = document.getElementById('fixed-modal-title');
+            const btnEl = document.getElementById('fixed-submit-btn');
+            const idField = document.getElementById('edit-fixed-id');
+            const nameField = document.getElementById('fixed-item-name');
+            const amountField = document.getElementById('fixed-item-amount');
+
+            if (id) {
+                const item = fixedExpenses.find(i => i.id === id);
+                if (!item) return;
+                titleEl.innerText = 'Editar Despesa Fixa';
+                btnEl.innerText = 'Salvar Alteração';
+                idField.value = item.id;
+                nameField.value = item.name;
+                amountField.value = item.amount.toFixed(2).replace('.', ',');
             } else {
-                setFixedFormVisible(true);
+                titleEl.innerText = 'Adicionar Despesa Fixa';
+                btnEl.innerText = 'Adicionar';
+                idField.value = '';
+                nameField.value = '';
+                amountField.value = '';
             }
+            openModal('modal-fixed-expense');
+            setTimeout(() => nameField.focus(), 100);
         };
 
         const renderFixedExpensesList = () => {
@@ -2376,7 +2363,7 @@
 
             let total = 0;
             if (fixedExpenses.length === 0) {
-                list.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding: 16px;">Nenhuma despesa fixa cadastrada.</p>';
+                list.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding: 24px;">Nenhuma despesa fixa cadastrada.</p>';
             } else {
                 fixedExpenses.forEach((item) => {
                     total += item.amount;
@@ -2406,7 +2393,7 @@
                     editBtn.className = 'card-btn edit-btn';
                     editBtn.title = 'Editar Despesa';
                     editBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>';
-                    editBtn.onclick = () => openEditFixedExpense(item.id);
+                    editBtn.onclick = () => openFixedExpenseModal(item.id);
 
                     const sep = document.createElement('div');
                     sep.style.cssText = 'width: 1px; height: 14px; background-color: var(--border-color); margin: 0 2px;';
@@ -2427,16 +2414,6 @@
                 });
             }
             totalEl.innerText = formatCurrency(total);
-        };
-
-        const openEditFixedExpense = (id) => {
-            const item = fixedExpenses.find(i => i.id === id);
-            if (!item) return;
-            document.getElementById('edit-fixed-id').value = item.id;
-            document.getElementById('fixed-item-name').value = item.name;
-            document.getElementById('fixed-item-amount').value = item.amount.toFixed(2).replace('.', ',');
-            document.getElementById('fixed-submit-btn').innerText = 'Salvar Alteração';
-            setFixedFormVisible(true);
         };
 
         const saveFixedExpense = () => {
@@ -2466,13 +2443,7 @@
 
             localStorage.setItem('myFixedExpenses', JSON.stringify(fixedExpenses));
             renderFixedExpensesList();
-
-            const isSmallScreen = window.innerWidth <= 600;
-            if (isSmallScreen && fixedExpenses.length >= 2) {
-                setFixedFormVisible(false);
-            } else {
-                resetFixedForm();
-            }
+            closeModal('modal-fixed-expense');
         };
 
         const deleteFixedExpense = (id) => {
@@ -2480,16 +2451,10 @@
                 fixedExpenses = fixedExpenses.filter(item => item.id !== id);
                 localStorage.setItem('myFixedExpenses', JSON.stringify(fixedExpenses));
                 renderFixedExpensesList();
-
-                const isSmallScreen = window.innerWidth <= 600;
-                if (isSmallScreen && fixedExpenses.length < 2) {
-                    setFixedFormVisible(true);
-                }
             });
         };
 
         const openFixedReorderModal = () => {
-            closeModal('modal-fixed-expenses');
             tempFixedExpenses = JSON.parse(JSON.stringify(fixedExpenses));
             renderFixedReorderList();
             openModal('modal-fixed-reorder');
@@ -2559,68 +2524,52 @@
             fixedExpenses = [...tempFixedExpenses];
             localStorage.setItem('myFixedExpenses', JSON.stringify(fixedExpenses));
             closeModal('modal-fixed-reorder');
-            openFixedExpensesModal();
+            renderFixedExpensesList();
         };
 
-        const setCreditFormVisible = (show) => {
-            const container = document.getElementById('credit-form-container');
-            const btn = document.getElementById('toggle-credit-form-btn');
-            if (show) {
-                container.style.display = 'block';
-                btn.style.display = 'none';
-            } else {
-                container.style.display = 'none';
-                btn.style.display = 'inline-block';
-            }
-        };
-
-        const toggleCreditForm = () => {
-            const container = document.getElementById('credit-form-container');
-            const isHidden = container.style.display === 'none' || container.style.display === '';
-            setCreditFormVisible(isHidden);
-        };
-
-        const openCreditInstallmentsModal = () => {
+        const openCreditInstallmentsScreen = () => {
             renderCreditInstallmentsList();
-            
-            if (creditInstallments.length === 0) {
-                setCreditFormVisible(true);
-            } else {
-                setCreditFormVisible(false);
-            }
+        };
 
-            document.getElementById('edit-credit-id').value = '';
-            document.getElementById('credit-item-name').value = '';
-            document.getElementById('credit-item-amount').value = '';
-            document.getElementById('credit-item-dueday').value = '';
-            document.getElementById('credit-item-current').value = '';
-            document.getElementById('credit-item-total').value = '';
-            document.getElementById('credit-item-card-input').value = '';
-            
+        const openCreditInstallmentModal = (id = null) => {
+            const titleEl = document.getElementById('credit-modal-title');
+            const btnEl = document.getElementById('credit-submit-btn');
+            const idField = document.getElementById('edit-credit-id');
+            const nameField = document.getElementById('credit-item-name');
+            const amountField = document.getElementById('credit-item-amount');
+            const dueDayField = document.getElementById('credit-item-dueday');
+            const currentField = document.getElementById('credit-item-current');
+            const totalField = document.getElementById('credit-item-total');
+            const cardInput = document.getElementById('credit-item-card-input');
             const dropdown = document.getElementById('custom-bank-dropdown');
+
             if (dropdown) dropdown.style.display = 'none';
 
-            document.getElementById('credit-submit-btn').innerText = 'Adicionar Parcelamento';
-
-            openModal('modal-credit-installments');
-        };
-
-        const resetCreditForm = () => {
-            document.getElementById('edit-credit-id').value = '';
-            document.getElementById('credit-item-name').value = '';
-            document.getElementById('credit-item-amount').value = '';
-            document.getElementById('credit-item-dueday').value = '';
-            document.getElementById('credit-item-current').value = '';
-            document.getElementById('credit-item-total').value = '';
-            document.getElementById('credit-item-card-input').value = '';
-            document.getElementById('credit-submit-btn').innerText = 'Adicionar Parcelamento';
-            
-            const isSmallScreen = window.innerWidth <= 600;
-            if (isSmallScreen && creditInstallments.length >= 2) {
-                setCreditFormVisible(false);
+            if (id) {
+                const item = creditInstallments.find(i => i.id === id);
+                if (!item) return;
+                titleEl.innerText = 'Editar Parcelamento';
+                btnEl.innerText = 'Salvar Alteração';
+                idField.value = item.id;
+                nameField.value = item.name;
+                amountField.value = item.amount.toFixed(2).replace('.', ',');
+                dueDayField.value = item.dueDateDay;
+                currentField.value = item.currentInstallment;
+                totalField.value = item.totalInstallments;
+                cardInput.value = item.cardName || 'Outros';
             } else {
-                setCreditFormVisible(true);
+                titleEl.innerText = 'Adicionar Compra Parcelada';
+                btnEl.innerText = 'Adicionar';
+                idField.value = '';
+                nameField.value = '';
+                amountField.value = '';
+                dueDayField.value = '';
+                currentField.value = '';
+                totalField.value = '';
+                cardInput.value = '';
             }
+            openModal('modal-credit-installment');
+            setTimeout(() => nameField.focus(), 100);
         };
 
         const renderCreditInstallmentsList = () => {
@@ -2633,7 +2582,7 @@
             let activeCount = 0;
             
             if (creditInstallments.length === 0) {
-                list.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding: 16px;">Nenhum parcelamento cadastrado.</p>';
+                list.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding: 24px;">Nenhum parcelamento cadastrado.</p>';
                 totalEl.innerText = formatCurrency(0);
                 if (countEl) countEl.innerText = 0;
                 return;
@@ -2708,7 +2657,7 @@
                     editBtn.className = 'card-btn edit-btn';
                     editBtn.title = 'Editar';
                     editBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>';
-                    editBtn.onclick = () => openEditCreditInstallment(item.id);
+                    editBtn.onclick = () => openCreditInstallmentModal(item.id);
 
                     const sep = document.createElement('div');
                     sep.style.cssText = 'width: 1px; height: 14px; background-color: var(--border-color); margin: 0 2px;';
@@ -2762,7 +2711,6 @@
                     compInfo.appendChild(descC);
                     compInfo.appendChild(subC);
 
-                    // Container de ações para itens concluídos (Editar + Excluir)
                     const actionsC = document.createElement('div');
                     actionsC.style.cssText = 'display: flex; gap: 6px; align-items: center; flex-shrink: 0; margin-left: 8px;';
 
@@ -2770,7 +2718,7 @@
                     editC.className = 'card-btn edit-btn';
                     editC.title = 'Editar';
                     editC.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>';
-                    editC.onclick = () => openEditCreditInstallment(item.id);
+                    editC.onclick = () => openCreditInstallmentModal(item.id);
 
                     const sepC = document.createElement('div');
                     sepC.style.cssText = 'width: 1px; height: 14px; background-color: var(--border-color); margin: 0 2px;';
@@ -2799,21 +2747,6 @@
             if (countEl) countEl.innerText = activeCount;
         };
 
-        const openEditCreditInstallment = (id) => {
-            const item = creditInstallments.find(i => i.id === id);
-            if (!item) return;
-            document.getElementById('edit-credit-id').value = item.id;
-            document.getElementById('credit-item-name').value = item.name;
-            document.getElementById('credit-item-amount').value = item.amount.toFixed(2).replace('.', ',');
-            document.getElementById('credit-item-dueday').value = item.dueDateDay;
-            document.getElementById('credit-item-current').value = item.currentInstallment;
-            document.getElementById('credit-item-total').value = item.totalInstallments;
-            document.getElementById('credit-item-card-input').value = item.cardName || 'Outros';
-
-            document.getElementById('credit-submit-btn').innerText = 'Salvar Alteração';
-            setCreditFormVisible(true);
-        };
-
         const saveCreditInstallment = () => {
             const editId = document.getElementById('edit-credit-id').value;
             const name = document.getElementById('credit-item-name').value.trim();
@@ -2822,7 +2755,6 @@
             const dueDateDay = parseInt(document.getElementById('credit-item-dueday').value, 10);
             const currentInstallment = parseInt(document.getElementById('credit-item-current').value, 10);
             const totalInstallments = parseInt(document.getElementById('credit-item-total').value, 10);
-            
             const rawCardInput = document.getElementById('credit-item-card-input').value;
             const cardName = normalizeBankName(rawCardInput);
 
@@ -2866,31 +2798,18 @@
 
             localStorage.setItem('myCreditInstallments', JSON.stringify(creditInstallments));
             renderCreditInstallmentsList();
-
-            // 1. Reseta os campos obrigatoriamente para ficarem em branco
-            resetCreditForm(); 
-
-            // 2. Recolhe o formulário automaticamente após o cadastro (tanto no celular quanto no computador)
-            if (creditInstallments.length >= 1) {
-                setCreditFormVisible(false);
-            }
-        }; // Fim da função saveCreditInstallment
+            closeModal('modal-credit-installment');
+        };
 
         const deleteCreditInstallment = (id) => {
             showCustomConfirm('Excluir Parcelamento', 'Deseja realmente excluir este parcelamento?', () => {
                 creditInstallments = creditInstallments.filter(item => item.id !== id);
                 localStorage.setItem('myCreditInstallments', JSON.stringify(creditInstallments));
                 renderCreditInstallmentsList();
-                
-                const isSmallScreen = window.innerWidth <= 600;
-                if (isSmallScreen && creditInstallments.length < 2) {
-                    setCreditFormVisible(true);
-                }
             });
         };
 
         const openCreditReorderModal = () => {
-            closeModal('modal-credit-installments');
             tempCreditInstallments = JSON.parse(JSON.stringify(creditInstallments));
             renderCreditReorderList();
             openModal('modal-credit-reorder');
@@ -2960,16 +2879,15 @@
             creditInstallments = [...tempCreditInstallments];
             localStorage.setItem('myCreditInstallments', JSON.stringify(creditInstallments));
             closeModal('modal-credit-reorder');
-            openCreditInstallmentsModal();
+            renderCreditInstallmentsList();
         };
 
-        const openFinancialReportModal = () => {
+        const renderFinancialReport = () => {
             const container = document.getElementById('financial-report-body');
             container.innerHTML = '';
 
             if (envelopes.length === 0 && fixedExpenses.length === 0 && creditInstallments.length === 0) {
                 container.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding: 20px;">Nenhum dado financeiro disponível para gerar relatório.</p>';
-                openModal('modal-financial-report');
                 return;
             }
 
@@ -3217,8 +3135,6 @@
                     </div>
                 </details>
             `;
-
-            openModal('modal-financial-report');
         };
 
         const openAppInfoModal = () => openModal('modal-app-info');
@@ -3235,8 +3151,7 @@
             const dashboard = document.getElementById('dashboard');
             list.innerHTML = '';
 
-            // Cabeçalho Dinâmico: "Meus Envelopes" na tela inicial (vazia) e com contador quando houver itens
-            const headerTitleEl = document.querySelector('header .header-title');
+            const headerTitleEl = document.getElementById('main-header-title');
             if (headerTitleEl) {
                 if (envelopes.length === 0) {
                     headerTitleEl.textContent = 'Meus Envelopes';
@@ -3431,7 +3346,6 @@
         const selectPaymentMethod = (method, element) => {
             const currentSelected = document.getElementById('expense-payment-method').value;
             document.querySelectorAll('.payment-option').forEach(el => el.classList.remove('selected'));
-            
             if (currentSelected === method) {
                 document.getElementById('expense-payment-method').value = '';
             } else {
@@ -3443,7 +3357,6 @@
         document.getElementById('expense-date').addEventListener('input', function(e) {
             let value = e.target.value.replace(/\D/g, '');
             if (value.length > 8) value = value.slice(0, 8);
-            
             if (value.length > 4) {
                 value = value.replace(/^(\d{2})(\d{2})(\d{1,4})$/, '$1/$2/$3');
             } else if (value.length > 2) {
@@ -3459,10 +3372,8 @@
             document.getElementById('expense-date').value = '';
             document.getElementById('expense-payment-method').value = '';
             document.querySelectorAll('.payment-option').forEach(el => el.classList.remove('selected'));
-
             document.getElementById('date-container').style.display = 'none';
             document.getElementById('toggle-date-btn').style.display = 'inline-block';
-
             document.getElementById('desc-container').style.display = 'none';
             document.getElementById('toggle-desc-btn').style.display = 'inline-block';
         };
@@ -3511,95 +3422,93 @@
         };
 
         const saveExpense = () => {
-        const envId = parseInt(document.getElementById('expense-env-id').value);
-        const expenseId = document.getElementById('expense-item-id').value;
-        const amountStr = document.getElementById('expense-amount').value.trim();
-        const amount = parseBrNumber(amountStr);
-        const paymentMethod = document.getElementById('expense-payment-method').value;
-        const desc = document.getElementById('expense-desc').value.trim();
-        const dateVal = document.getElementById('expense-date').value;
+            const envId = parseInt(document.getElementById('expense-env-id').value);
+            const expenseId = document.getElementById('expense-item-id').value;
+            const amountStr = document.getElementById('expense-amount').value.trim();
+            const amount = parseBrNumber(amountStr);
+            const paymentMethod = document.getElementById('expense-payment-method').value;
+            const desc = document.getElementById('expense-desc').value.trim();
+            const dateVal = document.getElementById('expense-date').value;
 
-        if (isNaN(amount) || amount <= 0) {
-            alert('Insira um valor de gasto válido.');
-            return;
-        }
-
-        const envIndex = envelopes.findIndex(env => env.id === envId);
-        if (envIndex === -1) return; 
-
-        let baseDate = new Date(); 
-        if (expenseId) {
-            const existingExp = (envelopes[envIndex].expenses || []).find(e => e.id == expenseId);
-            if (existingExp && existingExp.date) {
-                const parsedDate = new Date(existingExp.date);
-                if (!isNaN(parsedDate.getTime())) baseDate = parsedDate; 
-            }
-        }
-
-        let expDateIso = baseDate.toISOString();
-        let selectedDate = new Date(baseDate); // CORREÇÃO: Inicializa com a data base para evitar erro se estiver em branco
-
-        if (dateVal) {
-            const parts = dateVal.split('/');
-            if (parts.length === 3 && parts[0].length === 2 && parts[1].length === 2 && parts[2].length === 4) {
-                const day = parseInt(parts[0], 10);
-                const month = parseInt(parts[1], 10) - 1;
-                const year = parseInt(parts[2], 10);
-
-                if (year < 2000 || year > 2100 || month < 0 || month > 11 || day < 1 || day > 31) {
-                    alert('Data inválida. Verifique o dia, mês e ano informados.');
-                    return;
-                }
-
-                selectedDate = new Date(year, month, day, baseDate.getHours(), baseDate.getMinutes(), baseDate.getSeconds());
-                
-                if (!isNaN(selectedDate.getTime()) && selectedDate.getFullYear() === year && selectedDate.getMonth() === month && selectedDate.getDate() === day) {
-                    expDateIso = selectedDate.toISOString();
-                } else {
-                    alert('Data inválida (este dia não existe no mês informado).');
-                    return;
-                }
-            } else {
-                alert('Formato de data incompleto ou incorreto. Use DD/MM/AAAA');
+            if (isNaN(amount) || amount <= 0) {
+                alert('Insira um valor de gasto válido.');
                 return;
             }
-        }
 
-        // Validação de data futura
-        const today = new Date();
-        today.setHours(23, 59, 59, 999); // Final do dia atual
+            const envIndex = envelopes.findIndex(env => env.id === envId);
+            if (envIndex === -1) return; 
 
-        if (selectedDate > today) {
-            alert('Não é permitido registrar gastos com data futura nos envelopes. O sistema de envelopes controla o mês atual. Para despesas futuras, utilize o módulo de Despesas Fixas ou Parcelamentos.');
-            return;
-        }
-
-        envelopes[envIndex].expenses = envelopes[envIndex].expenses || [];
-        if (expenseId) {
-            const expIndex = envelopes[envIndex].expenses.findIndex(e => e.id == expenseId);
-            if(expIndex !== -1) {
-                envelopes[envIndex].expenses[expIndex].amount = amount;
-                envelopes[envIndex].expenses[expIndex].paymentMethod = paymentMethod;
-                envelopes[envIndex].expenses[expIndex].desc = desc;
-                envelopes[envIndex].expenses[expIndex].date = expDateIso;
+            let baseDate = new Date(); 
+            if (expenseId) {
+                const existingExp = (envelopes[envIndex].expenses || []).find(e => e.id == expenseId);
+                if (existingExp && existingExp.date) {
+                    const parsedDate = new Date(existingExp.date);
+                    if (!isNaN(parsedDate.getTime())) baseDate = parsedDate; 
+                }
             }
-        } else {
-            envelopes[envIndex].expenses.push({
-                id: Date.now(),
-                amount: amount,
-                paymentMethod: paymentMethod,
-                desc: desc,
-                date: expDateIso
-            });
-        }
-        
-        closeModal('modal-expense');
-        updateApp();
-        
-        if(document.getElementById('modal-history').classList.contains('active-modal')) {
-            openHistoryModal(envId, 'current');
-        }
-    };
+
+            let expDateIso = baseDate.toISOString();
+            let selectedDate = new Date(baseDate);
+
+            if (dateVal) {
+                const parts = dateVal.split('/');
+                if (parts.length === 3 && parts[0].length === 2 && parts[1].length === 2 && parts[2].length === 4) {
+                    const day = parseInt(parts[0], 10);
+                    const month = parseInt(parts[1], 10) - 1;
+                    const year = parseInt(parts[2], 10);
+
+                    if (year < 2000 || year > 2100 || month < 0 || month > 11 || day < 1 || day > 31) {
+                        alert('Data inválida. Verifique o dia, mês e ano informados.');
+                        return;
+                    }
+
+                    selectedDate = new Date(year, month, day, baseDate.getHours(), baseDate.getMinutes(), baseDate.getSeconds());
+                    if (!isNaN(selectedDate.getTime()) && selectedDate.getFullYear() === year && selectedDate.getMonth() === month && selectedDate.getDate() === day) {
+                        expDateIso = selectedDate.toISOString();
+                    } else {
+                        alert('Data inválida (este dia não existe no mês informado).');
+                        return;
+                    }
+                } else {
+                    alert('Formato de data incompleto ou incorreto. Use DD/MM/AAAA');
+                    return;
+                }
+            }
+
+            const today = new Date();
+            today.setHours(23, 59, 59, 999);
+
+            if (selectedDate > today) {
+                alert('Não é permitido registrar gastos com data futura nos envelopes. O sistema de envelopes controla o mês atual. Para despesas futuras, utilize o módulo de Despesas Fixas ou Parcelamentos.');
+                return;
+            }
+
+            envelopes[envIndex].expenses = envelopes[envIndex].expenses || [];
+            if (expenseId) {
+                const expIndex = envelopes[envIndex].expenses.findIndex(e => e.id == expenseId);
+                if(expIndex !== -1) {
+                    envelopes[envIndex].expenses[expIndex].amount = amount;
+                    envelopes[envIndex].expenses[expIndex].paymentMethod = paymentMethod;
+                    envelopes[envIndex].expenses[expIndex].desc = desc;
+                    envelopes[envIndex].expenses[expIndex].date = expDateIso;
+                }
+            } else {
+                envelopes[envIndex].expenses.push({
+                    id: Date.now(),
+                    amount: amount,
+                    paymentMethod: paymentMethod,
+                    desc: desc,
+                    date: expDateIso
+                });
+            }
+            
+            closeModal('modal-expense');
+            updateApp();
+            
+            if(document.getElementById('modal-history').classList.contains('active-modal')) {
+                openHistoryModal(envId, 'current');
+            }
+        };
 
         const openHistoryModal = (envId, periodId = 'current') => {
             const env = envelopes.find(e => e.id === envId);
@@ -3649,7 +3558,6 @@
                 list.innerHTML = '<p style="text-align:center; color:var(--text-muted); margin-top:20px;">Nenhum gasto registrado neste período.</p>';
             } else {
                 const sortedExpenses = [...targetExpenses].sort((a,b) => new Date(b.date) - new Date(a.date));
-                
                 sortedExpenses.forEach(exp => {
                     if (!exp) return;
                     const item = document.createElement('div');
@@ -3781,7 +3689,6 @@
                 if (env.icon && env.icon.trim().startsWith('<svg')) {
                     currentSelectedSvg = sanitizeSvg(env.icon);
                     iconField.value = '📦';
-                    
                     const cleanEnvIcon = env.icon.replace(/['"\\]/g, '').trim();
                     document.querySelectorAll('.icon-option').forEach(el => {
                         const onclickAttr = el.getAttribute('onclick') || '';
@@ -3882,7 +3789,6 @@
             const envIndex = envelopes.findIndex(env => env.id === id);
             if (envIndex !== -1) {
                 const env = envelopes[envIndex];
-                
                 if (keepHistory && Array.isArray(env.expenses) && env.expenses.length > 0) {
                     env.history = Array.isArray(env.history) ? env.history : [];
                     const d = new Date();
@@ -4097,12 +4003,10 @@
             const downloadAnchor = document.createElement('a');
             downloadAnchor.href = url;
             downloadAnchor.download = fileName;
-            
             document.body.appendChild(downloadAnchor);
             downloadAnchor.click();
             document.body.removeChild(downloadAnchor);
             URL.revokeObjectURL(url);
-            
             closeModal('modal-export');
         };
 
@@ -4179,17 +4083,14 @@
                         const fixedLabel = document.createElement('label');
                         fixedLabel.className = 'checkbox-item';
                         fixedLabel.style.cssText = 'border-bottom: 2px solid var(--border-color); background: var(--primary-light-bg);';
-                        
                         const cb = document.createElement('input');
                         cb.type = 'checkbox';
                         cb.id = 'import-fixed-cb';
                         cb.checked = true;
                         cb.className = 'import-checkbox-fixed';
-
                         const div = document.createElement('div');
                         div.style.cssText = 'display:flex; align-items:center; gap:10px; min-width:0; flex:1;';
                         div.innerHTML = `<div class="envelope-icon-wrap" style="color: var(--primary);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg></div><span class="checkbox-item-title" style="font-weight: 700;">Despesas Fixas (${validFixed.length} itens)</span>`;
-
                         fixedLabel.appendChild(cb);
                         fixedLabel.appendChild(div);
                         importListEl.appendChild(fixedLabel);
@@ -4199,17 +4100,14 @@
                         const creditLabel = document.createElement('label');
                         creditLabel.className = 'checkbox-item';
                         creditLabel.style.cssText = 'border-bottom: 2px solid var(--border-color); background: var(--primary-light-bg);';
-                        
                         const cb = document.createElement('input');
                         cb.type = 'checkbox';
                         cb.id = 'import-credit-cb';
                         cb.checked = true;
                         cb.className = 'import-checkbox-credit';
-
                         const div = document.createElement('div');
                         div.style.cssText = 'display:flex; align-items:center; gap:10px; min-width:0; flex:1;';
                         div.innerHTML = `<div class="envelope-icon-wrap" style="color: var(--primary);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div><span class="checkbox-item-title" style="font-weight: 700;">Parcelamentos (${validCredit.length} itens)</span>`;
-
                         creditLabel.appendChild(cb);
                         creditLabel.appendChild(div);
                         importListEl.appendChild(creditLabel);
@@ -4218,27 +4116,21 @@
                     pendingImportData.envelopes.forEach((env, index) => {
                         const itemLabel = document.createElement('label');
                         itemLabel.className = 'checkbox-item';
-
                         const cb = document.createElement('input');
                         cb.type = 'checkbox';
                         cb.value = index;
                         cb.checked = true;
                         cb.className = 'import-checkbox';
-
                         const div = document.createElement('div');
                         div.style.cssText = 'display:flex; align-items:center; gap:10px; min-width:0; flex:1;';
-
                         const iconWrap = document.createElement('div');
                         iconWrap.className = 'envelope-icon-wrap';
                         iconWrap.innerHTML = renderIconHtml(env.icon);
-
                         const titleSpan = document.createElement('span');
                         titleSpan.className = 'checkbox-item-title';
                         titleSpan.textContent = env.name;
-
                         div.appendChild(iconWrap);
                         div.appendChild(titleSpan);
-
                         itemLabel.appendChild(cb);
                         itemLabel.appendChild(div);
                         importListEl.appendChild(itemLabel);
@@ -4316,10 +4208,8 @@
         const showCustomConfirm = (title, message, callback, btnText = 'Excluir', isDanger = true) => {
             document.getElementById('custom-confirm-title').innerText = title;
             document.getElementById('custom-confirm-message').innerText = message;
-            
             const okBtn = document.getElementById('custom-confirm-ok-btn');
             okBtn.innerText = btnText;
-            
             const iconContainer = document.getElementById('custom-confirm-icon-container');
             if (isDanger) {
                 iconContainer.style.background = 'rgba(233, 28, 93, 0.12)';
@@ -4330,7 +4220,6 @@
                 iconContainer.style.color = 'var(--primary)';
                 okBtn.className = 'btn btn-confirm';
             }
-
             customConfirmCallback = callback;
             openModal('modal-custom-confirm');
         };
