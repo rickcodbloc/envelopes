@@ -2225,9 +2225,9 @@
         };
 
         const generateDonutSvg = (items, totalSum, isEnvelopes = false) => {
-            const size = 200;
+            const size = 220; // Aumentado levemente de 200 para 220 para dar mais respiro ao layout
             const center = size / 2;
-            const radius = 75;
+            const radius = 80; // Raio ajustado proporcionalmente para acompanhar o novo tamanho
             const strokeWidth = 32;
             let cumulativePercent = 0;
 
@@ -2269,14 +2269,19 @@
                 `;
             });
 
+            // Tratamento dinâmico do texto central para evitar estouro em números grandes (milhões/bilhões)
+            const formattedTotal = formatCurrency(totalSum);
+            // Reduz dinamicamente o tamanho da fonte se o texto for muito longo (ex: acima de 12 caracteres)
+            const fontSizeStyle = formattedTotal.length > 12 ? 'font-size: 0.85rem;' : (formattedTotal.length > 10 ? 'font-size: 0.95rem;' : 'font-size: 1.05rem;');
+
             return `
                 <div style="position: relative; width: ${size}px; height: ${size}px; margin: 10px auto;">
                     <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
                         ${svgSlices}
                     </svg>
-                    <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none;">
+                    <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none; padding: 0 15px; text-align: center;">
                         <span style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Total</span>
-                        <span style="font-size: 1.05rem; font-weight: 700; color: var(--text-main);">${formatCurrency(totalSum)}</span>
+                        <span style="${fontSizeStyle} font-weight: 700; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;">${formattedTotal}</span>
                     </div>
                 </div>
                 <div style="display: flex; flex-direction: column; gap: 8px; width: 100%; align-items: center;">
