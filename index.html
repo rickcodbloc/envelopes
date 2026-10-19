@@ -1181,9 +1181,8 @@
                         <div style="width:20px; height:20px; display:flex; align-items:center; justify-content:center; color:var(--primary);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg></div>
                         <h2 style="margin:0; font-size: 1.25rem;">CONSOLIDADO DO MÊS</h2>
                     </div>
-                    <button class="card-btn" onclick="showFullView('graficos')" title="Análise Visual (Gráficos)" style="background: var(--primary-light-bg); padding: 7px 10px; border-radius: 8px; color: var(--primary); display: flex; align-items: center; gap: 6px; font-size: 0.82rem; font-weight: 600;">
+                    <button class="card-btn" onclick="showFullView('graficos')" title="Análise Visual (Gráficos)" aria-label="Análise Visual (Gráficos)" style="background: var(--primary-light-bg); padding: 7px; border-radius: 8px; color: var(--primary); display: flex; align-items: center; justify-content: center;">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path><path d="M22 12A10 10 0 0 0 12 2v10z"></path></svg>
-                        Gráficos
                     </button>
                 </div>
                 <div id="financial-report-body" style="font-size: 0.9rem; color: var(--text-main); display: flex; flex-direction: column; gap: 12px; max-height: 68vh; overflow-y: auto; padding-right: 4px; margin-top: 8px;"></div>
@@ -1203,8 +1202,8 @@
 
                 <!-- Botões de Alternância (Pílula) -->
                 <div style="display: flex; background: var(--border-color); padding: 4px; border-radius: 10px; margin-bottom: 16px;">
-                    <button class="btn" id="chart-tab-general" onclick="switchChartTab('general')" style="flex: 1; padding: 8px 4px; font-size: 0.85rem; white-space: nowrap; background: var(--primary); color: white; border-radius: 8px;">Geral</button>
-                    <button class="btn" id="chart-tab-envelopes" onclick="switchChartTab('envelopes')" style="flex: 1; padding: 8px 4px; font-size: 0.85rem; white-space: nowrap; background: transparent; color: var(--text-main); border-radius: 8px;">Envelopes</button>
+                    <button class="btn chart-tab-pill" id="chart-tab-general" onclick="switchChartTab('general')" style="flex: 1; padding: 8px 4px; font-size: 0.85rem; white-space: nowrap; background: var(--primary); color: white; border-radius: 8px;">Geral</button>
+                    <button class="btn chart-tab-pill" id="chart-tab-envelopes" onclick="switchChartTab('envelopes')" style="flex: 1; padding: 8px 4px; font-size: 0.85rem; white-space: nowrap; background: transparent; color: var(--text-main); border-radius: 8px;">Envelopes</button>
                 </div>
 
                 <!-- Container do Gráfico SVG e Legenda -->
