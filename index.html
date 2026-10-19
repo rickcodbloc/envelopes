@@ -1176,11 +1176,39 @@
         <!-- 3. Tela de Relatório Financeiro -->
         <div id="view-financial-report" class="full-view-container">
             <div class="full-view-content">
-                <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
-                    <div style="width:20px; height:20px; display:flex; align-items:center; justify-content:center; color:var(--primary);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg></div>
-                    <h2 style="margin:0; font-size: 1.25rem;">CONSOLIDADO DO MÊS</h2>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <div style="width:20px; height:20px; display:flex; align-items:center; justify-content:center; color:var(--primary);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg></div>
+                        <h2 style="margin:0; font-size: 1.25rem;">CONSOLIDADO DO MÊS</h2>
+                    </div>
+                    <button class="card-btn" onclick="showFullView('graficos')" title="Análise Visual (Gráficos)" style="background: var(--primary-light-bg); padding: 7px 10px; border-radius: 8px; color: var(--primary); display: flex; align-items: center; gap: 6px; font-size: 0.82rem; font-weight: 600;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path><path d="M22 12A10 10 0 0 0 12 2v10z"></path></svg>
+                        Gráficos
+                    </button>
                 </div>
                 <div id="financial-report-body" style="font-size: 0.9rem; color: var(--text-main); display: flex; flex-direction: column; gap: 12px; max-height: 68vh; overflow-y: auto; padding-right: 4px; margin-top: 8px;"></div>
+            </div>
+        </div>
+
+        <!-- 4. Nova Tela de Gráficos / Análise Visual -->
+        <div id="view-graficos" class="full-view-container">
+            <div class="full-view-content">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <div style="width:20px; height:20px; display:flex; align-items:center; justify-content:center; color:var(--primary);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path><path d="M22 12A10 10 0 0 0 12 2v10z"></path></svg></div>
+                        <h2 style="margin:0; font-size: 1.25rem;">Análise Visual</h2>
+                    </div>
+                </div>
+                <p class="modal-subtitle">Acompanhe a distribuição dos seus gastos de forma intuitiva.</p>
+
+                <!-- Botões de Alternância (Pílula) -->
+                <div style="display: flex; background: var(--border-color); padding: 4px; border-radius: 10px; margin-bottom: 16px;">
+                    <button class="btn" id="chart-tab-general" onclick="switchChartTab('general')" style="flex: 1; padding: 8px 4px; font-size: 0.85rem; white-space: nowrap; background: var(--primary); color: white; border-radius: 8px;">Geral</button>
+                    <button class="btn" id="chart-tab-envelopes" onclick="switchChartTab('envelopes')" style="flex: 1; padding: 8px 4px; font-size: 0.85rem; white-space: nowrap; background: transparent; color: var(--text-main); border-radius: 8px;">Envelopes</button>
+                </div>
+
+                <!-- Container do Gráfico SVG e Legenda -->
+                <div id="graficos-container" style="display: flex; flex-direction: column; align-items: center; gap: 16px; flex: 1; overflow-y: auto; padding-bottom: 10px;"></div>
             </div>
         </div>
 
@@ -2092,6 +2120,7 @@
             else if (currentView === 'despesas-fixas') renderFixedExpensesList();
             else if (currentView === 'parcelamentos') renderCreditInstallmentsList();
             else if (currentView === 'relatorio') renderFinancialReport();
+            else if (currentView === 'graficos') renderGraphicsView(); // ADICIONADO
         };
 
         const getEnvSpent = (env) => (env.expenses || []).reduce((acc, curr) => acc + curr.amount, 0);
@@ -2111,6 +2140,141 @@
             }
         });
 
+        let currentChartTab = 'general';
+
+        const switchChartTab = (tab) => {
+            currentChartTab = tab;
+            const btnGeneral = document.getElementById('chart-tab-general');
+            const btnEnvelopes = document.getElementById('chart-tab-envelopes');
+
+            if (tab === 'general') {
+                btnGeneral.style.background = 'var(--primary)';
+                btnGeneral.style.color = 'white';
+                btnEnvelopes.style.background = 'transparent';
+                btnEnvelopes.style.color = 'var(--text-main)';
+            } else {
+                btnEnvelopes.style.background = 'var(--primary)';
+                btnEnvelopes.style.color = 'white';
+                btnGeneral.style.background = 'transparent';
+                btnGeneral.style.color = 'var(--text-main)';
+            }
+            renderGraphicsView();
+        };
+
+        const renderGraphicsView = () => {
+            const container = document.getElementById('graficos-container');
+            if (!container) return;
+            container.innerHTML = '';
+
+            if (currentChartTab === 'general') {
+                let totalSpentCurrent = 0;
+                envelopes.forEach(env => { totalSpentCurrent += getEnvSpent(env); });
+                let totalFixed = fixedExpenses.reduce((acc, curr) => acc + curr.amount, 0);
+                let activeCreditTotal = creditInstallments
+                    .filter(i => i.currentInstallment <= i.totalInstallments)
+                    .reduce((acc, curr) => acc + curr.amount, 0);
+
+                const grandTotal = totalSpentCurrent + totalFixed + activeCreditTotal;
+
+                if (grandTotal === 0) {
+                    container.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding: 30px;">Nenhum gasto registrado para exibir no gráfico geral.</p>';
+                    return;
+                }
+
+                const items = [
+                    { label: 'Despesas Variáveis', value: totalSpentCurrent, color: 'var(--primary)' },
+                    { label: 'Despesas Fixas', value: totalFixed, color: '#32D74B' },
+                    { label: 'Parcelamentos', value: activeCreditTotal, color: '#FF9F0A' }
+                ].filter(i => i.value > 0);
+
+                container.innerHTML = generateDonutSvg(items, grandTotal);
+            } else {
+                let totalSpentCurrent = 0;
+                envelopes.forEach(env => { totalSpentCurrent += getEnvSpent(env); });
+
+                if (envelopes.length === 0 || totalSpentCurrent === 0) {
+                    container.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding: 30px;">Nenhum gasto registrado nos envelopes.</p>';
+                    return;
+                }
+
+                const palette = ['#8A05BE', '#007AFF', '#E91C5D', '#32D74B', '#FF9F0A', '#FF453A', '#64D2FF', '#5E5CE6'];
+                const items = envelopes.map((env, idx) => ({
+                    label: env.name,
+                    value: getEnvSpent(env),
+                    icon: env.icon,
+                    color: palette[idx % palette.length]
+                })).filter(i => i.value > 0);
+
+                if (items.length === 0) {
+                    container.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding: 30px;">Nenhum envelope com gastos no momento.</p>';
+                    return;
+                }
+
+                container.innerHTML = generateDonutSvg(items, totalSpentCurrent, true);
+            }
+        };
+
+        const generateDonutSvg = (items, totalSum, isEnvelopes = false) => {
+            const size = 200;
+            const center = size / 2;
+            const radius = 75;
+            const strokeWidth = 32;
+            let cumulativePercent = 0;
+
+            let svgSlices = '';
+            let legendHtml = '';
+
+            items.forEach((item) => {
+                const percent = item.value / totalSum;
+                const dashArray = `${percent * 2 * Math.PI * radius} ${2 * Math.PI * radius}`;
+                const dashOffset = -cumulativePercent * 2 * Math.PI * radius;
+                cumulativePercent += percent;
+
+                let strokeColor = item.color;
+                if (strokeColor === 'var(--primary)') {
+                    const theme = document.body.getAttribute('data-theme') || 'purple';
+                    strokeColor = theme === 'blue' ? '#007AFF' : (theme === 'pink' ? '#E91C5D' : '#8A05BE');
+                }
+
+                svgSlices += `
+                    <circle cx="${center}" cy="${center}" r="${radius}" fill="transparent" 
+                        stroke="${strokeColor}" stroke-width="${strokeWidth}" 
+                        stroke-dasharray="${dashArray}" stroke-dashoffset="${dashOffset}" 
+                        transform="rotate(-90 ${center} ${center})" style="transition: stroke-dasharray 0.6s ease;" />
+                `;
+
+                const pRounded = Math.round(percent * 100);
+                legendHtml += `
+                    <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; max-width: 320px; padding: 8px 12px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px;">
+                        <div style="display: flex; align-items: center; gap: 8px; min-width: 0; flex: 1;">
+                            <div style="width: 12px; height: 12px; border-radius: 50%; background-color: ${strokeColor}; flex-shrink: 0;"></div>
+                            ${isEnvelopes ? `<div class="envelope-icon-wrap" style="width: 20px; height: 20px;">${renderIconHtml(item.icon)}</div>` : ''}
+                            <span style="font-size: 0.88rem; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${sanitizeHtml(item.label)}</span>
+                        </div>
+                        <div style="text-align: right; flex-shrink: 0; margin-left: 8px;">
+                            <span style="font-size: 0.88rem; font-weight: 700; display: block;">${formatCurrency(item.value)}</span>
+                            <span style="font-size: 0.75rem; color: var(--text-muted);">${pRounded}%</span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            return `
+                <div style="position: relative; width: ${size}px; height: ${size}px; margin: 10px auto;">
+                    <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+                        ${svgSlices}
+                    </svg>
+                    <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none;">
+                        <span style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Total</span>
+                        <span style="font-size: 1.05rem; font-weight: 700; color: var(--text-main);">${formatCurrency(totalSum)}</span>
+                    </div>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 8px; width: 100%; align-items: center;">
+                    ${legendHtml}
+                </div>
+            `;
+        };
+
         // Gestão de Telas Dinâmicas (SPA)
         const showFullView = (viewName) => {
             currentView = viewName;
@@ -2121,6 +2285,7 @@
             document.getElementById('view-fixed-expenses').style.display = 'none';
             document.getElementById('view-credit-installments').style.display = 'none';
             document.getElementById('view-financial-report').style.display = 'none';
+            document.getElementById('view-graficos').style.display = 'none'; // ADICIONADO
 
             document.getElementById('header-back-btn').style.display = 'flex';
             document.getElementById('header-add-envelope-btn').style.display = 'none';
@@ -2139,6 +2304,10 @@
                 titleEl.textContent = 'Relatório Financeiro';
                 document.getElementById('view-financial-report').style.display = 'flex';
                 renderFinancialReport();
+            } else if (viewName === 'graficos') {
+                titleEl.textContent = 'Análise Visual';
+                document.getElementById('view-graficos').style.display = 'flex';
+                renderGraphicsView();
             }
         };
 
@@ -2147,6 +2316,7 @@
             document.getElementById('view-fixed-expenses').style.display = 'none';
             document.getElementById('view-credit-installments').style.display = 'none';
             document.getElementById('view-financial-report').style.display = 'none';
+            document.getElementById('view-graficos').style.display = 'none'; // ADICIONADO
 
             document.getElementById('header-back-btn').style.display = 'none';
             document.getElementById('header-add-envelope-btn').style.display = 'flex';
