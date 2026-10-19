@@ -1025,6 +1025,33 @@
             align-items: center;
         }
 
+        /* Classes dedicadas para as legendas dos gráficos (Garantia de Dark Mode) */
+        .donut-legend-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 320px;
+            padding: 8px 12px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+        }
+        .donut-legend-label {
+            font-size: 0.88rem;
+            font-weight: 500;
+            color: var(--text-main) !important;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .donut-legend-value {
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: var(--text-main) !important;
+            display: block;
+        }
+
     </style>
 </head>
 <body data-theme="purple">
@@ -2255,14 +2282,14 @@
 
                 const pRounded = Math.round(percent * 100);
                 legendHtml += `
-                    <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; max-width: 320px; padding: 8px 12px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px;">
+                    <div class="donut-legend-card">
                         <div style="display: flex; align-items: center; gap: 8px; min-width: 0; flex: 1;">
                             <div style="width: 9px; height: 9px; border-radius: 50%; background-color: ${strokeColor}; flex-shrink: 0;"></div>
                             ${isEnvelopes ? `<div class="envelope-icon-wrap" style="width: 20px; height: 20px;">${renderIconHtml(item.icon)}</div>` : ''}
-                            <span style="font-size: 0.88rem; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${sanitizeHtml(item.label)}</span>
+                            <span class="donut-legend-label">${sanitizeHtml(item.label)}</span>
                         </div>
                         <div style="text-align: right; flex-shrink: 0; margin-left: 8px;">
-                            <span style="font-size: 0.88rem; font-weight: 700; display: block;">${formatCurrency(item.value)}</span>
+                            <span class="donut-legend-value">${formatCurrency(item.value)}</span>
                             <span style="font-size: 0.75rem; color: var(--text-muted);">${pRounded}%</span>
                         </div>
                     </div>
