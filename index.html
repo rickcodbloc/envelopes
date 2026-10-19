@@ -1025,6 +1025,24 @@
             align-items: center;
         }
 
+        /* Contador Discreto em Círculo / Pílula (Já usado em Relatório Financeiro) */
+        .report-item-counter {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 20px;
+            height: 20px;
+            padding: 0 6px;
+            margin-left: 8px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--primary);
+            background-color: var(--primary-light-bg);
+            border-radius: 10px;
+            vertical-align: middle;
+            flex-shrink: 0;
+        }
+
         /* Classes dedicadas para as legendas dos gráficos (Garantia de Dark Mode) */
         .donut-legend-card {
             display: flex;
@@ -1465,7 +1483,7 @@
                     <p>Funciona 100% offline, sem servidores externos ou cadastro. Seus dados ficam armazenados localmente no dispositivo, com opções de exportação e importação de backups.</p>
 
                     <div style="border-top: 1px solid var(--border-color); padding-top: 10px; margin-top: 4px; font-size: 0.85rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 4px;">
-                        <span><strong>Versão:</strong> 3.7</span>
+                        <span><strong>Versão:</strong> 3.7.2</span>
                         <span><strong>Desenvolvedor:</strong> Ricardo Soares</span>
                         <span>© 2026 | Todos os direitos reservados.</span>
                     </div>
@@ -3287,6 +3305,16 @@
                 return;
             }
 
+            // 1. Despesas Variáveis (Quantidade de Envelopes)
+            let totalVariableCount = envelopes.length;
+
+            // 2. Despesas Fixas
+            let totalFixedCount = fixedExpenses.length;
+
+            // 3. Parcelamentos
+            let totalCreditCount = creditInstallments.length;
+            // ---------------------------------------------
+
             let totalSpentCurrent = 0;
             let totalBudgetCurrent = 0;
             let paymentTotals = { 'Crédito': 0, 'Débito': 0, 'Pix': 0, 'Dinheiro': 0 };
@@ -3478,18 +3506,18 @@
 
                 <details class="report-details" style="background:var(--card-bg); border:1px solid var(--border-color); border-radius:10px; padding:10px 14px;">
                     <summary style="font-weight:600; font-size:0.9rem; cursor:pointer; color:var(--text-main); outline:none; display:flex; justify-content:space-between; align-items:center;">
-                        <span>Despesas Variáveis</span>
+                        <div><span>Despesas Variáveis</span><span class="report-item-counter">${totalVariableCount}</span></div>
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="report-chevron"><polyline points="6 9 12 15 18 9"></polyline></svg>
                     </summary>
                     <div style="margin-top:10px; padding-top:8px; border-top:1px solid var(--border-color); display:flex; flex-direction:column; gap:6px;">
                         <div style="font-size:0.85rem; color:var(--text-muted); font-weight:600;">Soma total: ${formatCurrency(totalSpentCurrent)}</div>
                         ${envelopesBreakdownHtml}
                     </div>
-                </details>       
+                </details>     
 
                 <details class="report-details" style="background:var(--card-bg); border:1px solid var(--border-color); border-radius:10px; padding:10px 14px;">
                     <summary style="font-weight:600; font-size:0.9rem; cursor:pointer; color:var(--text-main); outline:none; display:flex; justify-content:space-between; align-items:center;">
-                        <span>Despesas Fixas</span>
+                        <div><span>Despesas Fixas</span><span class="report-item-counter">${totalFixedCount}</span></div>
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="report-chevron"><polyline points="6 9 12 15 18 9"></polyline></svg>
                     </summary>
                     <div style="margin-top:10px; padding-top:8px; border-top:1px solid var(--border-color); display:flex; flex-direction:column; gap:6px;">
@@ -3500,7 +3528,7 @@
 
                 <details class="report-details" style="background:var(--card-bg); border:1px solid var(--border-color); border-radius:10px; padding:10px 14px;">
                     <summary style="font-weight:600; font-size:0.9rem; cursor:pointer; color:var(--text-main); outline:none; display:flex; justify-content:space-between; align-items:center;">
-                        <span>Parcelamentos</span>
+                        <div><span>Parcelamentos</span><span class="report-item-counter">${totalCreditCount}</span></div>
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="report-chevron"><polyline points="6 9 12 15 18 9"></polyline></svg>
                     </summary>
                     <div style="margin-top:10px; padding-top:8px; border-top:1px solid var(--border-color); display:flex; flex-direction:column; gap:6px;">
