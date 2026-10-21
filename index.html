@@ -1138,6 +1138,10 @@
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
                             Parcelamentos
                         </button>
+                        <button class="drawer-item" onclick="toggleOptionsDrawer(); showFullView('outros-compromissos')">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                        Outros compromissos
+                        </button>
                         <button class="drawer-item" onclick="toggleOptionsDrawer(); openSettingsModal()">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
                             Configurações
@@ -1225,7 +1229,32 @@
                 <div id="credit-installments-list" class="checkbox-list" style="margin-bottom: 0; flex: 1;"></div>
             </div>
         </div>
+        <div id="view-other-commitments" class="full-view-container">
+            <div class="full-view-content">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                    <h2 style="margin: 0; font-size: 1.25rem; display: flex; align-items: center; gap: 8px;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                        Outros compromissos
+                    </h2>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="card-btn" onclick="openOtherCommitmentModal()" title="Adicionar Compromisso" style="background: var(--primary-light-bg); padding: 7px; border-radius: 8px; color: var(--primary); display: flex; align-items: center; justify-content: center;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        </button>
+                        <button class="card-btn" onclick="openOtherReorderModal()" title="Reordenar Compromissos" style="background: var(--border-color); padding: 7px; border-radius: 8px; color: var(--primary); display: flex; align-items: center; justify-content: center;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+                        </button>
+                    </div>
+                </div>
+                <p class="modal-subtitle">Financiamentos, consórcios, empréstimos e outros compromissos de longo prazo.</p>
+                
+                <div style="background: var(--border-color); padding: 10px 14px; border-radius: 10px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">Total Mês (<span id="other-active-count">0</span> ativas):</span>
+                    <strong id="other-total-value" style="font-size: 1.1rem; color: var(--text-main);">R$ 0,00</strong>
+                </div>
 
+                <div id="other-commitments-list" class="checkbox-list" style="margin-bottom: 0; flex: 1;"></div>
+            </div>
+        </div>
         <!-- 3. Tela de Relatório Financeiro -->
         <div id="view-financial-report" class="full-view-container">
             <div class="full-view-content">
@@ -1381,7 +1410,58 @@
                 </div>
             </div>
         </div>
+        <div id="modal-other-commitment" class="modal-overlay">
+        <div class="modal-content">
+            <h2 id="other-modal-title">Adicionar Compromisso</h2>
+            <input type="hidden" id="edit-other-id">
+            <div class="form-group">
+                <label>Nome do Compromisso</label>
+                <input type="text" id="other-item-name" placeholder="Ex: Financiamento Imóvel" maxlength="35">
+            </div>
+            <div style="display: flex; gap: 8px;">
+                <div class="form-group" style="flex: 1.3; min-width: 0;">
+                    <label>Valor da Parcela (R$)</label>
+                    <input type="text" id="other-item-amount" inputmode="decimal" placeholder="1.200,00" maxlength="15">
+                </div>
+                <div class="form-group" style="width: 100px; flex-shrink: 0;">
+                    <label>Vencimento</label>
+                    <input type="number" id="other-item-dueday" inputmode="numeric" placeholder="10" min="1" max="31">
+                </div>
+            </div>
+            <div style="display: flex; gap: 8px;">
+                <div class="form-group" style="flex: 1; min-width: 0;">
+                    <label>Parcela Atual</label>
+                    <input type="number" id="other-item-current" inputmode="numeric" placeholder="1" min="1" max="999">
+                </div>
+                <div class="form-group" style="flex: 1; min-width: 0;">
+                    <label>Total de Parcelas</label>
+                    <input type="number" id="other-item-total" inputmode="numeric" placeholder="360" min="1" max="999">
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <button class="btn btn-cancel" onclick="closeModal('modal-other-commitment')">Cancelar</button>
+                <button class="btn btn-confirm" id="other-submit-btn" onclick="saveOtherCommitment()">Adicionar</button>
+            </div>
+        </div>
+    </div>
 
+    <div id="modal-other-reorder" class="modal-overlay">
+    <div class="modal-content">
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+            <h2 style="margin:0;">Reordenar Compromissos</h2>
+        </div>
+        <p class="modal-subtitle">Ajuste a ordem dos seus compromissos:</p>
+        <label for="other-auto-sort-cb" style="display:flex; align-items:center; gap:8px; margin:0 0 12px; padding:8px 10px; border-radius:8px; background:var(--border-color); cursor:pointer;">
+            <input type="checkbox" id="other-auto-sort-cb" onchange="toggleOtherAutoSort(this)" style="width:18px; height:18px; flex-shrink:0; accent-color:var(--primary); cursor:pointer;">
+            <span id="other-auto-sort-label" style="font-size:0.8rem; font-weight:600; color:var(--text-main);">Auto por vencimento</span>
+        </label>
+        <div id="other-reorder-list" class="checkbox-list" style="padding: 8px;"></div>
+        <div class="modal-buttons">
+            <button class="btn btn-cancel" onclick="closeModal('modal-other-reorder')">Cancelar</button>
+            <button class="btn btn-confirm" onclick="saveOtherReorderModal()">OK</button>
+        </div>
+    </div>
+</div>
         <div id="modal-multi-reset" class="modal-overlay">
             <div class="modal-content">
                 <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
@@ -1736,8 +1816,33 @@
         let tempIsFixedAutoSort = isFixedAutoSort;
         let currentSelectedSvg = null;
         let currentHistoryEnvId = null;
-        let pendingImportData = { envelopes: [], fixedExpenses: [], creditInstallments: [], fixedAutoSort: null };
+        // Inclui Outros Compromissos no estado temporário para manter o fluxo de backup/importação completo.
+        let pendingImportData = { envelopes: [], fixedExpenses: [], creditInstallments: [], otherCommitments: [], fixedAutoSort: null, otherAutoSort: null };
         let currentView = 'home'; // 'home', 'despesas-fixas', 'parcelamentos', 'relatorio'
+        let otherCommitments = [];
+        let tempOtherCommitments = [];
+        let isOtherAutoSort = localStorage.getItem('myOtherAutoSort') !== 'false';
+        let tempIsOtherAutoSort = isOtherAutoSort;
+
+        // Ordenação estável por vencimento para Outros Compromissos.
+        const sortOtherCommitmentsByDueDate = (items) => {
+            items.sort((a, b) => {
+                const dayA = Number.isInteger(Number(a && a.dueDateDay)) && Number(a.dueDateDay) >= 1 && Number(a.dueDateDay) <= 31
+                    ? Number(a.dueDateDay) : null;
+                const dayB = Number.isInteger(Number(b && b.dueDateDay)) && Number(b.dueDateDay) >= 1 && Number(b.dueDateDay) <= 31
+                    ? Number(b.dueDateDay) : null;
+                if (dayA === null && dayB === null) return 0;
+                if (dayA === null) return 1;
+                if (dayB === null) return -1;
+                return dayA - dayB;
+            });
+            return items;
+        };
+
+        const sortOtherCommitmentsIfNeeded = () => {
+            if (isOtherAutoSort) sortOtherCommitmentsByDueDate(otherCommitments);
+        };
+
 
         const sanitizeHtml = (str) => {
             if (!str || typeof str !== 'string') return '';
@@ -1859,6 +1964,30 @@
             creditInstallments = [];
         }
 
+        try {
+            const rawOther = localStorage.getItem('myOtherCommitments');
+            if (rawOther) {
+                const parsed = JSON.parse(rawOther);
+                if (Array.isArray(parsed)) {
+                    otherCommitments = parsed
+                        .filter(item => item && typeof item === 'object' && typeof item.name === 'string' && typeof item.amount === 'number' && !isNaN(item.amount))
+                        .map(item => ({
+                            id: Number(item.id) || (Date.now() + Math.random()),
+                            name: item.name.trim(),
+                            amount: item.amount,
+                            dueDateDay: Number(item.dueDateDay) >= 1 && Number(item.dueDateDay) <= 31 ? Number(item.dueDateDay) : 10,
+                            currentInstallment: Number(item.currentInstallment) >= 1 ? Number(item.currentInstallment) : 1,
+                            totalInstallments: Number(item.totalInstallments) >= 1 ? Number(item.totalInstallments) : 1,
+                            lastYear: typeof item.lastYear === 'number' ? item.lastYear : undefined,
+                            lastMonth: typeof item.lastMonth === 'number' ? item.lastMonth : undefined
+                        }));
+                    sortOtherCommitmentsIfNeeded();
+                }
+            }
+        } catch (e) {
+            otherCommitments = [];
+        }
+
         // Mapeamento das cores primárias oficiais de cada tema
         const themeColors = {
             purple: '#8A05BE',
@@ -1945,77 +2074,83 @@
             updateThemeColorMeta(theme); // <-- ADICIONE ESTA LINHA AQUI
         };
 
+        // Avança parcelas vencidas sem duplicar regras: a mesma rotina atende parcelamentos e outros compromissos.
         const processInstallmentsAutoUpdate = () => {
             const now = new Date();
             const curYear = now.getFullYear();
             const curMonth = now.getMonth();
             const curDay = now.getDate();
-            let changed = false;
 
-            creditInstallments = creditInstallments.map(item => {
-                if (!item || typeof item.currentInstallment !== 'number' || typeof item.totalInstallments !== 'number') return item;
-                if (item.currentInstallment > item.totalInstallments) return item;
-                
-                if (item.lastYear === undefined || item.lastMonth === undefined) {
-                    item.lastYear = curYear;
-                    item.lastMonth = curMonth;
-                    changed = true;
-                    return item;
-                }
+            const processCollection = (items, storageKey) => {
+                let changed = false;
+                const updatedItems = items.map(item => {
+                    if (!item || typeof item.currentInstallment !== 'number' || typeof item.totalInstallments !== 'number') return item;
+                    if (item.currentInstallment > item.totalInstallments) return item;
 
-                let lYear = item.lastYear;
-                let lMonth = item.lastMonth;
-                item.dueDateDay = typeof item.dueDateDay === 'number' && item.dueDateDay >= 1 && item.dueDateDay <= 31 ? item.dueDateDay : 10;
-
-                let safetyCounter = 0;
-                while (safetyCounter < 24) {
-                    safetyCounter++;
-                    let nextMonth = lMonth + 1;
-                    let nextYear = lYear;
-                    if (nextMonth > 11) {
-                        nextMonth = 0;
-                        nextYear++;
+                    if (item.lastYear === undefined || item.lastMonth === undefined) {
+                        item.lastYear = curYear;
+                        item.lastMonth = curMonth;
+                        changed = true;
+                        return item;
                     }
 
-                    const maxDaysInNextMonth = new Date(nextYear, nextMonth + 1, 0).getDate();
-                    const effectiveDueDay = Math.min(item.dueDateDay, maxDaysInNextMonth);
+                    let lYear = item.lastYear;
+                    let lMonth = item.lastMonth;
+                    item.dueDateDay = typeof item.dueDateDay === 'number' && item.dueDateDay >= 1 && item.dueDateDay <= 31 ? item.dueDateDay : 10;
 
-                    let canAdvance = false;
-                    if (curYear > nextYear) {
-                        canAdvance = true;
-                    } else if (curYear === nextYear) {
-                        if (curMonth > nextMonth) {
-                            canAdvance = true;
-                        } else if (curMonth === nextMonth && curDay >= effectiveDueDay) {
-                            canAdvance = true;
+                    let safetyCounter = 0;
+                    while (safetyCounter < 24) {
+                        safetyCounter++;
+                        let nextMonth = lMonth + 1;
+                        let nextYear = lYear;
+                        if (nextMonth > 11) {
+                            nextMonth = 0;
+                            nextYear++;
                         }
-                    }
 
-                    if (canAdvance) {
-                        if (item.currentInstallment <= item.totalInstallments) {
-                            item.currentInstallment++;
-                            lYear = nextYear;
-                            lMonth = nextMonth;
-                            changed = true;
+                        const maxDaysInNextMonth = new Date(nextYear, nextMonth + 1, 0).getDate();
+                        const effectiveDueDay = Math.min(item.dueDateDay, maxDaysInNextMonth);
+
+                        let canAdvance = false;
+                        if (curYear > nextYear) {
+                            canAdvance = true;
+                        } else if (curYear === nextYear) {
+                            if (curMonth > nextMonth) {
+                                canAdvance = true;
+                            } else if (curMonth === nextMonth && curDay >= effectiveDueDay) {
+                                canAdvance = true;
+                            }
+                        }
+
+                        if (canAdvance) {
+                            if (item.currentInstallment <= item.totalInstallments) {
+                                item.currentInstallment++;
+                                lYear = nextYear;
+                                lMonth = nextMonth;
+                                changed = true;
+                            } else {
+                                lYear = nextYear;
+                                lMonth = nextMonth;
+                                changed = true;
+                                break;
+                            }
                         } else {
-                            lYear = nextYear;
-                            lMonth = nextMonth;
-                            changed = true;
                             break;
                         }
-                    } else {
-                        break;
                     }
-                }
 
-                item.lastYear = lYear;
-                item.lastMonth = lMonth;
-                return item;
-            });
+                    item.lastYear = lYear;
+                    item.lastMonth = lMonth;
+                    return item;
+                });
 
-            if (changed) {
-                localStorage.setItem('myCreditInstallments', JSON.stringify(creditInstallments));
-            }
+                if (changed) localStorage.setItem(storageKey, JSON.stringify(updatedItems));
+                return updatedItems;
+            };
+
+            creditInstallments = processCollection(creditInstallments, 'myCreditInstallments');
+            // Outros Compromissos têm os mesmos campos de controle de parcela e também avançam por vencimento.
+            otherCommitments = processCollection(otherCommitments, 'myOtherCommitments');
         };
 
         processInstallmentsAutoUpdate();
@@ -2153,7 +2288,7 @@
             });
         }
 
-        ['env-total', 'expense-amount', 'reset-total', 'fixed-item-amount', 'credit-item-amount'].forEach(id => setupLiveValueLimit(id));
+        ['env-total', 'expense-amount', 'reset-total', 'fixed-item-amount', 'credit-item-amount', 'other-item-amount'].forEach(id => setupLiveValueLimit(id));
 
         const formatCurrency = (value) => Number(value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
         
@@ -2174,6 +2309,7 @@
             if (currentView === 'home') renderEnvelopes();
             else if (currentView === 'despesas-fixas') renderFixedExpensesList();
             else if (currentView === 'parcelamentos') renderCreditInstallmentsList();
+            else if (currentView === 'outros-compromissos') renderOtherCommitmentsList();
             else if (currentView === 'relatorio') renderFinancialReport();
             else if (currentView === 'graficos') renderGraphicsView(); // ADICIONADO
         };
@@ -2228,8 +2364,11 @@
                 let activeCreditTotal = creditInstallments
                     .filter(i => i.currentInstallment <= i.totalInstallments)
                     .reduce((acc, curr) => acc + curr.amount, 0);
+                const totalOther = otherCommitments
+                    .filter(i => i.currentInstallment <= i.totalInstallments)
+                    .reduce((acc, curr) => acc + curr.amount, 0);
 
-                const grandTotal = totalSpentCurrent + totalFixed + activeCreditTotal;
+                const grandTotal = totalSpentCurrent + totalFixed + activeCreditTotal + totalOther;
 
                 if (grandTotal === 0) {
                     container.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding: 30px;">Nenhum gasto registrado para exibir no gráfico geral.</p>';
@@ -2239,7 +2378,8 @@
                 const items = [
                     { label: 'Despesas Variáveis', value: totalSpentCurrent, color: 'var(--primary)' },
                     { label: 'Despesas Fixas', value: totalFixed, color: '#32D74B' },
-                    { label: 'Parcelamentos', value: activeCreditTotal, color: '#FF9F0A' }
+                    { label: 'Parcelamentos', value: activeCreditTotal, color: '#FF9F0A' },
+                    { label: 'Outros compromissos', value: totalOther, color: '#64D2FF' }
                 ].filter(i => i.value > 0);
 
                 container.innerHTML = generateDonutSvg(items, grandTotal);
@@ -2346,6 +2486,7 @@
             document.getElementById('view-credit-installments').style.display = 'none';
             document.getElementById('view-financial-report').style.display = 'none';
             document.getElementById('view-graficos').style.display = 'none'; // ADICIONADO
+            document.getElementById('view-other-commitments').style.display = 'none'; // ADICIONADO
 
             document.getElementById('header-back-btn').style.display = 'flex';
             document.getElementById('header-add-envelope-btn').style.display = 'none';
@@ -2360,7 +2501,12 @@
                 titleEl.textContent = 'Parcelamentos';
                 document.getElementById('view-credit-installments').style.display = 'flex';
                 openCreditInstallmentsScreen();
-            } else if (viewName === 'relatorio') {
+            } else if (viewName === 'outros-compromissos') {
+                titleEl.textContent = 'Outros compromissos';
+                document.getElementById('view-other-commitments').style.display = 'flex';
+                openOtherCommitmentsScreen();
+            }
+            else if (viewName === 'relatorio') {
                 titleEl.textContent = 'Relatório Financeiro';
                 document.getElementById('view-financial-report').style.display = 'flex';
                 renderFinancialReport();
@@ -2377,6 +2523,7 @@
             document.getElementById('view-credit-installments').style.display = 'none';
             document.getElementById('view-financial-report').style.display = 'none';
             document.getElementById('view-graficos').style.display = 'none'; // ADICIONADO
+            document.getElementById('view-other-commitments').style.display = 'none'; // ADICIONADO
 
             document.getElementById('header-back-btn').style.display = 'none';
             document.getElementById('header-add-envelope-btn').style.display = 'flex';
@@ -2652,14 +2799,21 @@
             localStorage.removeItem('myFixedExpenses');
             localStorage.removeItem('myFixedAutoSort');
             localStorage.removeItem('myCreditInstallments');
+            // A restauração também apaga os dados e a preferência de ordenação de Outros Compromissos.
+            localStorage.removeItem('myOtherCommitments');
+            localStorage.removeItem('myOtherAutoSort');
             localStorage.removeItem('myAppTheme');
             envelopes = [];
             fixedExpenses = [];
             isFixedAutoSort = true;
             tempIsFixedAutoSort = true;
             creditInstallments = [];
+            otherCommitments = [];
+            tempOtherCommitments = [];
+            isOtherAutoSort = true;
+            tempIsOtherAutoSort = true;
             setAppTheme('purple');
-            updateApp();
+            goHome();
             closeModal('modal-restore');
             alert('O aplicativo foi restaurado aos padrões com sucesso.');
         };
@@ -3296,23 +3450,364 @@
             renderCreditInstallmentsList();
         };
 
+        const openOtherCommitmentsScreen = () => {
+            renderOtherCommitmentsList();
+        };
+
+        const openOtherCommitmentModal = (id = null) => {
+            const titleEl = document.getElementById('other-modal-title');
+            const btnEl = document.getElementById('other-submit-btn');
+            const idField = document.getElementById('edit-other-id');
+            const nameField = document.getElementById('other-item-name');
+            const amountField = document.getElementById('other-item-amount');
+            const dueDayField = document.getElementById('other-item-dueday');
+            const currentField = document.getElementById('other-item-current');
+            const totalField = document.getElementById('other-item-total');
+
+            if (id !== null && id !== undefined) {
+                const item = otherCommitments.find(i => i.id === id);
+                if (!item) return;
+                titleEl.innerText = 'Editar Compromisso';
+                btnEl.innerText = 'Salvar';
+                idField.value = item.id;
+                nameField.value = item.name;
+                amountField.value = item.amount.toFixed(2).replace('.', ',');
+                dueDayField.value = item.dueDateDay;
+                currentField.value = item.currentInstallment;
+                totalField.value = item.totalInstallments;
+            } else {
+                titleEl.innerText = 'Adicionar Compromisso';
+                btnEl.innerText = 'Adicionar';
+                idField.value = '';
+                nameField.value = '';
+                amountField.value = '';
+                dueDayField.value = '';
+                currentField.value = '';
+                totalField.value = '';
+            }
+            openModal('modal-other-commitment');
+            setTimeout(() => nameField.focus(), 100);
+        };
+
+        // Mantém os mesmos botões, ícones, divisor e espaçamento usados nas despesas fixas/parcelamentos.
+        const createOtherCommitmentActions = (item) => {
+            const actionsDiv = document.createElement('div');
+            actionsDiv.style.cssText = 'display:flex; gap:6px; align-items:center; flex-shrink:0; margin-left:16px;';
+
+            const editBtn = document.createElement('button');
+            editBtn.className = 'card-btn edit-btn';
+            editBtn.title = 'Editar Compromisso';
+            editBtn.setAttribute('aria-label', `Editar ${item.name}`);
+            editBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>';
+            editBtn.onclick = () => openOtherCommitmentModal(item.id);
+
+            const sep = document.createElement('div');
+            sep.setAttribute('aria-hidden', 'true');
+            sep.style.cssText = 'width:1px; height:14px; background-color:var(--border-color); margin:0 2px;';
+
+            const delBtn = document.createElement('button');
+            delBtn.className = 'card-btn delete-btn';
+            delBtn.title = 'Excluir Compromisso';
+            delBtn.setAttribute('aria-label', `Excluir ${item.name}`);
+            delBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>';
+            delBtn.onclick = () => deleteOtherCommitment(item.id);
+
+            actionsDiv.appendChild(editBtn);
+            actionsDiv.appendChild(sep);
+            actionsDiv.appendChild(delBtn);
+            return actionsDiv;
+        };
+
+        const renderOtherCommitmentsList = () => {
+            sortOtherCommitmentsIfNeeded();
+            const list = document.getElementById('other-commitments-list');
+            const totalEl = document.getElementById('other-total-value');
+            const countEl = document.getElementById('other-active-count');
+            list.innerHTML = '';
+
+            let totalActive = 0;
+            const activeItems = otherCommitments.filter(i => i.currentInstallment <= i.totalInstallments);
+            const completedItems = otherCommitments.filter(i => i.currentInstallment > i.totalInstallments);
+
+            if (activeItems.length === 0) {
+                // Texto discreto centralizado quando estiver vazio
+                // Distingue ausência de cadastro de itens concluídos.
+                const title = completedItems.length > 0 ? 'Nenhum compromisso ativo no momento.' : 'Nenhum compromisso cadastrado!';
+                const description = completedItems.length > 0
+                    ? 'Os compromissos concluídos continuam disponíveis no histórico abaixo.'
+                    : 'Local ideal para adicionar financiamentos, empréstimos, consignados, consórcios e afins.';
+                list.innerHTML = `
+                    <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:40px 16px; color:var(--text-muted); min-height:140px; gap:10px;">
+                        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.4;"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                        <span style="font-size:0.9rem; font-weight:600; color:var(--text-main);">${title}</span>
+                        <span style="font-size:0.8rem; line-height:1.45; max-width:290px;">${description}</span>
+                    </div>
+                `;
+            } else {
+                activeItems.forEach(item => {
+                    totalActive += item.amount;
+                    const histItem = document.createElement('div');
+                    histItem.className = 'history-item';
+                    histItem.style.padding = '10px 8px';
+
+                    const infoDiv = document.createElement('div');
+                    infoDiv.className = 'history-info';
+                    const descSpan = document.createElement('span');
+                    descSpan.className = 'history-desc';
+                    descSpan.style.cssText = 'font-weight:600;';
+                    descSpan.textContent = item.name;
+
+                    const detailsDiv = document.createElement('div');
+                    detailsDiv.style.cssText = 'display:flex; align-items:center; gap:8px; margin-top:3px; flex-wrap:wrap;';
+                    const amtSpan = document.createElement('span');
+                    amtSpan.className = 'history-amount';
+                    amtSpan.textContent = formatCurrency(item.amount);
+
+                    const parcBadge = document.createElement('span');
+                    parcBadge.style.cssText = 'font-size:0.75rem; color:var(--primary); font-weight:600; background:var(--primary-light-bg); padding:2px 6px; border-radius:4px;';
+                    parcBadge.textContent = `Parc. ${item.currentInstallment}/${item.totalInstallments}`;
+                    detailsDiv.appendChild(amtSpan);
+                    detailsDiv.appendChild(parcBadge);
+
+                    const dueSpan = document.createElement('span');
+                    dueSpan.className = 'history-date';
+                    dueSpan.style.cssText = 'display:block; margin-top:3px;';
+                    dueSpan.textContent = `Vencimento dia ${item.dueDateDay}`;
+
+                    infoDiv.appendChild(descSpan);
+                    infoDiv.appendChild(detailsDiv);
+                    infoDiv.appendChild(dueSpan);
+                    histItem.appendChild(infoDiv);
+                    histItem.appendChild(createOtherCommitmentActions(item));
+                    list.appendChild(histItem);
+                });
+            }
+
+            totalEl.innerText = formatCurrency(totalActive);
+            if (countEl) countEl.innerText = activeItems.length;
+
+            // Assim como em Parcelamentos, compromissos concluídos permanecem acessíveis para consulta/edição/exclusão.
+            if (completedItems.length > 0) {
+                const detailsEl = document.createElement('details');
+                detailsEl.className = 'report-details';
+                detailsEl.style.cssText = 'margin-top:14px; background:var(--card-bg); border:1px solid var(--border-color); border-radius:10px; padding:8px 12px;';
+
+                const summaryEl = document.createElement('summary');
+                summaryEl.style.cssText = 'font-weight:600; font-size:0.88rem; cursor:pointer; color:var(--text-muted); outline:none; display:flex; justify-content:space-between; align-items:center;';
+                summaryEl.innerHTML = `<span>Compromissos Concluídos (${completedItems.length})</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="report-chevron"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
+
+                const innerContainer = document.createElement('div');
+                innerContainer.style.cssText = 'margin-top:8px; padding-top:6px; border-top:1px solid var(--border-color);';
+
+                completedItems.forEach(item => {
+                    const row = document.createElement('div');
+                    row.className = 'history-item';
+                    row.style.cssText = 'padding:8px 4px; opacity:0.85;';
+                    const info = document.createElement('div');
+                    info.className = 'history-info';
+                    info.style.cssText = 'min-width:0; flex:1; overflow:hidden;';
+                    const name = document.createElement('span');
+                    name.className = 'history-desc';
+                    name.style.cssText = 'font-weight:500; font-size:0.9rem; text-decoration:line-through;';
+                    name.textContent = item.name;
+                    const sub = document.createElement('span');
+                    sub.style.cssText = 'font-size:0.75rem; color:var(--text-muted);';
+                    sub.textContent = `Concluído (${item.totalInstallments}/${item.totalInstallments}) • Venc. dia ${item.dueDateDay} • ${formatCurrency(item.amount)}`;
+                    info.appendChild(name);
+                    info.appendChild(sub);
+                    row.appendChild(info);
+                    row.appendChild(createOtherCommitmentActions(item));
+                    innerContainer.appendChild(row);
+                });
+
+                detailsEl.appendChild(summaryEl);
+                detailsEl.appendChild(innerContainer);
+                list.appendChild(detailsEl);
+            }
+        };
+
+        const saveOtherCommitment = () => {
+            const editId = document.getElementById('edit-other-id').value;
+            const name = document.getElementById('other-item-name').value.trim();
+            const amount = parseBrNumber(document.getElementById('other-item-amount').value.trim());
+            const dueDateDay = parseInt(document.getElementById('other-item-dueday').value, 10);
+            const currentInstallment = parseInt(document.getElementById('other-item-current').value, 10);
+            const totalInstallments = parseInt(document.getElementById('other-item-total').value, 10);
+
+            if (!name || !Number.isFinite(amount) || amount <= 0 || !Number.isInteger(dueDateDay) || dueDateDay < 1 || dueDateDay > 31 || !Number.isInteger(currentInstallment) || currentInstallment < 1 || !Number.isInteger(totalInstallments) || totalInstallments < 1) {
+                alert('Preencha todos os campos obrigatórios corretamente.');
+                return;
+            }
+
+            const now = new Date();
+            if (editId) {
+                const index = otherCommitments.findIndex(i => i.id == editId);
+                if (index !== -1) {
+                    const item = otherCommitments[index];
+                    // Ao alterar a parcela, reinicia a referência mensal como já ocorre nos parcelamentos.
+                    if (item.currentInstallment !== currentInstallment || item.totalInstallments !== totalInstallments) {
+                        item.lastYear = now.getFullYear();
+                        item.lastMonth = now.getMonth();
+                    }
+                    Object.assign(item, { name, amount, dueDateDay, currentInstallment, totalInstallments });
+                }
+            } else {
+                otherCommitments.push({
+                    id: Date.now(),
+                    name,
+                    amount,
+                    dueDateDay,
+                    currentInstallment,
+                    totalInstallments,
+                    lastYear: now.getFullYear(),
+                    lastMonth: now.getMonth()
+                });
+            }
+
+            sortOtherCommitmentsIfNeeded();
+            localStorage.setItem('myOtherCommitments', JSON.stringify(otherCommitments));
+            renderOtherCommitmentsList();
+            closeModal('modal-other-commitment');
+            if (currentView === 'relatorio') renderFinancialReport();
+            if (currentView === 'graficos') renderGraphicsView();
+        };
+
+        const deleteOtherCommitment = (id) => {
+            showCustomConfirm('Excluir Compromisso', 'Deseja realmente excluir este compromisso?', () => {
+                otherCommitments = otherCommitments.filter(item => item.id !== id);
+                sortOtherCommitmentsIfNeeded();
+                localStorage.setItem('myOtherCommitments', JSON.stringify(otherCommitments));
+                renderOtherCommitmentsList();
+                if (currentView === 'relatorio') renderFinancialReport();
+                if (currentView === 'graficos') renderGraphicsView();
+            });
+        };
+
+        const openOtherReorderModal = () => {
+            tempOtherCommitments = JSON.parse(JSON.stringify(otherCommitments));
+            tempIsOtherAutoSort = isOtherAutoSort;
+            if (tempIsOtherAutoSort) sortOtherCommitmentsByDueDate(tempOtherCommitments);
+            const checkbox = document.getElementById('other-auto-sort-cb');
+            checkbox.checked = tempIsOtherAutoSort;
+            updateOtherAutoSortLabel();
+            renderOtherReorderList();
+            openModal('modal-other-reorder');
+        };
+
+        const updateOtherAutoSortLabel = () => {
+            const label = document.getElementById('other-auto-sort-label');
+            label.textContent = tempIsOtherAutoSort ? 'Auto por vencimento' : 'Ordenação manual';
+        };
+
+        const toggleOtherAutoSort = (checkbox) => {
+            // A preferência só é persistida ao confirmar a janela, permitindo cancelar sem alterar os dados.
+            tempIsOtherAutoSort = checkbox.checked;
+            if (tempIsOtherAutoSort) sortOtherCommitmentsByDueDate(tempOtherCommitments);
+            updateOtherAutoSortLabel();
+            renderOtherReorderList();
+        };
+
+        const renderOtherReorderList = () => {
+            const list = document.getElementById('other-reorder-list');
+            list.innerHTML = '';
+            if (tempOtherCommitments.length === 0) {
+                list.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding:16px;">Nenhum compromisso para reordenar.</p>';
+                return;
+            }
+
+            tempOtherCommitments.forEach((item, index) => {
+                const el = document.createElement('div');
+                el.className = 'checkbox-item';
+                el.style.justifyContent = 'space-between';
+                if (tempIsOtherAutoSort) {
+                    el.style.opacity = '0.65';
+                    el.style.cursor = 'default';
+                }
+
+                const leftDiv = document.createElement('div');
+                leftDiv.style.cssText = 'display:flex; flex-direction:column; align-items:flex-start; gap:2px; min-width:0; flex:1;';
+                const titleSpan = document.createElement('span');
+                titleSpan.className = 'checkbox-item-title';
+                titleSpan.style.cssText = 'display:block; width:100%; flex:none; min-width:0;';
+                titleSpan.textContent = item.name;
+                const detailsSpan = document.createElement('span');
+                detailsSpan.style.cssText = 'font-size:0.73rem; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%;';
+                detailsSpan.textContent = `venc. ${item.dueDateDay} · ${formatCurrency(item.amount)} · parcela ${item.currentInstallment}/${item.totalInstallments}`;
+                leftDiv.appendChild(titleSpan);
+                leftDiv.appendChild(detailsSpan);
+
+                const rightDiv = document.createElement('div');
+                rightDiv.style.cssText = 'display:flex; gap:6px; flex-shrink:0;';
+                if (!tempIsOtherAutoSort) {
+                    if (index > 0) {
+                        const upBtn = document.createElement('button');
+                        upBtn.className = 'card-btn';
+                        upBtn.title = 'Subir';
+                        upBtn.setAttribute('aria-label', `Subir ${item.name}`);
+                        upBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>';
+                        upBtn.onclick = () => moveOtherTemp(item.id, -1);
+                        rightDiv.appendChild(upBtn);
+                    }
+                    if (index < tempOtherCommitments.length - 1) {
+                        const downBtn = document.createElement('button');
+                        downBtn.className = 'card-btn';
+                        downBtn.title = 'Descer';
+                        downBtn.setAttribute('aria-label', `Descer ${item.name}`);
+                        downBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>';
+                        downBtn.onclick = () => moveOtherTemp(item.id, 1);
+                        rightDiv.appendChild(downBtn);
+                    }
+                }
+
+                el.appendChild(leftDiv);
+                el.appendChild(rightDiv);
+                list.appendChild(el);
+            });
+        };
+
+        const moveOtherTemp = (itemId, direction) => {
+            if (tempIsOtherAutoSort) return;
+            const index = tempOtherCommitments.findIndex(i => i.id === itemId);
+            if (index === -1) return;
+            const newIndex = index + direction;
+            if (newIndex < 0 || newIndex >= tempOtherCommitments.length) return;
+            const temp = tempOtherCommitments[index];
+            tempOtherCommitments[index] = tempOtherCommitments[newIndex];
+            tempOtherCommitments[newIndex] = temp;
+            renderOtherReorderList();
+        };
+
+        const saveOtherReorderModal = () => {
+            isOtherAutoSort = tempIsOtherAutoSort;
+            localStorage.setItem('myOtherAutoSort', String(isOtherAutoSort));
+            otherCommitments = JSON.parse(JSON.stringify(tempOtherCommitments));
+            sortOtherCommitmentsIfNeeded();
+            localStorage.setItem('myOtherCommitments', JSON.stringify(otherCommitments));
+            closeModal('modal-other-reorder');
+            renderOtherCommitmentsList();
+        };
+
         const renderFinancialReport = () => {
             const container = document.getElementById('financial-report-body');
             container.innerHTML = '';
 
-            if (envelopes.length === 0 && fixedExpenses.length === 0 && creditInstallments.length === 0) {
+            if (envelopes.length === 0 && fixedExpenses.length === 0 && creditInstallments.length === 0 && otherCommitments.length === 0) {
                 container.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding: 20px;">Nenhum dado financeiro disponível para gerar relatório.</p>';
                 return;
             }
 
             // 1. Despesas Variáveis (Quantidade de Envelopes)
-            let totalVariableCount = envelopes.length;
+            let totalVariableCount = envelopes.length; 
 
             // 2. Despesas Fixas
             let totalFixedCount = fixedExpenses.length;
 
             // 3. Parcelamentos
             let totalCreditCount = creditInstallments.length;
+            // Outros compromissos contam como ativos enquanto a parcela atual não ultrapassar o total.
+            const activeOtherCommitments = otherCommitments.filter(i => i.currentInstallment <= i.totalInstallments);
+            // O contador mostra todos os registros, como em Parcelamentos; o subtotal considera somente os ativos.
+            const totalOtherCount = otherCommitments.length;
             // ---------------------------------------------
 
             let totalSpentCurrent = 0;
@@ -3337,9 +3832,11 @@
             let activeCreditTotal = creditInstallments
                 .filter(i => i.currentInstallment <= i.totalInstallments)
                 .reduce((acc, curr) => acc + curr.amount, 0);
+            // A categoria já era calculada, mas o valor não entrava no consolidado nem na meta mensal.
+            const totalOther = activeOtherCommitments.reduce((acc, curr) => acc + curr.amount, 0);
 
-            const totalSpentWithFixed = totalSpentCurrent + totalFixed + activeCreditTotal;
-            const totalBudgetWithFixed = totalBudgetCurrent + totalFixed + activeCreditTotal;
+            const totalSpentWithFixed = totalSpentCurrent + totalFixed + activeCreditTotal + totalOther;
+            const totalBudgetWithFixed = totalBudgetCurrent + totalFixed + activeCreditTotal + totalOther;
             const variableRemaining = totalBudgetCurrent - totalSpentCurrent;
             const variablePercent = totalBudgetCurrent > 0 ? Math.round((totalSpentCurrent / totalBudgetCurrent) * 100) : 0;
 
@@ -3474,6 +3971,24 @@
                 creditBreakdownHtml = `<span style="color:var(--text-muted); font-size:0.85rem;">Nenhum parcelamento ativo no mês.</span>`;
             }
 
+            // Detalhamento de Outros Compromissos alinhado ao total de itens ativos calculado acima.
+            let otherBreakdownHtml = '';
+            if (activeOtherCommitments.length > 0) {
+                activeOtherCommitments.forEach(item => {
+                    otherBreakdownHtml += `
+                        <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.85rem; padding:6px 0; border-bottom:1px solid var(--border-color); gap:8px;">
+                            <div style="display:flex; flex-direction:column; min-width:0; flex:1;">
+                                <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-weight:500;">${sanitizeHtml(item.name)}</span>
+                                <span style="font-size:0.75rem; color:var(--text-muted);">Parcela ${item.currentInstallment}/${item.totalInstallments} (Venc. dia ${item.dueDateDay})</span>
+                            </div>
+                            <span style="white-space:nowrap; flex-shrink:0;"><strong>${formatCurrency(item.amount)}</strong></span>
+                        </div>
+                    `;
+                });
+            } else {
+                otherBreakdownHtml = `<span style="color:var(--text-muted); font-size:0.85rem;">Nenhum compromisso ativo no mês.</span>`;
+            }
+
             let envelopesBreakdownHtml = '';
             envelopes.forEach(env => {
                 const spent = getEnvSpent(env);
@@ -3490,7 +4005,7 @@
 
             container.innerHTML = `
                 <div style="background:var(--card-bg); border:1px solid var(--border-color); box-shadow:var(--card-shadow); padding:16px; border-radius:14px; display:flex; flex-direction:column; gap:6px;">
-                    <span style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; font-weight:600; letter-spacing:0.5px;">Total Fixo+Variável+Parc.</span>
+                    <span style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; font-weight:600; letter-spacing:0.5px;">Total Fixo+Variável+Parc.+Outros</span>
                     <div style="display:flex; flex-direction:column; gap:2px;">
                         <span style="font-size:1.6rem; font-weight:700; color:var(--text-main);">${formatCurrency(totalSpentWithFixed)}</span>
                         <span style="font-size:0.85rem; color:var(--text-muted);">Meta para o Mês: <strong>${formatCurrency(totalBudgetWithFixed)}</strong></span>
@@ -3535,6 +4050,17 @@
                         <div style="font-size:0.85rem; color:var(--text-muted); font-weight:600;">Soma total: ${formatCurrency(activeCreditTotal)}</div>
                         ${creditBreakdownHtml}
                     </div>
+                </details>
+
+                <details class="report-details" style="background:var(--card-bg); border:1px solid var(--border-color); border-radius:10px; padding:10px 14px;">
+                <summary style="font-weight:600; font-size:0.9rem; cursor:pointer; color:var(--text-main); outline:none; display:flex; justify-content:space-between; align-items:center;">
+                    <div><span>Outros compromissos</span><span class="report-item-counter">${totalOtherCount}</span></div>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="report-chevron"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </summary>
+                <div style="margin-top:10px; padding-top:8px; border-top:1px solid var(--border-color); display:flex; flex-direction:column; gap:6px;">
+                    <div style="font-size:0.85rem; color:var(--text-muted); font-weight:600;">Soma total: ${formatCurrency(totalOther)}</div>
+                    ${otherBreakdownHtml}
+                </div>
                 </details>
 
                 <details class="report-details" style="background:var(--card-bg); border:1px solid var(--border-color); border-radius:10px; padding:10px 14px;">
@@ -4248,10 +4774,12 @@
             const creditContainer = document.getElementById('export-credit-container');
             if (fixedContainer) fixedContainer.style.display = (format === 'txt') ? 'none' : 'flex';
             if (creditContainer) creditContainer.style.display = (format === 'txt') ? 'none' : 'flex';
+            const otherContainer = document.getElementById('export-other-container');
+            if (otherContainer) otherContainer.style.display = (format === 'txt') ? 'none' : 'flex';
         };
 
         const openExportModal = () => {
-            if (!envelopes.length && !fixedExpenses.length && !creditInstallments.length) {
+            if (!envelopes.length && !fixedExpenses.length && !creditInstallments.length && !otherCommitments.length) {
                 alert('Não há dados para exportar.');
                 return;
             }
@@ -4285,6 +4813,20 @@
                 `;
             }
 
+            if (otherCommitments.length > 0) {
+                htmlList += `
+                    <label class="checkbox-item" id="export-other-container" style="border-bottom:2px solid var(--border-color); background:var(--primary-light-bg);">
+                        <input type="checkbox" id="export-other-cb" checked class="export-checkbox-other">
+                        <div style="display:flex; align-items:center; gap:10px; min-width:0; flex:1;">
+                            <div class="envelope-icon-wrap" style="color:var(--primary);">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                            </div>
+                            <span class="checkbox-item-title" style="font-weight:700;">Compromissos (${otherCommitments.length} itens)</span>
+                        </div>
+                    </label>
+                `;
+            }
+
             envelopes.forEach(env => {
                 htmlList += `
                     <label class="checkbox-item">
@@ -4297,6 +4839,8 @@
                 `;
             });
             document.getElementById('export-list').innerHTML = htmlList;
+            // Sem envelopes, o relatório TXT não consegue representar os dados de outras categorias; prioriza-se o backup JSON.
+            if (envelopes.length === 0) document.getElementById('export-format').value = 'json';
             updateExportFormatView();
             openModal('modal-export');
         };
@@ -4314,10 +4858,12 @@
                 const selectedIds = Array.from(checkboxes).map(cb => parseInt(cb.value));
                 const fixedCb = document.getElementById('export-fixed-cb');
                 const creditCb = document.getElementById('export-credit-cb');
+                const otherCb = document.getElementById('export-other-cb');
                 const exportFixed = fixedCb ? fixedCb.checked : false;
                 const exportCredit = creditCb ? creditCb.checked : false;
+                const exportOther = otherCb ? otherCb.checked : false;
 
-                if (selectedIds.length === 0 && !exportFixed && !exportCredit) {
+                if (selectedIds.length === 0 && !exportFixed && !exportCredit && !exportOther) {
                     alert('Selecione pelo menos um item para exportar.');
                     return;
                 }
@@ -4328,11 +4874,13 @@
                 }
 
                 const dataToExport = {
-                    version: 6,
+                    version: 7,
                     envelopes: envelopes.filter(env => selectedIds.includes(env.id)),
                     fixedExpenses: exportFixed ? fixedExpenses : [],
                     fixedAutoSort: exportFixed ? isFixedAutoSort : null,
-                    creditInstallments: exportCredit ? creditInstallments : []
+                    creditInstallments: exportCredit ? creditInstallments : [],
+                    otherCommitments: exportOther ? otherCommitments : [],
+                    otherAutoSort: exportOther ? isOtherAutoSort : null
                 };
 
                 fileContent = JSON.stringify(dataToExport, null, 2);
@@ -4454,7 +5002,9 @@
                     let rawEnvelopes = [];
                     let rawFixed = [];
                     let rawCredit = [];
+                    let rawOther = [];
                     let rawFixedAutoSort = null;
+                    let rawOtherAutoSort = null;
 
                     if (Array.isArray(imported)) {
                         rawEnvelopes = imported;
@@ -4462,7 +5012,9 @@
                         rawEnvelopes = Array.isArray(imported.envelopes) ? imported.envelopes : [];
                         rawFixed = Array.isArray(imported.fixedExpenses) ? imported.fixedExpenses : [];
                         rawCredit = Array.isArray(imported.creditInstallments) ? imported.creditInstallments : [];
+                        rawOther = Array.isArray(imported.otherCommitments) ? imported.otherCommitments : [];
                         rawFixedAutoSort = typeof imported.fixedAutoSort === 'boolean' ? imported.fixedAutoSort : null;
+                        rawOtherAutoSort = typeof imported.otherAutoSort === 'boolean' ? imported.otherAutoSort : null;
                     }
 
                     const validEnvelopes = rawEnvelopes
@@ -4486,20 +5038,38 @@
                         }));
 
                     const validCredit = rawCredit
-                        .filter(item => item && typeof item.name === 'string' && typeof item.amount === 'number' && !isNaN(item.amount))
+                        .filter(item => item && typeof item.name === 'string' && typeof item.amount === 'number' && Number.isFinite(item.amount))
                         .map(item => ({
                             id: Number(item.id) || (Date.now() + Math.random()),
                             name: item.name.trim(),
                             amount: item.amount,
-                            dueDateDay: Number(item.dueDateDay) || 10,
-                            currentInstallment: Number(item.currentInstallment) || 1,
-                            totalInstallments: Number(item.totalInstallments) || 1,
+                            dueDateDay: Number(item.dueDateDay) >= 1 && Number(item.dueDateDay) <= 31 ? Number(item.dueDateDay) : 10,
+                            currentInstallment: Number(item.currentInstallment) >= 1 ? Number(item.currentInstallment) : 1,
+                            totalInstallments: Number(item.totalInstallments) >= 1 ? Number(item.totalInstallments) : 1,
                             cardName: item.cardName ? item.cardName.trim() : 'Outros',
                             lastYear: item.lastYear,
                             lastMonth: item.lastMonth
                         }));
 
-                    if (validEnvelopes.length === 0 && validFixed.length === 0 && validCredit.length === 0) {
+                    const validOther = rawOther
+                        .filter(item => item && typeof item.name === 'string' && item.name.trim() !== '' && typeof item.amount === 'number' && Number.isFinite(item.amount) && item.amount > 0)
+                        .map(item => {
+                            const dueDay = Number(item.dueDateDay);
+                            const current = Number(item.currentInstallment);
+                            const total = Number(item.totalInstallments);
+                            return {
+                                id: Number(item.id) || (Date.now() + Math.random()),
+                                name: item.name.trim(),
+                                amount: item.amount,
+                                dueDateDay: Number.isInteger(dueDay) && dueDay >= 1 && dueDay <= 31 ? dueDay : 10,
+                                currentInstallment: Number.isInteger(current) && current >= 1 ? current : 1,
+                                totalInstallments: Number.isInteger(total) && total >= 1 ? total : 1,
+                                lastYear: Number.isInteger(item.lastYear) ? item.lastYear : undefined,
+                                lastMonth: Number.isInteger(item.lastMonth) && item.lastMonth >= 0 && item.lastMonth <= 11 ? item.lastMonth : undefined
+                            };
+                        });
+
+                    if (validEnvelopes.length === 0 && validFixed.length === 0 && validCredit.length === 0 && validOther.length === 0) {
                         alert('O arquivo não contém dados válidos para importação.');
                         return;
                     }
@@ -4508,7 +5078,9 @@
                         envelopes: validEnvelopes,
                         fixedExpenses: validFixed,
                         creditInstallments: validCredit,
-                        fixedAutoSort: rawFixedAutoSort
+                        otherCommitments: validOther,
+                        fixedAutoSort: rawFixedAutoSort,
+                        otherAutoSort: rawOtherAutoSort
                     };
                     
                     const importListEl = document.getElementById('import-list');
@@ -4548,6 +5120,23 @@
                         importListEl.appendChild(creditLabel);
                     }
 
+                    if (validOther.length > 0) {
+                        const otherLabel = document.createElement('label');
+                        otherLabel.className = 'checkbox-item';
+                        otherLabel.style.cssText = 'border-bottom:2px solid var(--border-color); background:var(--primary-light-bg);';
+                        const cb = document.createElement('input');
+                        cb.type = 'checkbox';
+                        cb.id = 'import-other-cb';
+                        cb.checked = true;
+                        cb.className = 'import-checkbox-other';
+                        const div = document.createElement('div');
+                        div.style.cssText = 'display:flex; align-items:center; gap:10px; min-width:0; flex:1;';
+                        div.innerHTML = `<div class="envelope-icon-wrap" style="color:var(--primary);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg></div><span class="checkbox-item-title" style="font-weight:700;">Outros compromissos (${validOther.length} itens)</span>`;
+                        otherLabel.appendChild(cb);
+                        otherLabel.appendChild(div);
+                        importListEl.appendChild(otherLabel);
+                    }
+
                     pendingImportData.envelopes.forEach((env, index) => {
                         const itemLabel = document.createElement('label');
                         itemLabel.className = 'checkbox-item';
@@ -4585,10 +5174,12 @@
             const selectedIndices = Array.from(checkboxes).map(cb => parseInt(cb.value));
             const fixedCb = document.getElementById('import-fixed-cb');
             const creditCb = document.getElementById('import-credit-cb');
+            const otherCb = document.getElementById('import-other-cb');
             const importFixed = fixedCb ? fixedCb.checked : false;
             const importCredit = creditCb ? creditCb.checked : false;
+            const importOther = otherCb ? otherCb.checked : false;
             
-            if (selectedIndices.length === 0 && !importFixed && !importCredit) {
+            if (selectedIndices.length === 0 && !importFixed && !importCredit && !importOther) {
                 alert('Selecione pelo menos um item para importar.');
                 return;
             }
@@ -4639,10 +5230,31 @@
                 localStorage.setItem('myCreditInstallments', JSON.stringify(creditInstallments));
             }
 
+            let addedOtherCount = 0;
+            if (importOther && pendingImportData.otherCommitments.length > 0) {
+                // Backups antigos podem não ter otherAutoSort; nesse caso mantemos a preferência local atual.
+                if (typeof pendingImportData.otherAutoSort === 'boolean') {
+                    isOtherAutoSort = pendingImportData.otherAutoSort;
+                    localStorage.setItem('myOtherAutoSort', String(isOtherAutoSort));
+                }
+
+                pendingImportData.otherCommitments.forEach(item => {
+                    const otherToImport = JSON.parse(JSON.stringify(item));
+                    const exists = otherCommitments.some(existing => existing.name.toLowerCase() === otherToImport.name.toLowerCase());
+                    if (!exists) {
+                        otherToImport.id = Date.now() + Math.floor(Math.random() * 1000) + addedOtherCount;
+                        otherCommitments.push(otherToImport);
+                        addedOtherCount++;
+                    }
+                });
+                sortOtherCommitmentsIfNeeded();
+                localStorage.setItem('myOtherCommitments', JSON.stringify(otherCommitments));
+            }
+
             updateApp();
             closeModal('modal-import');
-            alert(`Importação concluída com sucesso! (${addedEnvelopesCount} envelope(s), ${addedFixedCount} despesa(s) fixa(s) e ${addedCreditCount} parcelamento(s) adicionados).`);
-            pendingImportData = { envelopes: [], fixedExpenses: [], creditInstallments: [], fixedAutoSort: null };
+            alert(`Importação concluída! (${addedEnvelopesCount} envelope(s), ${addedFixedCount} despesa(s) fixa(s), ${addedCreditCount} parcelamento(s) e ${addedOtherCount} outro(s) compromisso(s) adicionados).`);
+            pendingImportData = { envelopes: [], fixedExpenses: [], creditInstallments: [], otherCommitments: [], fixedAutoSort: null, otherAutoSort: null };
         };
 
         let customConfirmCallback = null;
