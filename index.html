@@ -1062,6 +1062,45 @@
             display: block;
         }
 
+        /* Animação única e contínua para os gráficos da Análise Visual. */
+        @keyframes chartGuideFadeOut {
+            0%, 77% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+            }
+        }
+
+        /* Uma única máscara revela o anel inteiro, evitando reinícios por categoria. */
+        @keyframes chartRevealRing {
+            from {
+                stroke-dasharray: 0 var(--chart-circumference);
+            }
+            to {
+                stroke-dasharray: var(--chart-circumference) var(--chart-circumference);
+            }
+        }
+
+        .chart-guide-ring {
+            animation: chartGuideFadeOut 0.9s ease-out forwards;
+        }
+
+        .chart-reveal-mask {
+            animation: chartRevealRing 0.72s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .chart-guide-ring {
+                display: none;
+            }
+
+            .chart-reveal-mask {
+                animation: none !important;
+                stroke-dasharray: var(--chart-circumference) var(--chart-circumference);
+            }
+        }
+
     </style>
 </head>
 <body data-theme="purple">
@@ -2406,15 +2445,48 @@
             const center = size / 2;
             const radius = 80; // Raio ajustado proporcionalmente para acompanhar o novo tamanho
             const strokeWidth = 32;
+            const circumference = 2 * Math.PI * radius;
+            const gap = 1.6; // Separação minimalista, medida sobre o arco
             let cumulativePercent = 0;
 
             let svgSlices = '';
             let legendHtml = '';
 
+            // ID específico para a máscara do gráfico atualmente exibido.
+            const revealMaskId = isEnvelopes ? 'donut-reveal-mask-envelopes' : 'donut-reveal-mask-general';
+
+            // Linha-guia fina no centro exato da espessura da rosca.
+            const guideRingSvg = `
+                <circle cx="${center}" cy="${center}" r="${radius}" fill="none"
+                    stroke="#C5C7CC" stroke-width="1.25"
+                    class="chart-guide-ring" />
+            `;
+
+            // A máscara revela o anel colorido como um único traço contínuo.
+            const revealMaskSvg = `
+                <defs>
+                    <mask id="${revealMaskId}" maskUnits="userSpaceOnUse"
+                        maskContentUnits="userSpaceOnUse" mask-type="luminance"
+                        x="0" y="0" width="${size}" height="${size}">
+                        <rect x="0" y="0" width="${size}" height="${size}" fill="#000" />
+                        <circle cx="${center}" cy="${center}" r="${radius}" fill="none"
+                            stroke="#fff" stroke-width="${strokeWidth + 1}"
+                            stroke-dasharray="0 ${circumference}"
+                            transform="rotate(-90 ${center} ${center})"
+                            class="chart-reveal-mask"
+                            style="--chart-circumference: ${circumference};" />
+                    </mask>
+                </defs>
+            `;
+
             items.forEach((item) => {
                 const percent = item.value / totalSum;
-                const dashArray = `${percent * 2 * Math.PI * radius} ${2 * Math.PI * radius}`;
-                const dashOffset = -cumulativePercent * 2 * Math.PI * radius;
+                const rawLength = percent * circumference;
+                // Mantém o espaço quase uniforme sem reduzir demais fatias muito pequenas.
+                const gapLength = Math.min(gap, rawLength * 0.1);
+                const dashLength = Math.max(0, rawLength - gapLength);
+                const dashArray = `${dashLength} ${circumference}`;
+                const dashOffset = -cumulativePercent * circumference;
                 cumulativePercent += percent;
 
                 let strokeColor = item.color;
@@ -2424,10 +2496,10 @@
                 }
 
                 svgSlices += `
-                    <circle cx="${center}" cy="${center}" r="${radius}" fill="transparent" 
-                        stroke="${strokeColor}" stroke-width="${strokeWidth}" 
-                        stroke-dasharray="${dashArray}" stroke-dashoffset="${dashOffset}" 
-                        transform="rotate(-90 ${center} ${center})" style="transition: stroke-dasharray 0.6s ease;" />
+                    <circle cx="${center}" cy="${center}" r="${radius}" fill="transparent"
+                        stroke="${strokeColor}" stroke-width="${strokeWidth}"
+                        stroke-dasharray="${dashArray}" stroke-dashoffset="${dashOffset}"
+                        transform="rotate(-90 ${center} ${center})" />
                 `;
 
                 const pRounded = Math.round(percent * 100);
@@ -2454,7 +2526,11 @@
             return `
                 <div style="position: relative; width: ${size}px; height: ${size}px; margin: 10px auto;">
                     <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
-                        ${svgSlices}
+                        ${guideRingSvg}
+                        ${revealMaskSvg}
+                        <g mask="url(#${revealMaskId})">
+                            ${svgSlices}
+                        </g>
                     </svg>
                     <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none; padding: 0 15px; text-align: center;">
                         <span style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Total</span>
