@@ -1,4 +1,5 @@
-const CACHE_NAME = 'envelopes-cache-v8';
+// Atualizado para v9: força a criação de um novo cache para a versão atual do aplicativo.
+const CACHE_NAME = 'envelopes-cache-v9';
 
 const ASSETS_TO_CACHE = [
   './',
