@@ -1717,7 +1717,7 @@
                     <p>Funciona 100% offline, sem servidores externos ou cadastro. Seus dados ficam armazenados localmente no dispositivo, com opções de exportação e importação de backups.</p>
 
                     <div style="border-top: 1px solid var(--border-color); padding-top: 10px; margin-top: 4px; font-size: 0.85rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 4px;">
-                        <span><strong>Versão:</strong> 3.8.1</span>
+                        <span><strong>Versão:</strong> 4.0.2</span>
                         <span><strong>Desenvolvedor:</strong> Ricardo Soares</span>
                         <span>© 2026 | Todos os direitos reservados.</span>
                     </div>
@@ -2052,6 +2052,43 @@
             if (isFixedAutoSort) sortFixedExpensesByDueDate(fixedExpenses);
         };
 
+        // Gera IDs inteiros positivos e únicos dentro da coleção, compatíveis com os fluxos que usam parseInt().
+        // IDs válidos são preservados; somente IDs ausentes, fracionários ou duplicados são substituídos.
+        const createUniqueNumericId = (items = []) => {
+            const usedIds = new Set((Array.isArray(items) ? items : [])
+                .map(item => Number(item && item.id))
+                .filter(id => Number.isSafeInteger(id) && id > 0));
+            let candidate = Date.now();
+            while (usedIds.has(candidate)) candidate++;
+            return candidate;
+        };
+
+        const ensureUniqueNumericIds = (items, onChanged = null) => {
+            const validIdsReserved = new Set((Array.isArray(items) ? items : [])
+                .map(item => Number(item && item.id))
+                .filter(id => Number.isSafeInteger(id) && id > 0));
+            const usedIds = new Set();
+            let changed = false;
+            const normalizedItems = items.map(item => {
+                const originalId = item && item.id;
+                let id = Number(originalId);
+                if (!Number.isSafeInteger(id) || id <= 0 || usedIds.has(id)) {
+                    id = Date.now();
+                    while (validIdsReserved.has(id) || usedIds.has(id)) id++;
+                    item.id = id;
+                    changed = true;
+                } else {
+                    if (originalId !== id) changed = true;
+                    item.id = id;
+                }
+                usedIds.add(id);
+                return item;
+            });
+            // Persiste somente quando a normalização realmente mudou um ID; evita escritas extras em cada abertura.
+            if (changed && typeof onChanged === 'function') onChanged(normalizedItems);
+            return normalizedItems;
+        };
+
         // CARREGAMENTO SEGURO
         try {
             const rawEnv = localStorage.getItem('myEnvelopes');
@@ -2059,15 +2096,20 @@
                 const parsed = JSON.parse(rawEnv);
                 if (Array.isArray(parsed)) {
                     envelopes = parsed
-                        .filter(env => env && typeof env === 'object' && typeof env.name === 'string' && typeof env.total === 'number' && !isNaN(env.total))
+                        .filter(env => env && typeof env === 'object' && typeof env.name === 'string' && typeof env.total === 'number' && Number.isFinite(env.total))
                         .map(env => ({
-                            id: Number(env.id) || (Date.now() + Math.random()),
+                            id: Number(env.id),
                             name: env.name.trim(),
                             total: env.total,
                             icon: env.icon ? (env.icon.startsWith('<svg') ? sanitizeSvg(env.icon) : sanitizeHtml(env.icon)) : '📦',
-                            expenses: Array.isArray(env.expenses) ? env.expenses.filter(ex => ex && typeof ex === 'object' && typeof ex.amount === 'number' && !isNaN(ex.amount)) : [],
+                            expenses: Array.isArray(env.expenses) ? env.expenses.filter(ex => ex && typeof ex === 'object' && typeof ex.amount === 'number' && Number.isFinite(ex.amount)) : [],
                             history: Array.isArray(env.history) ? env.history.filter(h => h && typeof h === 'object' && Array.isArray(h.expenses)) : []
                         }));
+                    // Corrige IDs legados fracionários/duplicados sem alterar IDs válidos.
+                    envelopes = ensureUniqueNumericIds(envelopes, normalized => {
+                        try { localStorage.setItem('myEnvelopes', JSON.stringify(normalized)); }
+                        catch (error) { console.error('Não foi possível persistir os IDs corrigidos dos envelopes:', error); }
+                    });
                 }
             }
         } catch (e) {
@@ -2082,11 +2124,16 @@
                     fixedExpenses = parsed
                         .filter(item => item && typeof item === 'object' && typeof item.name === 'string' && typeof item.amount === 'number' && Number.isFinite(item.amount))
                         .map(item => ({
-                            id: Number(item.id) || (Date.now() + Math.random()),
+                            id: Number(item.id),
                             name: item.name.trim(),
                             amount: item.amount,
                             dueDateDay: normalizeFixedDueDay(item.dueDateDay)
                         }));
+                    // Mantém IDs de despesas fixas válidos e corrige somente os inconsistentes.
+                    fixedExpenses = ensureUniqueNumericIds(fixedExpenses, normalized => {
+                        try { localStorage.setItem('myFixedExpenses', JSON.stringify(normalized)); }
+                        catch (error) { console.error('Não foi possível persistir os IDs corrigidos das despesas fixas:', error); }
+                    });
                     sortFixedExpensesIfNeeded();
                 }
             }
@@ -2100,18 +2147,23 @@
                 const parsed = JSON.parse(rawCredit);
                 if (Array.isArray(parsed)) {
                     creditInstallments = parsed
-                        .filter(item => item && typeof item === 'object' && typeof item.name === 'string' && typeof item.amount === 'number' && !isNaN(item.amount))
+                        .filter(item => item && typeof item === 'object' && typeof item.name === 'string' && typeof item.amount === 'number' && Number.isFinite(item.amount))
                         .map(item => ({
-                            id: Number(item.id) || (Date.now() + Math.random()),
+                            id: Number(item.id),
                             name: item.name.trim(),
                             amount: item.amount,
-                            dueDateDay: Number(item.dueDateDay) >= 1 && Number(item.dueDateDay) <= 31 ? Number(item.dueDateDay) : 10,
-                            currentInstallment: Number(item.currentInstallment) >= 1 ? Number(item.currentInstallment) : 1,
-                            totalInstallments: Number(item.totalInstallments) >= 1 ? Number(item.totalInstallments) : 1,
+                            dueDateDay: Number.isInteger(Number(item.dueDateDay)) && Number(item.dueDateDay) >= 1 && Number(item.dueDateDay) <= 31 ? Number(item.dueDateDay) : 10,
+                            currentInstallment: Number.isInteger(Number(item.currentInstallment)) && Number(item.currentInstallment) >= 1 ? Number(item.currentInstallment) : 1,
+                            totalInstallments: Number.isInteger(Number(item.totalInstallments)) && Number(item.totalInstallments) >= 1 ? Number(item.totalInstallments) : 1,
                             cardName: item.cardName ? item.cardName.trim() : 'Outros',
                             lastYear: typeof item.lastYear === 'number' ? item.lastYear : undefined,
                             lastMonth: typeof item.lastMonth === 'number' ? item.lastMonth : undefined
                         }));
+                    // IDs inteiros e únicos evitam divergência entre lookup, edição e exclusão.
+                    creditInstallments = ensureUniqueNumericIds(creditInstallments, normalized => {
+                        try { localStorage.setItem('myCreditInstallments', JSON.stringify(normalized)); }
+                        catch (error) { console.error('Não foi possível persistir os IDs corrigidos dos parcelamentos:', error); }
+                    });
                 }
             }
         } catch (e) {
@@ -2124,17 +2176,22 @@
                 const parsed = JSON.parse(rawOther);
                 if (Array.isArray(parsed)) {
                     otherCommitments = parsed
-                        .filter(item => item && typeof item === 'object' && typeof item.name === 'string' && typeof item.amount === 'number' && !isNaN(item.amount))
+                        .filter(item => item && typeof item === 'object' && typeof item.name === 'string' && typeof item.amount === 'number' && Number.isFinite(item.amount))
                         .map(item => ({
-                            id: Number(item.id) || (Date.now() + Math.random()),
+                            id: Number(item.id),
                             name: item.name.trim(),
                             amount: item.amount,
-                            dueDateDay: Number(item.dueDateDay) >= 1 && Number(item.dueDateDay) <= 31 ? Number(item.dueDateDay) : 10,
-                            currentInstallment: Number(item.currentInstallment) >= 1 ? Number(item.currentInstallment) : 1,
-                            totalInstallments: Number(item.totalInstallments) >= 1 ? Number(item.totalInstallments) : 1,
+                            dueDateDay: Number.isInteger(Number(item.dueDateDay)) && Number(item.dueDateDay) >= 1 && Number(item.dueDateDay) <= 31 ? Number(item.dueDateDay) : 10,
+                            currentInstallment: Number.isInteger(Number(item.currentInstallment)) && Number(item.currentInstallment) >= 1 ? Number(item.currentInstallment) : 1,
+                            totalInstallments: Number.isInteger(Number(item.totalInstallments)) && Number(item.totalInstallments) >= 1 ? Number(item.totalInstallments) : 1,
                             lastYear: typeof item.lastYear === 'number' ? item.lastYear : undefined,
                             lastMonth: typeof item.lastMonth === 'number' ? item.lastMonth : undefined
                         }));
+                    // IDs inteiros e únicos evitam divergência entre lookup, edição e exclusão.
+                    otherCommitments = ensureUniqueNumericIds(otherCommitments, normalized => {
+                        try { localStorage.setItem('myOtherCommitments', JSON.stringify(normalized)); }
+                        catch (error) { console.error('Não foi possível persistir os IDs corrigidos de outros compromissos:', error); }
+                    });
                     sortOtherCommitmentsIfNeeded();
                 }
             }
@@ -2202,6 +2259,7 @@
             }
         };
 
+        // Preferência intencional do projeto: zoom começa desativado e pode ser habilitado nas Configurações.
         let savedZoomPref = localStorage.getItem('myAllowZoom') === 'true';
         applyZoomSetting(savedZoomPref);
 
@@ -2256,7 +2314,20 @@
         };
         const getEntryPeriodKey = (entry, fallbackKey = null) => {
             if (entry && isValidMonthKey(entry.periodKey)) return entry.periodKey;
-            if (entry && entry.date) {
+            if (entry && typeof entry.date === 'string' && entry.date) {
+                // Datas sem horário (YYYY-MM-DD) representam um dia de calendário local, não meia-noite UTC.
+                // Isso evita classificar o dia 1º como o mês anterior em fusos como o de Brasília.
+                const dateOnlyMatch = entry.date.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+                if (dateOnlyMatch) {
+                    const year = Number(dateOnlyMatch[1]);
+                    const month = Number(dateOnlyMatch[2]) - 1;
+                    const day = Number(dateOnlyMatch[3]);
+                    const localDate = new Date(year, month, day);
+                    if (localDate.getFullYear() === year && localDate.getMonth() === month && localDate.getDate() === day) {
+                        return getMonthKey(localDate);
+                    }
+                    return isValidMonthKey(fallbackKey) ? fallbackKey : null;
+                }
                 const date = new Date(entry.date);
                 if (!Number.isNaN(date.getTime())) return getMonthKey(date);
             }
@@ -2655,6 +2726,20 @@
             if (!duplicate) historyItem.expenses.push(expense);
         };
 
+        // A fotografia mensal salva é a fonte correta do orçamento de um ciclo encerrado.
+        // O orçamento atual pode ter sido alterado depois da virada do mês.
+        const getEnvelopeBudgetForPeriod = (env, periodKey) => {
+            const snapshot = openMonthlySnapshot && openMonthlySnapshot.periodKey === periodKey
+                ? openMonthlySnapshot
+                : monthlySnapshots.find(item => item.periodKey === periodKey);
+            const rows = snapshot && Array.isArray(snapshot.envelopes) ? snapshot.envelopes : [];
+            const snapshotRow = rows.find(item => Number(item.id) === Number(env.id))
+                || rows.find(item => item.name === env.name);
+            return snapshotRow && finiteMoney(snapshotRow.total)
+                ? snapshotRow.total
+                : (finiteMoney(env.total) ? env.total : 0);
+        };
+
         const archiveEnvelopePeriod = (env, periodKey, expenses, keepHistory) => {
             if (!keepHistory || !Array.isArray(expenses) || expenses.length === 0) return;
             env.history = Array.isArray(env.history) ? env.history : [];
@@ -2664,7 +2749,7 @@
                     id: Date.now() + Math.random(),
                     periodKey,
                     label: formatMonthLabelKey(periodKey),
-                    total: finiteMoney(env.total) ? env.total : 0,
+                    total: getEnvelopeBudgetForPeriod(env, periodKey),
                     expenses: []
                 };
                 env.history.unshift(historyItem);
@@ -2676,6 +2761,31 @@
                     historyItem.expenses.push({ ...expense, periodKey });
                 }
             });
+        };
+
+        // Em uma regularização, arquiva os ciclos pendentes; em uma redefinição manual comum, arquiva o mês atual.
+        // A rotina compartilhada evita que o fechamento de um ciclo pendente apague gastos já lançados no mês novo.
+        const getEnvelopeResetPeriodKeys = () => {
+            const pendingPeriods = [...new Set(monthCycleState.pendingCycles.filter(isValidMonthKey))].sort();
+            return pendingPeriods.length > 0 ? pendingPeriods : [getMonthKey()];
+        };
+
+        const archiveAndRemoveEnvelopePeriods = (env, periodKeys, keepHistory) => {
+            const allExpenses = Array.isArray(env.expenses) ? env.expenses : [];
+            const periodsToRemove = new Set(periodKeys.filter(isValidMonthKey));
+            const fallbackKey = monthCycleState.lastObservedCycle || getMonthKey();
+
+            periodsToRemove.forEach(periodKey => {
+                const periodExpenses = allExpenses.filter(expense =>
+                    getEntryPeriodKey(expense, fallbackKey) === periodKey
+                );
+                archiveEnvelopePeriod(env, periodKey, periodExpenses, keepHistory);
+            });
+
+            // Registros de outros períodos, especialmente do mês em andamento, permanecem intactos.
+            env.expenses = allExpenses.filter(expense =>
+                !periodsToRemove.has(getEntryPeriodKey(expense, fallbackKey))
+            );
         };
 
         const renderCycleNotice = () => {
@@ -2809,7 +2919,15 @@
                     return item;
                 });
 
-                if (changed) localStorage.setItem(storageKey, JSON.stringify(updatedItems));
+                if (changed) {
+                    try {
+                        localStorage.setItem(storageKey, JSON.stringify(updatedItems));
+                    } catch (error) {
+                        // Não interrompe a abertura do app se a persistência de parcelas falhar.
+                        console.error(`Não foi possível salvar a atualização automática em ${storageKey}:`, error);
+                        alert('As parcelas foram atualizadas apenas nesta sessão porque o armazenamento local falhou. Faça um backup e verifique o espaço disponível.');
+                    }
+                }
                 return updatedItems;
             };
 
@@ -2971,8 +3089,8 @@
             return `${day}/${month} às ${timeStr}`;
         };
 
-        const updateApp = () => {
-            localStorage.setItem('myEnvelopes', JSON.stringify(envelopes));
+        // Redesenha a tela atual sem gravar dados; também é usado para desfazer uma alteração que não pôde ser salva.
+        const renderCurrentView = () => {
             renderCycleNotice();
             if (currentView === 'home') renderEnvelopes();
             else if (currentView === 'despesas-fixas') renderFixedExpensesList();
@@ -2980,6 +3098,22 @@
             else if (currentView === 'outros-compromissos') renderOtherCommitmentsList();
             else if (currentView === 'relatorio') renderFinancialReport();
             else if (currentView === 'graficos') renderGraphicsView(); // ADICIONADO
+        };
+
+        const updateApp = (options = {}) => {
+            // A interface continua sendo atualizada, mas uma falha de persistência é informada explicitamente.
+            let envelopeSaveSucceeded = true;
+            try {
+                localStorage.setItem('myEnvelopes', JSON.stringify(envelopes));
+            } catch (error) {
+                envelopeSaveSucceeded = false;
+                console.error('Não foi possível salvar os envelopes no armazenamento local:', error);
+            }
+            renderCurrentView();
+            if (!envelopeSaveSucceeded && options.suppressSaveAlert !== true) {
+                alert('As alterações aparecem nesta sessão, mas não foi possível salvá-las permanentemente. Faça um backup assim que o armazenamento voltar a funcionar e evite fechar ou recarregar o aplicativo até resolver o problema.');
+            }
+            return envelopeSaveSucceeded;
         };
 
         // O saldo do cartão de envelope considera apenas os lançamentos do mês corrente.
@@ -3424,6 +3558,12 @@
         };
 
         const confirmMultiReset = () => {
+            // Revalida o ciclo no momento da confirmação, pois o modal pode ter ficado aberto durante a virada.
+            checkMonthCycleBoundary();
+            if (monthlySnapshotSaveError && monthCycleState.lastObservedCycle !== getMonthKey()) {
+                alert('Não foi possível salvar a fotografia mensal anterior. Nenhum envelope foi redefinido. Faça um backup e tente novamente.');
+                return;
+            }
             const checkboxes = document.querySelectorAll('.multi-reset-cb:checked');
             const selectedIds = Array.from(checkboxes).map(cb => parseInt(cb.value));
             // Em uma regularização mensal, também é válido manter todos os envelopes sem zerá-los.
@@ -3434,27 +3574,38 @@
             }
 
             const currentKey = getMonthKey();
-            const d = new Date();
-            const periodLabel = formatMonthLabelKey(currentKey);
+            const periodsToReset = getEnvelopeResetPeriodKeys();
+            // Backup em memória para não exibir uma redefinição que falhou ao ser salva.
+            const envelopesBeforeReset = JSON.parse(JSON.stringify(envelopes));
 
             envelopes.forEach(env => {
                 if (selectedIds.includes(env.id)) {
                     const histTag = document.querySelector(`.multi-reset-hist-tag[data-id="${env.id}"]`);
                     const keepHistory = histTag ? histTag.getAttribute('data-keep') === 'true' : true;
-                    const allExpenses = Array.isArray(env.expenses) ? env.expenses : [];
-                    const currentExpenses = allExpenses.filter(expense => getEntryPeriodKey(expense, monthCycleState.lastObservedCycle || currentKey) === currentKey);
-                    archiveEnvelopePeriod(env, currentKey, currentExpenses, keepHistory);
-                    // Mantém eventuais registros de outros meses na coleção; não os mistura nem os apaga.
-                    env.expenses = allExpenses.filter(expense => getEntryPeriodKey(expense, monthCycleState.lastObservedCycle || currentKey) !== currentKey);
+                    archiveAndRemoveEnvelopePeriods(env, periodsToReset, keepHistory);
                 }
             });
 
+            // Primeiro persiste os envelopes; só depois remove a pendência para evitar um fechamento incompleto.
             // A seleção do usuário (redefinir ou manter cada envelope) regulariza a pendência mensal.
-            monthCycleState.lastObservedCycle = currentKey;
-            monthCycleState.pendingCycles = [];
-            monthCycleState.bannerDismissedFor = null;
-            persistMonthCycleState();
-            updateApp();
+            if (!updateApp()) {
+                envelopes = envelopesBeforeReset;
+                renderCurrentView();
+                return;
+            }
+
+            const previousCycleState = { ...monthCycleState, pendingCycles: [...monthCycleState.pendingCycles] };
+            if (previousCycleState.pendingCycles.length > 0) {
+                monthCycleState = { ...monthCycleState, lastObservedCycle: currentKey, pendingCycles: [], bannerDismissedFor: null };
+                if (!persistMonthCycleState()) {
+                    // Mantém a pendência se ela não puder ser persistida; os envelopes já gravados podem ser regularizados novamente.
+                    monthCycleState = previousCycleState;
+                    renderCycleNotice();
+                    alert('Os envelopes foram salvos, mas não foi possível salvar a regularização do ciclo. A pendência foi mantida; verifique o armazenamento e tente novamente.');
+                    return;
+                }
+            }
+            renderCycleNotice();
             closeModal('modal-multi-reset');
         };
 
@@ -4641,13 +4792,12 @@
                 totalSpentCurrent += spent;
                 totalBudgetCurrent += env.total;
 
-                if (Array.isArray(env.expenses)) {
-                    env.expenses.forEach(exp => {
-                        if (exp && exp.paymentMethod && paymentTotals[exp.paymentMethod] !== undefined) {
-                            paymentTotals[exp.paymentMethod] += exp.amount;
-                        }
-                    });
-                }
+                // Usa a mesma coleção mensal de getEnvSpent() para não somar pagamentos de períodos antigos.
+                getEnvCurrentExpenses(env).forEach(exp => {
+                    if (exp && exp.paymentMethod && paymentTotals[exp.paymentMethod] !== undefined && Number.isFinite(exp.amount)) {
+                        paymentTotals[exp.paymentMethod] += exp.amount;
+                    }
+                });
             });
 
             let totalFixed = fixedExpenses.reduce((acc, curr) => acc + curr.amount, 0);
@@ -4694,6 +4844,9 @@
                 const diffPercent = prevSpentTotal > 0 ? Math.abs(Math.round((diff / prevSpentTotal) * 100)) : 0;
                 if (diff === 0) {
                     comparisonHtml = `<span>Gastos idênticos ao mês anterior (${sanitizeHtml(comparedMonthLabel)}).</span>`;
+                } else if (prevSpentTotal === 0 && totalSpentCurrent > 0) {
+                    // Percentual sobre zero é indefinido; informa o aumento absoluto sem exibir +0% enganoso.
+                    comparisonHtml = `<span style="color:var(--danger);">${formatCurrency(totalSpentCurrent)} gastos no mês atual; mês anterior sem gastos (variação percentual não aplicável).</span>`;
                 } else if (diff > 0) {
                     comparisonHtml = `<span style="color:var(--danger);">+${diffPercent}% (${formatCurrency(diff)} a mais que o mês anterior)</span>`;
                 } else {
@@ -5573,6 +5726,12 @@
         };
 
         const confirmReset = () => {
+            // Revalida a virada antes de arquivar; uma fotografia mensal pendente tem prioridade sobre a redefinição.
+            checkMonthCycleBoundary();
+            if (monthlySnapshotSaveError && monthCycleState.lastObservedCycle !== getMonthKey()) {
+                alert('Não foi possível salvar a fotografia mensal anterior. O envelope não foi redefinido. Faça um backup e tente novamente.');
+                return;
+            }
             const id = parseInt(document.getElementById('reset-id').value);
             const totalStr = document.getElementById('reset-total').value.trim();
             const newTotal = parseBrNumber(totalStr);
@@ -5586,14 +5745,16 @@
             const envIndex = envelopes.findIndex(env => env.id === id);
             if (envIndex !== -1) {
                 const env = envelopes[envIndex];
-                const currentKey = getMonthKey();
-                const allExpenses = Array.isArray(env.expenses) ? env.expenses : [];
-                const currentExpenses = allExpenses.filter(expense => getEntryPeriodKey(expense, monthCycleState.lastObservedCycle || currentKey) === currentKey);
-                archiveEnvelopePeriod(env, currentKey, currentExpenses, keepHistory);
-                env.expenses = allExpenses.filter(expense => getEntryPeriodKey(expense, monthCycleState.lastObservedCycle || currentKey) !== currentKey);
+                const envelopeBeforeReset = JSON.parse(JSON.stringify(env));
+                // Se houver ciclo pendente, fecha-se esse(s) período(s) e preservam-se gastos do mês em andamento.
+                archiveAndRemoveEnvelopePeriods(env, getEnvelopeResetPeriodKeys(), keepHistory);
                 env.total = newTotal;
+                if (!updateApp()) {
+                    envelopes[envIndex] = envelopeBeforeReset;
+                    renderCurrentView();
+                    return;
+                }
                 closeModal('modal-reset');
-                updateApp();
             }
         };
 
@@ -5723,8 +5884,8 @@
                 }
 
                 if (exportFixed && isFixedAutoSort) {
+                    // A exportação usa a ordenação atual em memória; não depende de uma gravação auxiliar no localStorage.
                     sortFixedExpensesIfNeeded();
-                    localStorage.setItem('myFixedExpenses', JSON.stringify(fixedExpenses));
                 }
 
                 const dataToExport = {
@@ -5772,9 +5933,10 @@
                         ? `Restante Disponível: ${formatCurrency(available)}\n\n` 
                         : `Valor Excedido: ${formatCurrency(Math.abs(available))} (ACIMA DO LIMITE)\n\n`;
 
-                    if (Array.isArray(env.expenses) && env.expenses.length > 0) {
+                    const currentMonthExpenses = getEnvCurrentExpenses(env);
+                    if (currentMonthExpenses.length > 0) {
                         fileContent += `[GASTOS DO MÊS ATUAL]\n`;
-                        const sortedExpenses = [...env.expenses].sort((a,b) => new Date(b.date) - new Date(a.date));
+                        const sortedExpenses = [...currentMonthExpenses].sort((a,b) => new Date(b.date) - new Date(a.date));
                         sortedExpenses.forEach(exp => {
                             if (!exp) return;
                             fileContent += `  - ${formatDate(exp.date)} | ${formatCurrency(exp.amount)}`;
@@ -5785,6 +5947,23 @@
                         fileContent += `\n`;
                     } else {
                         fileContent += `Nenhum gasto registrado neste mês.\n\n`;
+                    }
+
+                    // Mantém visíveis no relatório os gastos antigos que ainda não foram arquivados no histórico individual.
+                    const otherPeriodExpenses = (Array.isArray(env.expenses) ? env.expenses : []).filter(exp =>
+                        getEntryPeriodKey(exp, monthCycleState.lastObservedCycle || getMonthKey()) !== getMonthKey()
+                    );
+                    if (otherPeriodExpenses.length > 0) {
+                        fileContent += `[LANÇAMENTOS DE OUTROS PERÍODOS MANTIDOS NO ENVELOPE]\n`;
+                        [...otherPeriodExpenses].sort((a,b) => new Date(b.date) - new Date(a.date)).forEach(exp => {
+                            if (!exp) return;
+                            const entryPeriod = getEntryPeriodKey(exp, monthCycleState.lastObservedCycle || getMonthKey());
+                            fileContent += `  - ${entryPeriod ? formatMonthLabelKey(entryPeriod) : 'Período desconhecido'} | ${formatDate(exp.date)} | ${formatCurrency(exp.amount)}`;
+                            if (exp.paymentMethod) fileContent += ` (${exp.paymentMethod})`;
+                            if (exp.desc) fileContent += ` | ${exp.desc}`;
+                            fileContent += `\n`;
+                        });
+                        fileContent += `\n`;
                     }
 
                     if (Array.isArray(env.history) && env.history.length > 0) {
@@ -5878,47 +6057,52 @@
                     }
 
                     const validEnvelopes = rawEnvelopes
-                        .filter(env => env && typeof env.name === 'string' && typeof env.total === 'number' && !isNaN(env.total))
+                        .filter(env => env && typeof env.name === 'string' && typeof env.total === 'number' && Number.isFinite(env.total))
                         .map(env => ({
-                            id: Number(env.id) || (Date.now() + Math.random()),
+                            id: Number(env.id),
                             name: env.name.trim(),
                             total: env.total,
                             icon: env.icon ? (env.icon.startsWith('<svg') ? sanitizeSvg(env.icon) : sanitizeHtml(env.icon)) : '📦',
-                            expenses: Array.isArray(env.expenses) ? env.expenses.filter(ex => ex && typeof ex === 'object' && typeof ex.amount === 'number' && !isNaN(ex.amount)) : [],
+                            expenses: Array.isArray(env.expenses) ? env.expenses.filter(ex => ex && typeof ex === 'object' && typeof ex.amount === 'number' && Number.isFinite(ex.amount)) : [],
                             history: Array.isArray(env.history) ? env.history.filter(h => h && typeof h === 'object' && Array.isArray(h.expenses)) : []
                         }));
+                    // Arquivos importados também passam pela regra única de IDs inteiros e sem duplicatas.
+                    ensureUniqueNumericIds(validEnvelopes);
 
                     const validFixed = rawFixed
                         .filter(item => item && typeof item.name === 'string' && typeof item.amount === 'number' && Number.isFinite(item.amount))
                         .map(item => ({
-                            id: Number(item.id) || (Date.now() + Math.random()),
+                            id: Number(item.id),
                             name: item.name.trim(),
                             amount: item.amount,
                             dueDateDay: normalizeFixedDueDay(item.dueDateDay)
                         }));
+                    ensureUniqueNumericIds(validFixed);
 
                     const validCredit = rawCredit
                         .filter(item => item && typeof item.name === 'string' && typeof item.amount === 'number' && Number.isFinite(item.amount))
                         .map(item => ({
-                            id: Number(item.id) || (Date.now() + Math.random()),
+                            id: Number(item.id),
                             name: item.name.trim(),
                             amount: item.amount,
-                            dueDateDay: Number(item.dueDateDay) >= 1 && Number(item.dueDateDay) <= 31 ? Number(item.dueDateDay) : 10,
-                            currentInstallment: Number(item.currentInstallment) >= 1 ? Number(item.currentInstallment) : 1,
-                            totalInstallments: Number(item.totalInstallments) >= 1 ? Number(item.totalInstallments) : 1,
+                            dueDateDay: Number.isInteger(Number(item.dueDateDay)) && Number(item.dueDateDay) >= 1 && Number(item.dueDateDay) <= 31 ? Number(item.dueDateDay) : 10,
+                            currentInstallment: Number.isInteger(Number(item.currentInstallment)) && Number(item.currentInstallment) >= 1 ? Number(item.currentInstallment) : 1,
+                            totalInstallments: Number.isInteger(Number(item.totalInstallments)) && Number(item.totalInstallments) >= 1 ? Number(item.totalInstallments) : 1,
                             cardName: item.cardName ? item.cardName.trim() : 'Outros',
-                            lastYear: item.lastYear,
-                            lastMonth: item.lastMonth
+                            lastYear: Number.isInteger(item.lastYear) ? item.lastYear : undefined,
+                            lastMonth: Number.isInteger(item.lastMonth) && item.lastMonth >= 0 && item.lastMonth <= 11 ? item.lastMonth : undefined
                         }));
+                    ensureUniqueNumericIds(validCredit);
 
                     const validOther = rawOther
+                        // Preserva a regra original desta coleção: itens importados exigem valor positivo.
                         .filter(item => item && typeof item.name === 'string' && item.name.trim() !== '' && typeof item.amount === 'number' && Number.isFinite(item.amount) && item.amount > 0)
                         .map(item => {
                             const dueDay = Number(item.dueDateDay);
                             const current = Number(item.currentInstallment);
                             const total = Number(item.totalInstallments);
                             return {
-                                id: Number(item.id) || (Date.now() + Math.random()),
+                                id: Number(item.id),
                                 name: item.name.trim(),
                                 amount: item.amount,
                                 dueDateDay: Number.isInteger(dueDay) && dueDay >= 1 && dueDay <= 31 ? dueDay : 10,
@@ -5928,6 +6112,7 @@
                                 lastMonth: Number.isInteger(item.lastMonth) && item.lastMonth >= 0 && item.lastMonth <= 11 ? item.lastMonth : undefined
                             };
                         });
+                    ensureUniqueNumericIds(validOther);
 
                     const validSnapshots = rawSnapshots.map(normalizeMonthlySnapshot).filter(Boolean)
                         .sort((a, b) => a.periodKey.localeCompare(b.periodKey)).slice(-12);
@@ -6069,13 +6254,38 @@
                 return;
             }
 
+            // Guarda as chaves e o estado atual antes de importar. Se uma gravação falhar, tentamos reverter a operação inteira.
+            const importStorageKeys = [
+                'myEnvelopes', 'myFixedExpenses', 'myFixedAutoSort', 'myCreditInstallments',
+                'myOtherCommitments', 'myOtherAutoSort', MONTHLY_SNAPSHOTS_KEY, 'myOpenMonthlySnapshot'
+            ];
+            const importStorageBefore = Object.create(null);
+            try {
+                importStorageKeys.forEach(key => { importStorageBefore[key] = localStorage.getItem(key); });
+            } catch (error) {
+                console.error('Não foi possível preparar a cópia interna antes da importação:', error);
+                alert('Não foi possível verificar o armazenamento atual. A importação não foi iniciada.');
+                return;
+            }
+            const importStateBefore = {
+                envelopes: JSON.parse(JSON.stringify(envelopes)),
+                fixedExpenses: JSON.parse(JSON.stringify(fixedExpenses)),
+                creditInstallments: JSON.parse(JSON.stringify(creditInstallments)),
+                otherCommitments: JSON.parse(JSON.stringify(otherCommitments)),
+                monthlySnapshots: JSON.parse(JSON.stringify(monthlySnapshots)),
+                openMonthlySnapshot: openMonthlySnapshot ? JSON.parse(JSON.stringify(openMonthlySnapshot)) : null,
+                monthlySnapshotSaveError,
+                isFixedAutoSort,
+                isOtherAutoSort
+            };
+
+            try {
             let addedEnvelopesCount = 0;
             selectedIndices.forEach(index => {
-                let envToImport = JSON.parse(JSON.stringify(pendingImportData.envelopes[index])); 
+                const envToImport = JSON.parse(JSON.stringify(pendingImportData.envelopes[index]));
+                // O ID é a identidade do envelope: reimportar o mesmo backup não deve duplicar orçamento e gastos.
                 const exists = envelopes.some(e => e.id === envToImport.id);
-                if (exists) {
-                    envToImport.id = Date.now() + Math.floor(Math.random() * 1000) + addedEnvelopesCount;
-                }
+                if (exists) return;
                 envelopes.push(envToImport);
                 addedEnvelopesCount++;
             });
@@ -6092,7 +6302,7 @@
                     let fixedToImport = JSON.parse(JSON.stringify(item));
                     const exists = fixedExpenses.some(f => f.name.toLowerCase() === fixedToImport.name.toLowerCase());
                     if (!exists) {
-                        fixedToImport.id = Date.now() + Math.floor(Math.random() * 1000) + addedFixedCount;
+                        fixedToImport.id = createUniqueNumericId(fixedExpenses);
                         fixedExpenses.push(fixedToImport);
                         addedFixedCount++;
                     }
@@ -6107,7 +6317,7 @@
                     let creditToImport = JSON.parse(JSON.stringify(item));
                     const exists = creditInstallments.some(c => c.name.toLowerCase() === creditToImport.name.toLowerCase() && c.cardName === creditToImport.cardName);
                     if (!exists) {
-                        creditToImport.id = Date.now() + Math.floor(Math.random() * 1000) + addedCreditCount;
+                        creditToImport.id = createUniqueNumericId(creditInstallments);
                         creditInstallments.push(creditToImport);
                         addedCreditCount++;
                     }
@@ -6127,7 +6337,7 @@
                     const otherToImport = JSON.parse(JSON.stringify(item));
                     const exists = otherCommitments.some(existing => existing.name.toLowerCase() === otherToImport.name.toLowerCase());
                     if (!exists) {
-                        otherToImport.id = Date.now() + Math.floor(Math.random() * 1000) + addedOtherCount;
+                        otherToImport.id = createUniqueNumericId(otherCommitments);
                         otherCommitments.push(otherToImport);
                         addedOtherCount++;
                     }
@@ -6147,8 +6357,7 @@
                     }
                 });
                 if (!persistMonthlySnapshots(mergedSnapshots)) {
-                    addedSnapshotsCount = 0;
-                    alert('Os demais dados foram importados, mas não foi possível gravar o histórico mensal por falta de espaço. Faça um backup e tente novamente.');
+                    throw new Error('Não foi possível gravar as fotografias mensais.');
                 }
                 if (pendingImportData.openMonthlySnapshot) {
                     const importedOpen = pendingImportData.openMonthlySnapshot;
@@ -6156,20 +6365,60 @@
                         openMonthlySnapshot = openMonthlySnapshot && openMonthlySnapshot.periodKey === importedOpen.periodKey
                             ? mergeMonthlySnapshots(openMonthlySnapshot, importedOpen) : importedOpen;
                         try { localStorage.setItem('myOpenMonthlySnapshot', JSON.stringify(openMonthlySnapshot)); }
-                        catch (error) { monthlySnapshotSaveError = true; console.error('Não foi possível importar o mês em andamento:', error); }
+                        catch (error) {
+                            monthlySnapshotSaveError = true;
+                            console.error('Não foi possível importar o mês em andamento:', error);
+                            throw new Error('Não foi possível gravar a fotografia do mês em andamento.');
+                        }
                     } else if (!monthlySnapshots.some(snapshot => snapshot.periodKey === importedOpen.periodKey)) {
                         // Se o mês do backup já terminou neste aparelho, ele vira uma fotografia encerrada.
-                        if (persistMonthlySnapshots([...monthlySnapshots, importedOpen])) addedSnapshotsCount++;
+                        if (!persistMonthlySnapshots([...monthlySnapshots, importedOpen])) {
+                            throw new Error('Não foi possível gravar a fotografia importada de um mês encerrado.');
+                        }
+                        if (monthlySnapshots.some(snapshot => snapshot.periodKey === importedOpen.periodKey)) addedSnapshotsCount++;
                     }
                 }
             }
 
             // Novos registros importados também recebem referência de mês antes da próxima renderização.
             normalizeLegacyExpensePeriods();
-            updateApp();
+            if (!updateApp({ suppressSaveAlert: true })) {
+                throw new Error('Não foi possível salvar os envelopes importados.');
+            }
             closeModal('modal-import');
             alert(`Importação concluída! (${addedEnvelopesCount} envelope(s), ${addedFixedCount} despesa(s) fixa(s), ${addedCreditCount} parcelamento(s), ${addedOtherCount} outro(s) compromisso(s) e ${addedSnapshotsCount} fotografia(s) mensal(is) adicionados).`);
             pendingImportData = { envelopes: [], fixedExpenses: [], creditInstallments: [], otherCommitments: [], monthlySnapshots: [], openMonthlySnapshot: null, fixedAutoSort: null, otherAutoSort: null };
+            } catch (error) {
+                console.error('Importação cancelada; restaurando os dados anteriores:', error);
+                envelopes = importStateBefore.envelopes;
+                fixedExpenses = importStateBefore.fixedExpenses;
+                creditInstallments = importStateBefore.creditInstallments;
+                otherCommitments = importStateBefore.otherCommitments;
+                monthlySnapshots = importStateBefore.monthlySnapshots;
+                openMonthlySnapshot = importStateBefore.openMonthlySnapshot;
+                monthlySnapshotSaveError = importStateBefore.monthlySnapshotSaveError;
+                isFixedAutoSort = importStateBefore.isFixedAutoSort;
+                isOtherAutoSort = importStateBefore.isOtherAutoSort;
+
+                let storageRollbackSucceeded = true;
+                // Remove primeiro as chaves tocadas para liberar espaço antes de restaurar os valores anteriores.
+                importStorageKeys.forEach(key => {
+                    try { localStorage.removeItem(key); }
+                    catch (rollbackError) { storageRollbackSucceeded = false; console.error('Falha ao remover chave durante rollback:', key, rollbackError); }
+                });
+                importStorageKeys.forEach(key => {
+                    const previousValue = importStorageBefore[key];
+                    if (previousValue === null || previousValue === undefined) return;
+                    try { localStorage.setItem(key, previousValue); }
+                    catch (rollbackError) { storageRollbackSucceeded = false; console.error('Falha ao restaurar chave durante rollback:', key, rollbackError); }
+                });
+                renderCurrentView();
+                if (storageRollbackSucceeded) {
+                    alert('A importação não foi concluída. Os dados anteriores foram restaurados; nenhum item desta importação foi mantido. Verifique o armazenamento antes de tentar novamente.');
+                } else {
+                    alert('A importação falhou e a restauração automática do armazenamento ficou incompleta. Não feche o aplicativo; exporte os dados que ainda aparecem e verifique o armazenamento local.');
+                }
+            }
         };
 
         let customConfirmCallback = null;
