@@ -2052,36 +2052,6 @@
             if (isFixedAutoSort) sortFixedExpensesByDueDate(fixedExpenses);
         };
 
-        // Gera IDs inteiros positivos e únicos dentro da coleção, compatíveis com os fluxos que usam parseInt().
-        // IDs válidos são preservados; somente IDs ausentes, fracionários ou duplicados são substituídos.
-        const createUniqueNumericId = (items = []) => {
-            const usedIds = new Set((Array.isArray(items) ? items : [])
-                .map(item => Number(item && item.id))
-                .filter(id => Number.isSafeInteger(id) && id > 0));
-            let candidate = Date.now();
-            while (usedIds.has(candidate)) candidate++;
-            return candidate;
-        };
-
-        const ensureUniqueNumericIds = (items) => {
-            const validIdsReserved = new Set((Array.isArray(items) ? items : [])
-                .map(item => Number(item && item.id))
-                .filter(id => Number.isSafeInteger(id) && id > 0));
-            const usedIds = new Set();
-            return items.map(item => {
-                let id = Number(item && item.id);
-                if (!Number.isSafeInteger(id) || id <= 0 || usedIds.has(id)) {
-                    id = Date.now();
-                    while (validIdsReserved.has(id) || usedIds.has(id)) id++;
-                    item.id = id;
-                } else {
-                    item.id = id;
-                }
-                usedIds.add(id);
-                return item;
-            });
-        };
-
         // CARREGAMENTO SEGURO
         try {
             const rawEnv = localStorage.getItem('myEnvelopes');
@@ -2089,17 +2059,15 @@
                 const parsed = JSON.parse(rawEnv);
                 if (Array.isArray(parsed)) {
                     envelopes = parsed
-                        .filter(env => env && typeof env === 'object' && typeof env.name === 'string' && env.name.trim() !== '' && typeof env.total === 'number' && Number.isFinite(env.total) && env.total >= 0)
+                        .filter(env => env && typeof env === 'object' && typeof env.name === 'string' && typeof env.total === 'number' && !isNaN(env.total))
                         .map(env => ({
-                            id: Number(env.id),
+                            id: Number(env.id) || (Date.now() + Math.random()),
                             name: env.name.trim(),
                             total: env.total,
                             icon: env.icon ? (env.icon.startsWith('<svg') ? sanitizeSvg(env.icon) : sanitizeHtml(env.icon)) : '📦',
-                            expenses: Array.isArray(env.expenses) ? env.expenses.filter(ex => ex && typeof ex === 'object' && typeof ex.amount === 'number' && Number.isFinite(ex.amount) && ex.amount > 0) : [],
+                            expenses: Array.isArray(env.expenses) ? env.expenses.filter(ex => ex && typeof ex === 'object' && typeof ex.amount === 'number' && !isNaN(ex.amount)) : [],
                             history: Array.isArray(env.history) ? env.history.filter(h => h && typeof h === 'object' && Array.isArray(h.expenses)) : []
                         }));
-                    // Corrige IDs legados fracionários/duplicados sem alterar IDs válidos.
-                    envelopes = ensureUniqueNumericIds(envelopes);
                 }
             }
         } catch (e) {
@@ -2112,15 +2080,13 @@
                 const parsed = JSON.parse(rawFixed);
                 if (Array.isArray(parsed)) {
                     fixedExpenses = parsed
-                        .filter(item => item && typeof item === 'object' && typeof item.name === 'string' && item.name.trim() !== '' && typeof item.amount === 'number' && Number.isFinite(item.amount) && item.amount > 0)
+                        .filter(item => item && typeof item === 'object' && typeof item.name === 'string' && typeof item.amount === 'number' && Number.isFinite(item.amount))
                         .map(item => ({
-                            id: Number(item.id),
+                            id: Number(item.id) || (Date.now() + Math.random()),
                             name: item.name.trim(),
                             amount: item.amount,
                             dueDateDay: normalizeFixedDueDay(item.dueDateDay)
                         }));
-                    // Mantém IDs de despesas fixas válidos e corrige somente os inconsistentes.
-                    fixedExpenses = ensureUniqueNumericIds(fixedExpenses);
                     sortFixedExpensesIfNeeded();
                 }
             }
@@ -2134,20 +2100,18 @@
                 const parsed = JSON.parse(rawCredit);
                 if (Array.isArray(parsed)) {
                     creditInstallments = parsed
-                        .filter(item => item && typeof item === 'object' && typeof item.name === 'string' && item.name.trim() !== '' && typeof item.amount === 'number' && Number.isFinite(item.amount) && item.amount > 0)
+                        .filter(item => item && typeof item === 'object' && typeof item.name === 'string' && typeof item.amount === 'number' && !isNaN(item.amount))
                         .map(item => ({
-                            id: Number(item.id),
+                            id: Number(item.id) || (Date.now() + Math.random()),
                             name: item.name.trim(),
                             amount: item.amount,
-                            dueDateDay: Number.isInteger(Number(item.dueDateDay)) && Number(item.dueDateDay) >= 1 && Number(item.dueDateDay) <= 31 ? Number(item.dueDateDay) : 10,
-                            currentInstallment: Number.isInteger(Number(item.currentInstallment)) && Number(item.currentInstallment) >= 1 ? Number(item.currentInstallment) : 1,
-                            totalInstallments: Number.isInteger(Number(item.totalInstallments)) && Number(item.totalInstallments) >= 1 ? Number(item.totalInstallments) : 1,
+                            dueDateDay: Number(item.dueDateDay) >= 1 && Number(item.dueDateDay) <= 31 ? Number(item.dueDateDay) : 10,
+                            currentInstallment: Number(item.currentInstallment) >= 1 ? Number(item.currentInstallment) : 1,
+                            totalInstallments: Number(item.totalInstallments) >= 1 ? Number(item.totalInstallments) : 1,
                             cardName: item.cardName ? item.cardName.trim() : 'Outros',
                             lastYear: typeof item.lastYear === 'number' ? item.lastYear : undefined,
                             lastMonth: typeof item.lastMonth === 'number' ? item.lastMonth : undefined
                         }));
-                    // IDs inteiros e únicos evitam divergência entre lookup, edição e exclusão.
-                    creditInstallments = ensureUniqueNumericIds(creditInstallments);
                 }
             }
         } catch (e) {
@@ -2160,19 +2124,17 @@
                 const parsed = JSON.parse(rawOther);
                 if (Array.isArray(parsed)) {
                     otherCommitments = parsed
-                        .filter(item => item && typeof item === 'object' && typeof item.name === 'string' && item.name.trim() !== '' && typeof item.amount === 'number' && Number.isFinite(item.amount) && item.amount > 0)
+                        .filter(item => item && typeof item === 'object' && typeof item.name === 'string' && typeof item.amount === 'number' && !isNaN(item.amount))
                         .map(item => ({
-                            id: Number(item.id),
+                            id: Number(item.id) || (Date.now() + Math.random()),
                             name: item.name.trim(),
                             amount: item.amount,
-                            dueDateDay: Number.isInteger(Number(item.dueDateDay)) && Number(item.dueDateDay) >= 1 && Number(item.dueDateDay) <= 31 ? Number(item.dueDateDay) : 10,
-                            currentInstallment: Number.isInteger(Number(item.currentInstallment)) && Number(item.currentInstallment) >= 1 ? Number(item.currentInstallment) : 1,
-                            totalInstallments: Number.isInteger(Number(item.totalInstallments)) && Number(item.totalInstallments) >= 1 ? Number(item.totalInstallments) : 1,
+                            dueDateDay: Number(item.dueDateDay) >= 1 && Number(item.dueDateDay) <= 31 ? Number(item.dueDateDay) : 10,
+                            currentInstallment: Number(item.currentInstallment) >= 1 ? Number(item.currentInstallment) : 1,
+                            totalInstallments: Number(item.totalInstallments) >= 1 ? Number(item.totalInstallments) : 1,
                             lastYear: typeof item.lastYear === 'number' ? item.lastYear : undefined,
                             lastMonth: typeof item.lastMonth === 'number' ? item.lastMonth : undefined
                         }));
-                    // IDs inteiros e únicos evitam divergência entre lookup, edição e exclusão.
-                    otherCommitments = ensureUniqueNumericIds(otherCommitments);
                     sortOtherCommitmentsIfNeeded();
                 }
             }
@@ -2240,7 +2202,6 @@
             }
         };
 
-        // Preferência intencional do projeto: zoom começa desativado e pode ser habilitado nas Configurações.
         let savedZoomPref = localStorage.getItem('myAllowZoom') === 'true';
         applyZoomSetting(savedZoomPref);
 
@@ -2295,20 +2256,7 @@
         };
         const getEntryPeriodKey = (entry, fallbackKey = null) => {
             if (entry && isValidMonthKey(entry.periodKey)) return entry.periodKey;
-            if (entry && typeof entry.date === 'string' && entry.date) {
-                // Datas sem horário (YYYY-MM-DD) representam um dia de calendário local, não meia-noite UTC.
-                // Isso evita classificar o dia 1º como o mês anterior em fusos como o de Brasília.
-                const dateOnlyMatch = entry.date.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-                if (dateOnlyMatch) {
-                    const year = Number(dateOnlyMatch[1]);
-                    const month = Number(dateOnlyMatch[2]) - 1;
-                    const day = Number(dateOnlyMatch[3]);
-                    const localDate = new Date(year, month, day);
-                    if (localDate.getFullYear() === year && localDate.getMonth() === month && localDate.getDate() === day) {
-                        return getMonthKey(localDate);
-                    }
-                    return isValidMonthKey(fallbackKey) ? fallbackKey : null;
-                }
+            if (entry && entry.date) {
                 const date = new Date(entry.date);
                 if (!Number.isNaN(date.getTime())) return getMonthKey(date);
             }
@@ -2730,31 +2678,6 @@
             });
         };
 
-        // Em uma regularização, arquiva os ciclos pendentes; em uma redefinição manual comum, arquiva o mês atual.
-        // A rotina compartilhada evita que o fechamento de um ciclo pendente apague gastos já lançados no mês novo.
-        const getEnvelopeResetPeriodKeys = () => {
-            const pendingPeriods = [...new Set(monthCycleState.pendingCycles.filter(isValidMonthKey))].sort();
-            return pendingPeriods.length > 0 ? pendingPeriods : [getMonthKey()];
-        };
-
-        const archiveAndRemoveEnvelopePeriods = (env, periodKeys, keepHistory) => {
-            const allExpenses = Array.isArray(env.expenses) ? env.expenses : [];
-            const periodsToRemove = new Set(periodKeys.filter(isValidMonthKey));
-            const fallbackKey = monthCycleState.lastObservedCycle || getMonthKey();
-
-            periodsToRemove.forEach(periodKey => {
-                const periodExpenses = allExpenses.filter(expense =>
-                    getEntryPeriodKey(expense, fallbackKey) === periodKey
-                );
-                archiveEnvelopePeriod(env, periodKey, periodExpenses, keepHistory);
-            });
-
-            // Registros de outros períodos, especialmente do mês em andamento, permanecem intactos.
-            env.expenses = allExpenses.filter(expense =>
-                !periodsToRemove.has(getEntryPeriodKey(expense, fallbackKey))
-            );
-        };
-
         const renderCycleNotice = () => {
             const notice = document.getElementById('month-cycle-notice');
             if (!notice) return;
@@ -2886,15 +2809,7 @@
                     return item;
                 });
 
-                if (changed) {
-                    try {
-                        localStorage.setItem(storageKey, JSON.stringify(updatedItems));
-                    } catch (error) {
-                        // Não interrompe a abertura do app se a persistência de parcelas falhar.
-                        console.error(`Não foi possível salvar a atualização automática em ${storageKey}:`, error);
-                        alert('As parcelas foram atualizadas apenas nesta sessão porque o armazenamento local falhou. Faça um backup e verifique o espaço disponível.');
-                    }
-                }
+                if (changed) localStorage.setItem(storageKey, JSON.stringify(updatedItems));
                 return updatedItems;
             };
 
@@ -3057,14 +2972,7 @@
         };
 
         const updateApp = () => {
-            // A interface continua sendo atualizada, mas uma falha de persistência é informada explicitamente.
-            let envelopeSaveSucceeded = true;
-            try {
-                localStorage.setItem('myEnvelopes', JSON.stringify(envelopes));
-            } catch (error) {
-                envelopeSaveSucceeded = false;
-                console.error('Não foi possível salvar os envelopes no armazenamento local:', error);
-            }
+            localStorage.setItem('myEnvelopes', JSON.stringify(envelopes));
             renderCycleNotice();
             if (currentView === 'home') renderEnvelopes();
             else if (currentView === 'despesas-fixas') renderFixedExpensesList();
@@ -3072,10 +2980,6 @@
             else if (currentView === 'outros-compromissos') renderOtherCommitmentsList();
             else if (currentView === 'relatorio') renderFinancialReport();
             else if (currentView === 'graficos') renderGraphicsView(); // ADICIONADO
-            if (!envelopeSaveSucceeded) {
-                alert('As alterações aparecem nesta sessão, mas não foi possível salvá-las permanentemente. Faça um backup assim que o armazenamento voltar a funcionar e evite fechar ou recarregar o aplicativo até resolver o problema.');
-            }
-            return envelopeSaveSucceeded;
         };
 
         // O saldo do cartão de envelope considera apenas os lançamentos do mês corrente.
@@ -3520,12 +3424,6 @@
         };
 
         const confirmMultiReset = () => {
-            // Revalida o ciclo no momento da confirmação, pois o modal pode ter ficado aberto durante a virada.
-            checkMonthCycleBoundary();
-            if (monthlySnapshotSaveError && monthCycleState.lastObservedCycle !== getMonthKey()) {
-                alert('Não foi possível salvar a fotografia mensal anterior. Nenhum envelope foi redefinido. Faça um backup e tente novamente.');
-                return;
-            }
             const checkboxes = document.querySelectorAll('.multi-reset-cb:checked');
             const selectedIds = Array.from(checkboxes).map(cb => parseInt(cb.value));
             // Em uma regularização mensal, também é válido manter todos os envelopes sem zerá-los.
@@ -3536,32 +3434,27 @@
             }
 
             const currentKey = getMonthKey();
-            const periodsToReset = getEnvelopeResetPeriodKeys();
+            const d = new Date();
+            const periodLabel = formatMonthLabelKey(currentKey);
 
             envelopes.forEach(env => {
                 if (selectedIds.includes(env.id)) {
                     const histTag = document.querySelector(`.multi-reset-hist-tag[data-id="${env.id}"]`);
                     const keepHistory = histTag ? histTag.getAttribute('data-keep') === 'true' : true;
-                    archiveAndRemoveEnvelopePeriods(env, periodsToReset, keepHistory);
+                    const allExpenses = Array.isArray(env.expenses) ? env.expenses : [];
+                    const currentExpenses = allExpenses.filter(expense => getEntryPeriodKey(expense, monthCycleState.lastObservedCycle || currentKey) === currentKey);
+                    archiveEnvelopePeriod(env, currentKey, currentExpenses, keepHistory);
+                    // Mantém eventuais registros de outros meses na coleção; não os mistura nem os apaga.
+                    env.expenses = allExpenses.filter(expense => getEntryPeriodKey(expense, monthCycleState.lastObservedCycle || currentKey) !== currentKey);
                 }
             });
 
-            // Primeiro persiste os envelopes; só depois remove a pendência para evitar um fechamento incompleto.
             // A seleção do usuário (redefinir ou manter cada envelope) regulariza a pendência mensal.
-            if (!updateApp()) return;
-
-            const previousCycleState = { ...monthCycleState, pendingCycles: [...monthCycleState.pendingCycles] };
-            if (previousCycleState.pendingCycles.length > 0) {
-                monthCycleState = { ...monthCycleState, lastObservedCycle: currentKey, pendingCycles: [], bannerDismissedFor: null };
-                if (!persistMonthCycleState()) {
-                    // Mantém a pendência se ela não puder ser persistida; os envelopes já gravados podem ser regularizados novamente.
-                    monthCycleState = previousCycleState;
-                    renderCycleNotice();
-                    alert('Os envelopes foram salvos, mas não foi possível salvar a regularização do ciclo. A pendência foi mantida; verifique o armazenamento e tente novamente.');
-                    return;
-                }
-            }
-            renderCycleNotice();
+            monthCycleState.lastObservedCycle = currentKey;
+            monthCycleState.pendingCycles = [];
+            monthCycleState.bannerDismissedFor = null;
+            persistMonthCycleState();
+            updateApp();
             closeModal('modal-multi-reset');
         };
 
@@ -4748,12 +4641,13 @@
                 totalSpentCurrent += spent;
                 totalBudgetCurrent += env.total;
 
-                // Usa a mesma coleção mensal de getEnvSpent() para não somar pagamentos de períodos antigos.
-                getEnvCurrentExpenses(env).forEach(exp => {
-                    if (exp && exp.paymentMethod && paymentTotals[exp.paymentMethod] !== undefined && Number.isFinite(exp.amount)) {
-                        paymentTotals[exp.paymentMethod] += exp.amount;
-                    }
-                });
+                if (Array.isArray(env.expenses)) {
+                    env.expenses.forEach(exp => {
+                        if (exp && exp.paymentMethod && paymentTotals[exp.paymentMethod] !== undefined) {
+                            paymentTotals[exp.paymentMethod] += exp.amount;
+                        }
+                    });
+                }
             });
 
             let totalFixed = fixedExpenses.reduce((acc, curr) => acc + curr.amount, 0);
@@ -4800,9 +4694,6 @@
                 const diffPercent = prevSpentTotal > 0 ? Math.abs(Math.round((diff / prevSpentTotal) * 100)) : 0;
                 if (diff === 0) {
                     comparisonHtml = `<span>Gastos idênticos ao mês anterior (${sanitizeHtml(comparedMonthLabel)}).</span>`;
-                } else if (prevSpentTotal === 0 && totalSpentCurrent > 0) {
-                    // Percentual sobre zero é indefinido; informa o aumento absoluto sem exibir +0% enganoso.
-                    comparisonHtml = `<span style="color:var(--danger);">${formatCurrency(totalSpentCurrent)} gastos no mês atual; mês anterior sem gastos (variação percentual não aplicável).</span>`;
                 } else if (diff > 0) {
                     comparisonHtml = `<span style="color:var(--danger);">+${diffPercent}% (${formatCurrency(diff)} a mais que o mês anterior)</span>`;
                 } else {
@@ -5682,12 +5573,6 @@
         };
 
         const confirmReset = () => {
-            // Revalida a virada antes de arquivar; uma fotografia mensal pendente tem prioridade sobre a redefinição.
-            checkMonthCycleBoundary();
-            if (monthlySnapshotSaveError && monthCycleState.lastObservedCycle !== getMonthKey()) {
-                alert('Não foi possível salvar a fotografia mensal anterior. O envelope não foi redefinido. Faça um backup e tente novamente.');
-                return;
-            }
             const id = parseInt(document.getElementById('reset-id').value);
             const totalStr = document.getElementById('reset-total').value.trim();
             const newTotal = parseBrNumber(totalStr);
@@ -5701,8 +5586,11 @@
             const envIndex = envelopes.findIndex(env => env.id === id);
             if (envIndex !== -1) {
                 const env = envelopes[envIndex];
-                // Se houver ciclo pendente, fecha-se esse(s) período(s) e preservam-se gastos do mês em andamento.
-                archiveAndRemoveEnvelopePeriods(env, getEnvelopeResetPeriodKeys(), keepHistory);
+                const currentKey = getMonthKey();
+                const allExpenses = Array.isArray(env.expenses) ? env.expenses : [];
+                const currentExpenses = allExpenses.filter(expense => getEntryPeriodKey(expense, monthCycleState.lastObservedCycle || currentKey) === currentKey);
+                archiveEnvelopePeriod(env, currentKey, currentExpenses, keepHistory);
+                env.expenses = allExpenses.filter(expense => getEntryPeriodKey(expense, monthCycleState.lastObservedCycle || currentKey) !== currentKey);
                 env.total = newTotal;
                 closeModal('modal-reset');
                 updateApp();
@@ -5835,8 +5723,8 @@
                 }
 
                 if (exportFixed && isFixedAutoSort) {
-                    // A exportação usa a ordenação atual em memória; não depende de uma gravação auxiliar no localStorage.
                     sortFixedExpensesIfNeeded();
+                    localStorage.setItem('myFixedExpenses', JSON.stringify(fixedExpenses));
                 }
 
                 const dataToExport = {
@@ -5990,42 +5878,38 @@
                     }
 
                     const validEnvelopes = rawEnvelopes
-                        .filter(env => env && typeof env.name === 'string' && env.name.trim() !== '' && typeof env.total === 'number' && Number.isFinite(env.total) && env.total > 0)
+                        .filter(env => env && typeof env.name === 'string' && typeof env.total === 'number' && !isNaN(env.total))
                         .map(env => ({
-                            id: Number(env.id),
+                            id: Number(env.id) || (Date.now() + Math.random()),
                             name: env.name.trim(),
                             total: env.total,
                             icon: env.icon ? (env.icon.startsWith('<svg') ? sanitizeSvg(env.icon) : sanitizeHtml(env.icon)) : '📦',
-                            expenses: Array.isArray(env.expenses) ? env.expenses.filter(ex => ex && typeof ex === 'object' && typeof ex.amount === 'number' && Number.isFinite(ex.amount) && ex.amount > 0) : [],
+                            expenses: Array.isArray(env.expenses) ? env.expenses.filter(ex => ex && typeof ex === 'object' && typeof ex.amount === 'number' && !isNaN(ex.amount)) : [],
                             history: Array.isArray(env.history) ? env.history.filter(h => h && typeof h === 'object' && Array.isArray(h.expenses)) : []
                         }));
-                    // Arquivos importados também passam pela regra única de IDs inteiros e sem duplicatas.
-                    ensureUniqueNumericIds(validEnvelopes);
 
                     const validFixed = rawFixed
-                        .filter(item => item && typeof item.name === 'string' && item.name.trim() !== '' && typeof item.amount === 'number' && Number.isFinite(item.amount) && item.amount > 0)
+                        .filter(item => item && typeof item.name === 'string' && typeof item.amount === 'number' && Number.isFinite(item.amount))
                         .map(item => ({
-                            id: Number(item.id),
+                            id: Number(item.id) || (Date.now() + Math.random()),
                             name: item.name.trim(),
                             amount: item.amount,
                             dueDateDay: normalizeFixedDueDay(item.dueDateDay)
                         }));
-                    ensureUniqueNumericIds(validFixed);
 
                     const validCredit = rawCredit
-                        .filter(item => item && typeof item.name === 'string' && item.name.trim() !== '' && typeof item.amount === 'number' && Number.isFinite(item.amount) && item.amount > 0)
+                        .filter(item => item && typeof item.name === 'string' && typeof item.amount === 'number' && Number.isFinite(item.amount))
                         .map(item => ({
-                            id: Number(item.id),
+                            id: Number(item.id) || (Date.now() + Math.random()),
                             name: item.name.trim(),
                             amount: item.amount,
-                            dueDateDay: Number.isInteger(Number(item.dueDateDay)) && Number(item.dueDateDay) >= 1 && Number(item.dueDateDay) <= 31 ? Number(item.dueDateDay) : 10,
-                            currentInstallment: Number.isInteger(Number(item.currentInstallment)) && Number(item.currentInstallment) >= 1 ? Number(item.currentInstallment) : 1,
-                            totalInstallments: Number.isInteger(Number(item.totalInstallments)) && Number(item.totalInstallments) >= 1 ? Number(item.totalInstallments) : 1,
+                            dueDateDay: Number(item.dueDateDay) >= 1 && Number(item.dueDateDay) <= 31 ? Number(item.dueDateDay) : 10,
+                            currentInstallment: Number(item.currentInstallment) >= 1 ? Number(item.currentInstallment) : 1,
+                            totalInstallments: Number(item.totalInstallments) >= 1 ? Number(item.totalInstallments) : 1,
                             cardName: item.cardName ? item.cardName.trim() : 'Outros',
-                            lastYear: Number.isInteger(item.lastYear) ? item.lastYear : undefined,
-                            lastMonth: Number.isInteger(item.lastMonth) && item.lastMonth >= 0 && item.lastMonth <= 11 ? item.lastMonth : undefined
+                            lastYear: item.lastYear,
+                            lastMonth: item.lastMonth
                         }));
-                    ensureUniqueNumericIds(validCredit);
 
                     const validOther = rawOther
                         .filter(item => item && typeof item.name === 'string' && item.name.trim() !== '' && typeof item.amount === 'number' && Number.isFinite(item.amount) && item.amount > 0)
@@ -6034,7 +5918,7 @@
                             const current = Number(item.currentInstallment);
                             const total = Number(item.totalInstallments);
                             return {
-                                id: Number(item.id),
+                                id: Number(item.id) || (Date.now() + Math.random()),
                                 name: item.name.trim(),
                                 amount: item.amount,
                                 dueDateDay: Number.isInteger(dueDay) && dueDay >= 1 && dueDay <= 31 ? dueDay : 10,
@@ -6044,7 +5928,6 @@
                                 lastMonth: Number.isInteger(item.lastMonth) && item.lastMonth >= 0 && item.lastMonth <= 11 ? item.lastMonth : undefined
                             };
                         });
-                    ensureUniqueNumericIds(validOther);
 
                     const validSnapshots = rawSnapshots.map(normalizeMonthlySnapshot).filter(Boolean)
                         .sort((a, b) => a.periodKey.localeCompare(b.periodKey)).slice(-12);
@@ -6191,7 +6074,7 @@
                 let envToImport = JSON.parse(JSON.stringify(pendingImportData.envelopes[index])); 
                 const exists = envelopes.some(e => e.id === envToImport.id);
                 if (exists) {
-                    envToImport.id = createUniqueNumericId(envelopes);
+                    envToImport.id = Date.now() + Math.floor(Math.random() * 1000) + addedEnvelopesCount;
                 }
                 envelopes.push(envToImport);
                 addedEnvelopesCount++;
@@ -6209,7 +6092,7 @@
                     let fixedToImport = JSON.parse(JSON.stringify(item));
                     const exists = fixedExpenses.some(f => f.name.toLowerCase() === fixedToImport.name.toLowerCase());
                     if (!exists) {
-                        fixedToImport.id = createUniqueNumericId(fixedExpenses);
+                        fixedToImport.id = Date.now() + Math.floor(Math.random() * 1000) + addedFixedCount;
                         fixedExpenses.push(fixedToImport);
                         addedFixedCount++;
                     }
@@ -6224,7 +6107,7 @@
                     let creditToImport = JSON.parse(JSON.stringify(item));
                     const exists = creditInstallments.some(c => c.name.toLowerCase() === creditToImport.name.toLowerCase() && c.cardName === creditToImport.cardName);
                     if (!exists) {
-                        creditToImport.id = createUniqueNumericId(creditInstallments);
+                        creditToImport.id = Date.now() + Math.floor(Math.random() * 1000) + addedCreditCount;
                         creditInstallments.push(creditToImport);
                         addedCreditCount++;
                     }
@@ -6244,7 +6127,7 @@
                     const otherToImport = JSON.parse(JSON.stringify(item));
                     const exists = otherCommitments.some(existing => existing.name.toLowerCase() === otherToImport.name.toLowerCase());
                     if (!exists) {
-                        otherToImport.id = createUniqueNumericId(otherCommitments);
+                        otherToImport.id = Date.now() + Math.floor(Math.random() * 1000) + addedOtherCount;
                         otherCommitments.push(otherToImport);
                         addedOtherCount++;
                     }
