@@ -1,6 +1,5 @@
-
-// v14: atualiza o shell offline após os refinamentos de configurações e persistência.
-const CACHE_NAME = 'envelopes-cache-v14';
+// v15: atualiza o cache offline após a implementação do lembrete de backup nas configurações.
+const CACHE_NAME = 'envelopes-cache-v15';
 
 const ASSETS_TO_CACHE = [
   './',

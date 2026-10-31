@@ -1081,9 +1081,9 @@
         .settings-storage-monitor {
             padding: 12px;
             margin-bottom: 12px;
-            border: 1px solid var(--border-color);
+            border: 1px solid var(--primary-light-bg);
             border-radius: 10px;
-            background: var(--bg);
+            background: var(--card-bg);
         }
         .settings-storage-top {
             display: flex;
@@ -1123,6 +1123,85 @@
             color: var(--danger);
         }
         .settings-storage-warning[hidden] { display: none; }
+
+        /* Lembrete de backup integrado aos dados locais: leve, responsivo e sem alertas intrusivos. */
+        .settings-backup-area {
+            margin-top: 14px;
+            padding-top: 14px;
+            border-top: 1px solid var(--border-color);
+        }
+        .settings-backup-heading { display: flex; align-items: flex-start; gap: 10px; min-width: 0; }
+        .settings-backup-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            color: var(--primary);
+            background: var(--primary-light-bg);
+        }
+        .settings-backup-content { flex: 1; min-width: 0; }
+        .settings-backup-title { font-size: 0.9rem; font-weight: 700; color: var(--text-main); }
+        .settings-backup-last {
+            display: block;
+            margin-top: 3px;
+            font-size: 0.76rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+        .settings-backup-description {
+            margin-top: 8px;
+            font-size: 0.79rem;
+            line-height: 1.45;
+            color: var(--text-muted);
+        }
+        .settings-backup-action {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 42px;
+            max-width: 100%;
+            margin-top: 12px;
+            padding: 9px 14px;
+            border: 1px solid var(--primary-light-bg);
+            border-radius: 10px;
+            background: var(--primary-light-bg);
+            color: var(--primary);
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .settings-backup-action:active { transform: scale(0.98); }
+        .settings-backup-action:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+        .settings-backup-action:disabled { opacity: 0.5; cursor: default; transform: none; }
+        .settings-backup-reminder {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 8px;
+            padding: 9px 10px;
+            margin-top: 10px;
+            border-radius: 9px;
+            color: var(--text-main);
+            background: var(--primary-light-bg);
+            font-size: 0.76rem;
+            line-height: 1.4;
+        }
+        .settings-backup-reminder[hidden] { display: none; }
+        .settings-backup-dismiss {
+            flex-shrink: 0;
+            padding: 0;
+            border: 0;
+            background: transparent;
+            color: var(--primary);
+            font: inherit;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .settings-backup-dismiss:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
         .settings-danger-action {
             width: 100%;
             display: flex;
@@ -1837,6 +1916,28 @@
                          <!-- Estimativa dos registros. Referência preventiva: 3 MB (não é o limite do navegador). Cache offline à parte. -->
                         <span class="settings-storage-note">Estimativa dos registros. Ref. Preventiva: 3 MB.</span>
                         <p class="settings-storage-warning" id="settings-storage-warning" role="status" hidden>Os dados atingiram a referência preventiva. Exporte um backup JSON completo para segurança.</p>
+
+                        <!-- Backup manual: utiliza a tela de exportação existente, com JSON pré-selecionado. -->
+                        <div class="settings-backup-area">
+                            <div class="settings-backup-heading">
+                                <span class="settings-backup-icon" aria-hidden="true">
+                                    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"></path><path d="m9 12 2 2 4-4"></path></svg>
+                                </span>
+                                <div class="settings-backup-content">
+                                    <div class="settings-backup-title">Backup dos dados</div>
+                                    <span class="settings-backup-last" id="settings-backup-last">Verificando...</span>
+                                    <p class="settings-backup-description">Recomendamos salvar periodicamente uma cópia dos seus dados financeiros.</p>
+                                </div>
+                            </div>
+                            <div class="settings-backup-reminder" id="settings-backup-reminder" role="status" hidden>
+                                <span id="settings-backup-reminder-text">Já faz 30 dias desde a última solicitação de backup completo.</span>
+                                <button type="button" class="settings-backup-dismiss" onclick="dismissBackupReminder()" aria-label="Dispensar lembrete de backup por 30 dias">Agora não</button>
+                            </div>
+                            <button type="button" class="settings-backup-action" id="settings-backup-export" onclick="openBackupFromSettings()">
+                                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M4 17v3h16v-3"></path></svg>
+                                Exportar backup
+                            </button>
+                        </div>
                     </div>
                     <button type="button" class="settings-danger-action" onclick="closeModal('modal-settings'); openRestoreModal()">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
@@ -2437,7 +2538,8 @@
             'myEnvelopes', 'myFixedExpenses', 'myFixedAutoSort',
             'myCreditInstallments', 'myOtherCommitments', 'myOtherAutoSort',
             'myMonthlySnapshots', 'myOpenMonthlySnapshot', 'myCycleState',
-            'myAppTheme', 'myColorMode', 'myAllowZoom'
+            'myAppTheme', 'myColorMode', 'myAllowZoom',
+            'myBackupReminderStart', 'myBackupLastRequestedAt', 'myBackupReminderDismissedAt'
         ];
         let storageWarningShownThisSession = false;
 
@@ -2490,6 +2592,88 @@
                 storageWarningShownThisSession = true;
                 alert('Os dados armazenados alcançaram cerca de 3 MB (referência preventiva, não limite do navegador). Faça um backup JSON completo. Nenhum registro foi removido.');
             }
+            updateBackupReminderUI();
+        };
+
+        // O lembrete acompanha apenas solicitações de backup JSON COMPLETO, nunca exportações parciais ou TXT.
+        // Um navegador não informa se o arquivo foi efetivamente guardado pelo usuário: o texto deixa isso explícito.
+        const BACKUP_REMINDER_INTERVAL_MS = 30 * 24 * 60 * 60 * 1000;
+        const BACKUP_REMINDER_START_KEY = 'myBackupReminderStart';
+        const BACKUP_LAST_REQUEST_KEY = 'myBackupLastRequestedAt';
+        const BACKUP_REMINDER_DISMISSED_KEY = 'myBackupReminderDismissedAt';
+
+        const hasFinancialDataForBackup = () =>
+            envelopes.length > 0 || fixedExpenses.length > 0 || creditInstallments.length > 0 ||
+            otherCommitments.length > 0 || monthlySnapshots.length > 0 || !!openMonthlySnapshot;
+
+        const getBackupTimestamp = (key) => {
+            try {
+                const raw = localStorage.getItem(key);
+                if (raw === null) return null;
+                const time = Number(raw);
+                return Number.isFinite(time) && time > 0 && time <= Date.now() ? time : null;
+            } catch (error) {
+                return null; // A falha de uma preferência nunca deve impedir o uso ou a exportação.
+            }
+        };
+
+        const storeBackupTimestamp = (key) => {
+            try {
+                localStorage.setItem(key, String(Date.now()));
+                return true;
+            } catch (error) {
+                console.warn('Não foi possível registrar a data do lembrete de backup:', error);
+                return false;
+            }
+        };
+
+        const ensureBackupReminderStart = () => {
+            if (!hasFinancialDataForBackup()) return;
+            if (!getBackupTimestamp(BACKUP_LAST_REQUEST_KEY) && !getBackupTimestamp(BACKUP_REMINDER_START_KEY)) {
+                storeBackupTimestamp(BACKUP_REMINDER_START_KEY);
+            }
+        };
+
+        const updateBackupReminderUI = () => {
+            const lastLabel = document.getElementById('settings-backup-last');
+            const reminder = document.getElementById('settings-backup-reminder');
+            const reminderText = document.getElementById('settings-backup-reminder-text');
+            const exportButton = document.getElementById('settings-backup-export');
+            if (!lastLabel || !reminder || !exportButton) return;
+            const hasData = hasFinancialDataForBackup();
+            exportButton.disabled = !hasData;
+            if (!hasData) {
+                lastLabel.textContent = 'Nenhum dado financeiro para exportar.';
+                reminder.hidden = true;
+                return;
+            }
+            ensureBackupReminderStart();
+            const last = getBackupTimestamp(BACKUP_LAST_REQUEST_KEY);
+            const start = getBackupTimestamp(BACKUP_REMINDER_START_KEY);
+            const dismissed = getBackupTimestamp(BACKUP_REMINDER_DISMISSED_KEY);
+            const now = Date.now();
+            lastLabel.textContent = last
+                ? `Último backup completo solicitado: ${new Date(last).toLocaleDateString('pt-BR')}`
+                : 'Nenhum backup completo solicitado neste dispositivo.';
+            const reminderDue = (last || start) !== null && now - (last || start) >= BACKUP_REMINDER_INTERVAL_MS;
+            reminder.hidden = !reminderDue || (dismissed !== null && now - dismissed < BACKUP_REMINDER_INTERVAL_MS);
+            if (reminderText) {
+                reminderText.textContent = last
+                    ? 'Já faz 30 dias ou mais desde a última solicitação de backup completo.'
+                    : 'Lembrete: salve uma primeira cópia dos seus dados financeiros.';
+            }
+        };
+
+        const dismissBackupReminder = () => {
+            storeBackupTimestamp(BACKUP_REMINDER_DISMISSED_KEY);
+            updateStorageMonitor();
+        };
+
+        const markCompleteBackupRequested = () => {
+            storeBackupTimestamp(BACKUP_LAST_REQUEST_KEY);
+            try { localStorage.removeItem(BACKUP_REMINDER_DISMISSED_KEY); }
+            catch (error) { console.warn('Não foi possível limpar o lembrete de backup:', error); }
+            updateStorageMonitor();
         };
 
         const openSettingsModal = () => {
@@ -4035,6 +4219,10 @@
             localStorage.removeItem(MONTH_CYCLE_STATE_KEY);
             localStorage.removeItem('myOpenMonthlySnapshot');
             localStorage.removeItem('myAppTheme');
+            // A redefinição também zera somente as datas informativas do lembrete de backup.
+            localStorage.removeItem(BACKUP_REMINDER_START_KEY);
+            localStorage.removeItem(BACKUP_LAST_REQUEST_KEY);
+            localStorage.removeItem(BACKUP_REMINDER_DISMISSED_KEY);
             monthlySnapshots = [];
             openMonthlySnapshot = null;
             monthlySnapshotSaveError = false;
@@ -6271,6 +6459,16 @@
             openModal('modal-export');
         };
 
+        // Reutiliza a exportação original; apenas seleciona o formato JSON para o atalho das Configurações.
+        const openBackupFromSettings = () => {
+            closeModal('modal-settings');
+            openExportModal();
+            if (document.getElementById('modal-export').classList.contains('active-modal')) {
+                document.getElementById('export-format').value = 'json';
+                updateExportFormatView();
+            }
+        };
+
         const confirmExport = async () => {
             const format = document.getElementById('export-format').value;
             // O nome do backup usa a data local, evitando antecipar o dia em fusos negativos.
@@ -6280,6 +6478,7 @@
             let fileContent = '';
             let fileName = '';
             let mimeType = '';
+            let isCompleteJsonBackup = false;
 
             if (format === 'json') {
                 const checkboxes = document.querySelectorAll('.export-checkbox:checked');
@@ -6297,6 +6496,13 @@
                     alert('Selecione pelo menos um item para exportar.');
                     return;
                 }
+
+                // Só uma seleção integral merece atualizar a data informativa de backup completo.
+                isCompleteJsonBackup = selectedIds.length === envelopes.length &&
+                    (!fixedExpenses.length || exportFixed) &&
+                    (!creditInstallments.length || exportCredit) &&
+                    (!otherCommitments.length || exportOther) &&
+                    (!(monthlySnapshots.length || openMonthlySnapshot) || exportHistory);
 
                 if (exportFixed && isFixedAutoSort) {
                     // A exportação usa a ordenação atual em memória; não depende de uma gravação auxiliar no localStorage.
@@ -6417,6 +6623,7 @@
                 try {
                     const file = new File([fileContent], fileName, { type: mimeType });
                     await navigator.share({ files: [file] });
+                    if (isCompleteJsonBackup) markCompleteBackupRequested();
                     closeModal('modal-export');
                     return; 
                 } catch (err) {
@@ -6434,6 +6641,8 @@
             downloadAnchor.download = fileName;
             document.body.appendChild(downloadAnchor);
             downloadAnchor.click();
+            // A plataforma pode não confirmar o salvamento; registra apenas a solicitação do download.
+            if (isCompleteJsonBackup) markCompleteBackupRequested();
             document.body.removeChild(downloadAnchor);
             URL.revokeObjectURL(url);
             closeModal('modal-export');
@@ -6893,6 +7102,8 @@
 
         // Renderização inicial e registro do Service Worker
         renderEnvelopes();
+        // Inicia a contagem preventiva quando há dados, mesmo antes da primeira visita às Configurações.
+        ensureBackupReminderStart();
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
