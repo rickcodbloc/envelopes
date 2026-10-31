@@ -656,6 +656,8 @@
             pointer-events: auto;
         }
 
+        /* Ao abrir a confirmação pelas Configurações, mantém o alerta acima do modal em saída. */
+        #modal-restore { z-index: 210; }
         #modal-expense, #modal-fixed-expense, #modal-credit-installment { z-index: 250; }
         #modal-fixed-reorder, #modal-credit-reorder { z-index: 260; }
 
@@ -1025,6 +1027,77 @@
             align-items: center;
         }
 
+        /* Seletor compacto de cores: três opções proporcionais, legíveis inclusive no iPhone. */
+        .settings-color-options {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            border: 1px solid var(--input-border);
+            border-radius: 11px;
+            overflow: hidden;
+            background: var(--card-bg);
+        }
+        .settings-color-option {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 7px;
+            min-width: 0;
+            min-height: 48px;
+            padding: 9px 5px;
+            border: 0;
+            background: transparent;
+            color: var(--text-main);
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.15s ease;
+        }
+        .settings-color-option + .settings-color-option {
+            border-left: 1px solid var(--border-color);
+            box-shadow: -1px 0 0 rgba(0, 0, 0, 0.025);
+        }
+        .settings-color-option[aria-pressed="true"] {
+            background: var(--primary-light-bg);
+        }
+        .settings-color-option:focus-visible {
+            outline: 2px solid var(--primary);
+            outline-offset: -3px;
+            z-index: 1;
+        }
+        .settings-color-swatch {
+            width: 19px;
+            height: 19px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+        }
+        .settings-color-option[aria-pressed="true"] .settings-color-swatch {
+            outline: 2px solid var(--primary);
+            outline-offset: 2px;
+        }
+        .settings-danger-action {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 9px;
+            min-height: 44px;
+            padding: 10px 12px;
+            border: 1px solid var(--input-border);
+            border-radius: 10px;
+            background: var(--card-bg);
+            color: var(--danger);
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .settings-danger-action:focus-visible {
+            outline: 2px solid var(--danger);
+            outline-offset: 2px;
+        }
+
         /* Contador Discreto (Já usado em Relatório Financeiro) */
         .report-item-counter {
         display: inline-block;
@@ -1234,10 +1307,6 @@
                         <button class="drawer-item" onclick="toggleOptionsDrawer(); openMultiDeleteModal()">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
                             Excluir envelopes
-                        </button>
-                        <button class="drawer-item" onclick="toggleOptionsDrawer(); openRestoreModal()">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
-                            Redefinir aplicativo
                         </button>
                         <button class="drawer-item" onclick="toggleOptionsDrawer(); showFullView('relatorio')">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
@@ -1670,10 +1739,16 @@
                 
                 <div class="settings-section">
                     <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">Tema de Cores</label>
-                    <div style="display: flex; flex-direction: column; gap: 8px;">
-                        <button class="btn" onclick="setAppTheme('purple')" style="background-color: #8A05BE; color: white; display: flex; align-items: center; justify-content: center; gap: 8px;">💜 Roxo Padrão</button>
-                        <button class="btn" onclick="setAppTheme('blue')" style="background-color: #007AFF; color: white; display: flex; align-items: center; justify-content: center; gap: 8px;">💙 Azul Elegante</button>
-                        <button class="btn" onclick="setAppTheme('pink')" style="background-color: #E91C5D; color: white; display: flex; align-items: center; justify-content: center; gap: 8px;">💖 Rosa Vibrante</button>
+                    <div class="settings-color-options" role="group" aria-label="Tema de cores">
+                        <button type="button" class="settings-color-option" data-theme-option="purple" onclick="setAppTheme('purple')" aria-pressed="false" title="Roxo padrão">
+                            <span class="settings-color-swatch" style="background:#8A05BE;" aria-hidden="true"></span>Roxo
+                        </button>
+                        <button type="button" class="settings-color-option" data-theme-option="blue" onclick="setAppTheme('blue')" aria-pressed="false" title="Azul elegante">
+                            <span class="settings-color-swatch" style="background:#007AFF;" aria-hidden="true"></span>Azul
+                        </button>
+                        <button type="button" class="settings-color-option" data-theme-option="pink" onclick="setAppTheme('pink')" aria-pressed="false" title="Rosa vibrante">
+                            <span class="settings-color-swatch" style="background:#E91C5D;" aria-hidden="true"></span>Rosa
+                        </button>
                     </div>
                 </div>
 
@@ -1698,6 +1773,15 @@
                         <button class="btn theme-mode-btn" data-mode="light" onclick="setAppColorMode('light')" style="flex:1; background-color: var(--border-color); color: var(--text-main); font-size: 0.85rem; padding: 10px 4px;">Claro</button>
                         <button class="btn theme-mode-btn" data-mode="dark" onclick="setAppColorMode('dark')" style="flex:1; background-color: var(--border-color); color: var(--text-main); font-size: 0.85rem; padding: 10px 4px;">Escuro</button>
                     </div>
+                </div>
+
+                <!-- Ação destrutiva isolada das preferências de aparência e acessibilidade. -->
+                <div class="settings-section">
+                    <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">Dados do aplicativo</label>
+                    <button type="button" class="settings-danger-action" onclick="closeModal('modal-settings'); openRestoreModal()">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
+                        Redefinir aplicativo
+                    </button>
                 </div>
 
                 <div class="modal-buttons" style="margin-top: 20px;">
@@ -2279,6 +2363,13 @@
             applyZoomSetting(allowZoom);
         };
 
+        // Indica o tema selecionado visualmente e para leitores de tela.
+        const updateThemeColorButtonsUI = (theme) => {
+            document.querySelectorAll('.settings-color-option').forEach(btn => {
+                btn.setAttribute('aria-pressed', String(btn.getAttribute('data-theme-option') === theme));
+            });
+        };
+
         const openSettingsModal = () => {
             const toggleInput = document.getElementById('zoom-toggle-input');
             if (toggleInput) {
@@ -2286,6 +2377,7 @@
             }
             const currentMode = localStorage.getItem('myColorMode') || 'auto';
             updateThemeModeButtonsUI(currentMode);
+            updateThemeColorButtonsUI(appTheme);
             openModal('modal-settings');
         };
 
@@ -2293,7 +2385,8 @@
             appTheme = theme;
             document.body.setAttribute('data-theme', theme);
             localStorage.setItem('myAppTheme', theme);
-            updateThemeColorMeta(theme); // <-- ADICIONE ESTA LINHA AQUI
+            updateThemeColorMeta(theme); // Atualiza a cor da barra de status com o tema selecionado.
+            updateThemeColorButtonsUI(theme);
         };
 
         // ---------------------------------------------------------------------
@@ -3949,6 +4042,38 @@
             totalEl.innerText = formatCurrency(total);
         };
 
+        // Preserva o estado anterior se uma gravação de compromisso ou preferência falhar.
+        // O usuário recebe um aviso e pode tentar novamente sem criar registros apenas em memória.
+        const persistFinancialChanges = (changes) => {
+            const previous = new Map();
+            const writtenKeys = [];
+            try {
+                changes.forEach(([key]) => previous.set(key, localStorage.getItem(key)));
+                changes.forEach(([key, value]) => {
+                    localStorage.setItem(key, value);
+                    writtenKeys.push(key);
+                });
+                return true;
+            } catch (error) {
+                console.error('Não foi possível salvar os compromissos no armazenamento local:', error);
+                let rollbackSucceeded = true;
+                writtenKeys.reverse().forEach(key => {
+                    try {
+                        const oldValue = previous.get(key);
+                        if (oldValue === null) localStorage.removeItem(key);
+                        else localStorage.setItem(key, oldValue);
+                    } catch (rollbackError) {
+                        rollbackSucceeded = false;
+                        console.error('Não foi possível desfazer a gravação parcial:', key, rollbackError);
+                    }
+                });
+                alert(rollbackSucceeded
+                    ? 'Não foi possível salvar a alteração. Os dados anteriores foram mantidos. Verifique o armazenamento local e tente novamente.'
+                    : 'Não foi possível concluir a gravação nem restaurar totalmente a preferência anterior. Não feche o aplicativo; faça um backup e verifique o armazenamento local.');
+                return false;
+            }
+        };
+
         const saveFixedExpense = () => {
             const editId = document.getElementById('edit-fixed-id').value;
             const name = document.getElementById('fixed-item-name').value.trim();
@@ -3971,15 +4096,16 @@
                 return;
             }
 
+            const nextFixedExpenses = fixedExpenses.map(item => ({ ...item }));
             if (editId) {
-                const index = fixedExpenses.findIndex(i => i.id == editId);
+                const index = nextFixedExpenses.findIndex(i => i.id == editId);
                 if (index !== -1) {
-                    fixedExpenses[index].name = name;
-                    fixedExpenses[index].amount = amount;
-                    fixedExpenses[index].dueDateDay = dueDateDay;
+                    nextFixedExpenses[index].name = name;
+                    nextFixedExpenses[index].amount = amount;
+                    nextFixedExpenses[index].dueDateDay = dueDateDay;
                 }
             } else {
-                fixedExpenses.push({
+                nextFixedExpenses.push({
                     id: Date.now(),
                     name: name,
                     amount: amount,
@@ -3987,17 +4113,19 @@
                 });
             }
 
-            sortFixedExpensesIfNeeded();
-            localStorage.setItem('myFixedExpenses', JSON.stringify(fixedExpenses));
+            if (isFixedAutoSort) sortFixedExpensesByDueDate(nextFixedExpenses);
+            if (!persistFinancialChanges([['myFixedExpenses', JSON.stringify(nextFixedExpenses)]])) return;
+            fixedExpenses = nextFixedExpenses;
             renderFixedExpensesList();
             closeModal('modal-fixed-expense');
         };
 
         const deleteFixedExpense = (id) => {
             showCustomConfirm('Excluir Despesa', 'Deseja realmente excluir esta despesa fixa?', () => {
-                fixedExpenses = fixedExpenses.filter(item => item.id !== id);
-                sortFixedExpensesIfNeeded();
-                localStorage.setItem('myFixedExpenses', JSON.stringify(fixedExpenses));
+                const nextFixedExpenses = fixedExpenses.filter(item => item.id !== id);
+                if (isFixedAutoSort) sortFixedExpensesByDueDate(nextFixedExpenses);
+                if (!persistFinancialChanges([['myFixedExpenses', JSON.stringify(nextFixedExpenses)]])) return;
+                fixedExpenses = nextFixedExpenses;
                 renderFixedExpensesList();
             });
         };
@@ -4107,11 +4235,14 @@
         };
 
         const saveFixedReorderModal = () => {
+            const nextFixedExpenses = JSON.parse(JSON.stringify(tempFixedExpenses));
+            if (tempIsFixedAutoSort) sortFixedExpensesByDueDate(nextFixedExpenses);
+            if (!persistFinancialChanges([
+                ['myFixedAutoSort', String(tempIsFixedAutoSort)],
+                ['myFixedExpenses', JSON.stringify(nextFixedExpenses)]
+            ])) return;
             isFixedAutoSort = tempIsFixedAutoSort;
-            localStorage.setItem('myFixedAutoSort', String(isFixedAutoSort));
-            fixedExpenses = JSON.parse(JSON.stringify(tempFixedExpenses));
-            sortFixedExpensesIfNeeded();
-            localStorage.setItem('myFixedExpenses', JSON.stringify(fixedExpenses));
+            fixedExpenses = nextFixedExpenses;
             closeModal('modal-fixed-reorder');
             renderFixedExpensesList();
         };
@@ -4356,11 +4487,12 @@
             const now = new Date();
             const curYear = now.getFullYear();
             const curMonth = now.getMonth();
+            const nextCreditInstallments = creditInstallments.map(item => ({ ...item }));
 
             if (editId) {
-                const index = creditInstallments.findIndex(i => i.id == editId);
+                const index = nextCreditInstallments.findIndex(i => i.id == editId);
                 if (index !== -1) {
-                    const item = creditInstallments[index];
+                    const item = nextCreditInstallments[index];
                     item.name = name;
                     item.amount = amount;
                     item.dueDateDay = dueDateDay;
@@ -4373,7 +4505,7 @@
                     item.cardName = cardName;
                 }
             } else {
-                creditInstallments.push({
+                nextCreditInstallments.push({
                     id: Date.now(),
                     name: name,
                     amount: amount,
@@ -4386,15 +4518,17 @@
                 });
             }
 
-            localStorage.setItem('myCreditInstallments', JSON.stringify(creditInstallments));
+            if (!persistFinancialChanges([['myCreditInstallments', JSON.stringify(nextCreditInstallments)]])) return;
+            creditInstallments = nextCreditInstallments;
             renderCreditInstallmentsList();
             closeModal('modal-credit-installment');
         };
 
         const deleteCreditInstallment = (id) => {
             showCustomConfirm('Excluir Parcelamento', 'Deseja realmente excluir este parcelamento?', () => {
-                creditInstallments = creditInstallments.filter(item => item.id !== id);
-                localStorage.setItem('myCreditInstallments', JSON.stringify(creditInstallments));
+                const nextCreditInstallments = creditInstallments.filter(item => item.id !== id);
+                if (!persistFinancialChanges([['myCreditInstallments', JSON.stringify(nextCreditInstallments)]])) return;
+                creditInstallments = nextCreditInstallments;
                 renderCreditInstallmentsList();
             });
         };
@@ -4466,8 +4600,9 @@
         };
 
         const saveCreditReorderModal = () => {
-            creditInstallments = [...tempCreditInstallments];
-            localStorage.setItem('myCreditInstallments', JSON.stringify(creditInstallments));
+            const nextCreditInstallments = [...tempCreditInstallments];
+            if (!persistFinancialChanges([['myCreditInstallments', JSON.stringify(nextCreditInstallments)]])) return;
+            creditInstallments = nextCreditInstallments;
             closeModal('modal-credit-reorder');
             renderCreditInstallmentsList();
         };
@@ -4663,10 +4798,11 @@
             }
 
             const now = new Date();
+            const nextOtherCommitments = otherCommitments.map(item => ({ ...item }));
             if (editId) {
-                const index = otherCommitments.findIndex(i => i.id == editId);
+                const index = nextOtherCommitments.findIndex(i => i.id == editId);
                 if (index !== -1) {
-                    const item = otherCommitments[index];
+                    const item = nextOtherCommitments[index];
                     // Ao alterar a parcela, reinicia a referência mensal como já ocorre nos parcelamentos.
                     if (item.currentInstallment !== currentInstallment || item.totalInstallments !== totalInstallments) {
                         item.lastYear = now.getFullYear();
@@ -4675,7 +4811,7 @@
                     Object.assign(item, { name, amount, dueDateDay, currentInstallment, totalInstallments });
                 }
             } else {
-                otherCommitments.push({
+                nextOtherCommitments.push({
                     id: Date.now(),
                     name,
                     amount,
@@ -4687,8 +4823,9 @@
                 });
             }
 
-            sortOtherCommitmentsIfNeeded();
-            localStorage.setItem('myOtherCommitments', JSON.stringify(otherCommitments));
+            if (isOtherAutoSort) sortOtherCommitmentsByDueDate(nextOtherCommitments);
+            if (!persistFinancialChanges([['myOtherCommitments', JSON.stringify(nextOtherCommitments)]])) return;
+            otherCommitments = nextOtherCommitments;
             renderOtherCommitmentsList();
             closeModal('modal-other-commitment');
             if (currentView === 'relatorio') renderFinancialReport();
@@ -4697,9 +4834,10 @@
 
         const deleteOtherCommitment = (id) => {
             showCustomConfirm('Excluir Compromisso', 'Deseja realmente excluir este compromisso?', () => {
-                otherCommitments = otherCommitments.filter(item => item.id !== id);
-                sortOtherCommitmentsIfNeeded();
-                localStorage.setItem('myOtherCommitments', JSON.stringify(otherCommitments));
+                const nextOtherCommitments = otherCommitments.filter(item => item.id !== id);
+                if (isOtherAutoSort) sortOtherCommitmentsByDueDate(nextOtherCommitments);
+                if (!persistFinancialChanges([['myOtherCommitments', JSON.stringify(nextOtherCommitments)]])) return;
+                otherCommitments = nextOtherCommitments;
                 renderOtherCommitmentsList();
                 if (currentView === 'relatorio') renderFinancialReport();
                 if (currentView === 'graficos') renderGraphicsView();
@@ -4801,11 +4939,14 @@
         };
 
         const saveOtherReorderModal = () => {
+            const nextOtherCommitments = JSON.parse(JSON.stringify(tempOtherCommitments));
+            if (tempIsOtherAutoSort) sortOtherCommitmentsByDueDate(nextOtherCommitments);
+            if (!persistFinancialChanges([
+                ['myOtherAutoSort', String(tempIsOtherAutoSort)],
+                ['myOtherCommitments', JSON.stringify(nextOtherCommitments)]
+            ])) return;
             isOtherAutoSort = tempIsOtherAutoSort;
-            localStorage.setItem('myOtherAutoSort', String(isOtherAutoSort));
-            otherCommitments = JSON.parse(JSON.stringify(tempOtherCommitments));
-            sortOtherCommitmentsIfNeeded();
-            localStorage.setItem('myOtherCommitments', JSON.stringify(otherCommitments));
+            otherCommitments = nextOtherCommitments;
             closeModal('modal-other-reorder');
             renderOtherCommitmentsList();
         };
@@ -4956,31 +5097,36 @@
             let prevSpentTotal = 0;
             let matchingEnvelopesCount = 0;
             let comparedMonthLabel = '';
+            let hasPreviousComparison = false;
 
-            const now = new Date();
-            let prevMonthIndex = now.getMonth() - 1;
-            let prevYearVal = now.getFullYear();
-            if (prevMonthIndex < 0) {
-                prevMonthIndex = 11;
-                prevYearVal--;
-            }
-            const monthNamesArr = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
-            const targetPrevLabelPrefix = `${monthNamesArr[prevMonthIndex]}/${prevYearVal}`;
-
-            envelopes.forEach(env => {
-                if (Array.isArray(env.history) && env.history.length > 0) {
-                    const matchingHist = env.history.find(h => h && typeof h === 'object' && typeof h.label === 'string' && h.label.startsWith(targetPrevLabelPrefix));
-                    if (matchingHist && Array.isArray(matchingHist.expenses)) {
-                        const validHistExps = matchingHist.expenses.filter(ex => ex && typeof ex.amount === 'number' && !isNaN(ex.amount));
-                        prevSpentTotal += validHistExps.reduce((acc, curr) => acc + curr.amount, 0);
-                        matchingEnvelopesCount++;
-                        comparedMonthLabel = matchingHist.label;
+            const prevPeriodKey = shiftMonthKey(getMonthKey(), -1);
+            const previousSnapshot = monthlySnapshots.find(snapshot => snapshot.periodKey === prevPeriodKey);
+            if (previousSnapshot && finiteMoney(previousSnapshot.totals.variable)) {
+                // A fotografia mensal é a fonte fechada do mês anterior, mesmo se envelopes
+                // tiverem sido criados ou excluídos desde então; compara apenas gastos variáveis.
+                prevSpentTotal = previousSnapshot.totals.variable;
+                comparedMonthLabel = previousSnapshot.label;
+                hasPreviousComparison = true;
+            } else {
+                // Compatibilidade com dados anteriores às fotografias: exige histórico de todos
+                // os envelopes atuais para não comparar subconjuntos de despesas.
+                const previousLabelPrefix = formatMonthLabelKey(prevPeriodKey);
+                envelopes.forEach(env => {
+                    if (Array.isArray(env.history) && env.history.length > 0) {
+                        const matchingHist = env.history.find(h => h && typeof h === 'object' && typeof h.label === 'string' && h.label.startsWith(previousLabelPrefix));
+                        if (matchingHist && Array.isArray(matchingHist.expenses)) {
+                            const validHistExps = matchingHist.expenses.filter(ex => ex && typeof ex.amount === 'number' && Number.isFinite(ex.amount));
+                            prevSpentTotal += validHistExps.reduce((acc, curr) => acc + curr.amount, 0);
+                            matchingEnvelopesCount++;
+                            comparedMonthLabel = matchingHist.label;
+                        }
                     }
-                }
-            });
+                });
+                hasPreviousComparison = envelopes.length > 0 && matchingEnvelopesCount === envelopes.length;
+            }
 
             let comparisonHtml = `<span style="color:var(--text-muted);">Comparação não disponível (sem dados equivalentes do mês anterior).</span>`;
-            if (matchingEnvelopesCount > 0 && matchingEnvelopesCount === envelopes.length) {
+            if (hasPreviousComparison) {
                 const diff = totalSpentCurrent - prevSpentTotal;
                 const diffPercent = prevSpentTotal > 0 ? Math.abs(Math.round((diff / prevSpentTotal) * 100)) : 0;
                 if (diff === 0) {
@@ -5201,7 +5347,7 @@
                     <div style="margin-top:10px; padding-top:8px; border-top:1px solid var(--border-color); font-size:0.85rem;">
                         ${comparisonHtml}
                         <div style="margin-top:6px; color:var(--text-muted); font-size:0.8rem;">
-                            Mês anterior: ${(matchingEnvelopesCount > 0 && matchingEnvelopesCount === envelopes.length) ? formatCurrency(prevSpentTotal) : 'N/A'}
+                            Mês anterior: ${hasPreviousComparison ? formatCurrency(prevSpentTotal) : 'N/A'}
                         </div>
                     </div>
                 </details>
@@ -6001,7 +6147,9 @@
 
         const confirmExport = async () => {
             const format = document.getElementById('export-format').value;
-            const todayStr = new Date().toISOString().split('T')[0];
+            // O nome do backup usa a data local, evitando antecipar o dia em fusos negativos.
+            const nowLocal = new Date();
+            const todayStr = `${nowLocal.getFullYear()}-${String(nowLocal.getMonth() + 1).padStart(2, '0')}-${String(nowLocal.getDate()).padStart(2, '0')}`;
 
             let fileContent = '';
             let fileName = '';

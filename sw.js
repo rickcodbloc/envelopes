@@ -1,5 +1,6 @@
 
- // v12: invalida o cache anterior para publicar a correção da importação e do histórico mensal.
+// v13: atualiza o shell offline após os refinamentos de configurações e persistência.
+const CACHE_NAME = 'envelopes-cache-v13';
 const CACHE_NAME = 'envelopes-cache-v12';
 
 const ASSETS_TO_CACHE = [
