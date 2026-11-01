@@ -1,5 +1,5 @@
-// v20: atualiza o cache offline para incluir a padronização visual dos agendamentos.
-const CACHE_NAME = 'envelopes-cache-v20';
+// v21: atualiza o cache offline para incluir a padronização visual dos agendamentos/Refinamentos visuais atuais.
+const CACHE_NAME = 'envelopes-cache-v21';
 
 const ASSETS_TO_CACHE = [
   './',

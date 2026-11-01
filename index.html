@@ -48,6 +48,7 @@
             --border-color: rgba(0, 0, 0, 0.06);
             --input-border: rgba(0, 0, 0, 0.16);
             --dashed-line: rgba(0, 0, 0, 0.16);
+            --action-divider: rgba(0, 0, 0, 0.19);
             --card-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
         }
 
@@ -80,11 +81,12 @@
                 --border-color: rgba(255, 255, 255, 0.1);
                 --input-border: rgba(255, 255, 255, 0.28);
                 --dashed-line: rgba(255, 255, 255, 0.25);
+                --action-divider: rgba(255, 255, 255, 0.25);
                 --card-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
             }
 
-            body:not([data-color-mode="light"]) .envelope-card {
-                border: 1px solid var(--border-color) !important;
+                body:not([data-color-mode="light"]) .envelope-card {
+                border: 1px solid rgba(255, 255, 255, 0.16) !important;
             }
         }
 
@@ -103,6 +105,7 @@
             --border-color: rgba(255, 255, 255, 0.1);
             --input-border: rgba(255, 255, 255, 0.28);
             --dashed-line: rgba(255, 255, 255, 0.25);
+            --action-divider: rgba(255, 255, 255, 0.25);
             --card-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
         }
         body[data-theme="blue"][data-color-mode="dark"] {
@@ -116,7 +119,7 @@
             --primary-light-bg: rgba(255, 55, 95, 0.18);
         }
         body[data-color-mode="dark"] .envelope-card {
-            border: 1px solid var(--border-color) !important;
+            border: 1px solid rgba(255, 255, 255, 0.16) !important;
         }
 
         * {
@@ -325,7 +328,7 @@
 
         #dashboard {
             background-color: var(--card-bg);
-            padding: 16px 20px;
+            padding: 14px 20px;
             padding-left: max(20px, calc(14px + env(safe-area-inset-left)));
             padding-right: max(20px, calc(14px + env(safe-area-inset-right)));
             display: flex; 
@@ -338,7 +341,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
 
         .dash-title-modern {
@@ -350,7 +353,7 @@
         }
 
         .dash-main-value {
-            font-size: 1.8rem;
+            font-size: 1.65rem;
             font-weight: 700;
             color: var(--text-main);
             letter-spacing: -0.5px;
@@ -457,7 +460,8 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            border: 1px solid var(--primary-light-bg);
+            /* Contorno sutil e temático, um pouco mais legível, sem aumentar a espessura. */
+            border: 1px solid color-mix(in srgb, var(--primary) 20%, transparent);
             transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, border-color 0.2s ease;
             min-width: 0;
         }
@@ -524,6 +528,63 @@
         .card-btn.edit-btn:active { color: var(--primary); background-color: var(--primary-light-bg); }
         .card-btn.delete-btn:active { color: var(--danger); background-color: rgba(233, 28, 93, 0.1); }
 
+        /* Botões superiores das categorias e telas auxiliares:
+        mesma área de toque, preservando todos os ícones originais. */
+        .section-header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+
+        .section-header-actions .card-btn,
+        .section-action-button {
+            width: 38px;
+            height: 38px;
+            flex: 0 0 38px;
+            padding: 0 !important;
+        }
+
+        /* Totais mensais: uma única linha, superfície neutra e contorno discreto. */
+        .section-total {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            padding: 10px 12px;
+            margin-bottom: 14px;
+            border: 1px solid var(--dashed-line);
+            border-radius: 11px;
+            background: color-mix(in srgb, var(--card-bg) 94%, var(--text-main) 6%);
+        }
+
+        .section-total > span {
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .section-total > strong {
+            flex-shrink: 0;
+            white-space: nowrap;
+            font-size: 1rem !important;
+        }
+
+        /* Proteção responsiva para telas estreitas, como iPhones compactos. */
+        @media (max-width: 360px) {
+            .section-header-actions { gap: 8px; }
+            .section-header-actions .card-btn, .section-action-button { width: 34px; height: 34px; flex-basis: 34px; }
+
+            #view-other-commitments .full-view-content > div:first-child > h2 {
+                font-size: 1.02rem !important;
+                gap: 5px !important;
+            }
+
+            .section-total { padding: 10px 9px; gap: 6px; }
+            .section-total > strong { font-size: 0.9rem !important; }
+        }
+
         .envelope-balances {
             display: flex;
             justify-content: space-between;
@@ -541,7 +602,7 @@
 
         .amount-left {
             font-weight: 700;
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             letter-spacing: -0.3px;
         }
 
@@ -1492,7 +1553,7 @@
         <!-- Dashboard Geral (Tela Inicial) -->
         <div id="dashboard">
             <div class="dash-header-modern">
-                <span class="dash-title-modern" id="dash-status-label">Disponível no Mês</span>
+                <span class="dash-title-modern" id="dash-status-label">Disponível</span>
                 <span class="dash-main-value" id="dash-available">R$ 0,00</span>
             </div>
             <div class="dash-progress-modern">
@@ -1500,7 +1561,7 @@
             </div>
             <div class="dash-footer-modern">
                 <span>Orçamento: <strong id="dash-total">R$ 0,00</strong></span>
-                <span>Gasto Total: <strong id="dash-spent">R$ 0,00</strong></span>
+                <span>Gasto: <strong id="dash-spent">R$ 0,00</strong></span>
             </div>
         </div>
 
@@ -1523,7 +1584,7 @@
                         <div style="width:20px; height:20px; display:flex; align-items:center; justify-content:center; color:var(--primary);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg></div>
                         <h2 style="margin: 0; font-size: 1.25rem;">Despesas fixas</h2>
                     </div>
-                    <div style="display: flex; gap: 10px;">
+                    <div class="section-header-actions">
                         <button class="card-btn" onclick="openFixedExpenseModal()" title="Adicionar Despesa Fixa" style="background: var(--primary-light-bg); padding: 7px; border-radius: 8px; color: var(--primary); display: flex; align-items: center; justify-content: center;">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                     </button>
@@ -1534,7 +1595,7 @@
                 </div>
                 <p class="modal-subtitle">Registre aluguel, academia, assinaturas e outras despesas fixas.</p>
                 
-                <div style="background: var(--border-color); padding: 10px 14px; border-radius: 10px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center;">
+                <div class="section-total">
                     <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">Total Fixo Mensal:</span>
                     <strong id="fixed-total-value" style="font-size: 1.1rem; color: var(--text-main);">R$ 0,00</strong>
                 </div>
@@ -1551,7 +1612,7 @@
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
                         Parcelamentos
                     </h2>
-                    <div style="display: flex; gap: 10px;">
+                    <div class="section-header-actions">
                         <button class="card-btn" onclick="openCreditInstallmentModal()" title="Adicionar Compra Parcelada" style="background: var(--primary-light-bg); padding: 7px; border-radius: 8px; color: var(--primary); display: flex; align-items: center; justify-content: center;">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                 </button>
@@ -1562,8 +1623,8 @@
                 </div>
                 <p class="modal-subtitle">Compras parceladas agrupadas por instituição financeira.</p>
                 
-                <div style="background: var(--border-color); padding: 10px 14px; border-radius: 10px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center;">
-                    <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">Total Mês (<span id="credit-active-count">0</span> ativas):</span>
+                <div class="section-total">
+                    <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">Total Mês (<span id="credit-active-count">0</span> ativos):</span>
                     <strong id="credit-total-value" style="font-size: 1.1rem; color: var(--text-main);">R$ 0,00</strong>
                 </div>
 
@@ -1577,7 +1638,7 @@
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
                         Outros compromissos
                     </h2>
-                    <div style="display: flex; gap: 10px;">
+                    <div class="section-header-actions">
                         <button class="card-btn" onclick="openOtherCommitmentModal()" title="Adicionar Compromisso" style="background: var(--primary-light-bg); padding: 7px; border-radius: 8px; color: var(--primary); display: flex; align-items: center; justify-content: center;">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                         </button>
@@ -1588,8 +1649,8 @@
                 </div>
                 <p class="modal-subtitle">Financiamentos, consórcios, empréstimos e outros compromissos de longo prazo.</p>
                 
-                <div style="background: var(--border-color); padding: 10px 14px; border-radius: 10px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center;">
-                    <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">Total Mês (<span id="other-active-count">0</span> ativas):</span>
+                <div class="section-total">
+                    <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">Total Mês (<span id="other-active-count">0</span> ativos):</span>
                     <strong id="other-total-value" style="font-size: 1.1rem; color: var(--text-main);">R$ 0,00</strong>
                 </div>
 
@@ -1604,7 +1665,7 @@
                         <div style="width:20px; height:20px; display:flex; align-items:center; justify-content:center; color:var(--primary);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg></div>
                         <h2 style="margin:0; font-size: 1.25rem;">CONSOLIDADO</h2>
                     </div>
-                    <div style="display:flex; gap:8px; align-items:center;">
+                    <div class="section-header-actions">
                         <button class="card-btn" onclick="showFullView('graficos')" title="Análise Visual (Gráficos)" aria-label="Análise Visual (Gráficos)" style="background: var(--primary-light-bg); padding: 7px; border-radius: 8px; color: var(--primary); display: flex; align-items: center; justify-content: center;">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path><path d="M22 12A10 10 0 0 0 12 2v10z"></path></svg>
                         </button>
@@ -1626,7 +1687,7 @@
                         <div style="width:20px; height:20px; display:flex; align-items:center; justify-content:center; color:var(--primary);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path><path d="M22 12A10 10 0 0 0 12 2v10z"></path></svg></div>
                         <h2 style="margin:0; font-size: 1.25rem;">Análise Visual</h2>
                     </div>
-                    <button class="card-btn" onclick="showFullView('relatorio')" title="Voltar ao modo de dados" aria-label="Voltar ao modo de dados" style="background: var(--primary-light-bg); padding: 7px; border-radius: 8px; color: var(--primary); display: flex; align-items: center; justify-content: center;">
+                    <button class="card-btn section-action-button" onclick="showFullView('relatorio')" title="Voltar ao modo de dados" aria-label="Voltar ao modo de dados" style="background: var(--primary-light-bg); padding: 7px; border-radius: 8px; color: var(--primary); display: flex; align-items: center; justify-content: center;">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
                     </button>
                 </div>
@@ -1649,13 +1710,13 @@
                 <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:8px;">
                     <h2 style="margin:0; font-size:1.2rem; display:flex; align-items:center; gap:8px;">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"></path><path d="m7 14 4-4 4 3 5-7"></path></svg>
-                        Comparação mensal
+                        Histórico mensal
                     </h2>
-                    <button class="card-btn" onclick="showFullView('relatorio')" title="Voltar ao relatório financeiro" aria-label="Voltar ao relatório financeiro" style="background:var(--primary-light-bg); padding:7px; border-radius:8px; color:var(--primary); display:flex; align-items:center; justify-content:center;">
+                    <button class="card-btn section-action-button" onclick="showFullView('relatorio')" title="Voltar ao relatório financeiro" aria-label="Voltar ao relatório financeiro" style="background:var(--primary-light-bg); padding:7px; border-radius:8px; color:var(--primary); display:flex; align-items:center; justify-content:center;">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
                     </button>
                 </div>
-                <p class="monthly-history-intro">Compare o mês em andamento com fotografias dos últimos períodos encerrados. Os compromissos refletem os cadastros ativos quando a fotografia foi gravada.</p>
+                <p class="monthly-history-intro">Acompanhe o mês atual e até 12 meses encerrados. Compare os totais e consulte os lançamentos.</p>
                 <div id="monthly-history-body" style="display:flex; flex-direction:column; gap:0;"></div>
             </div>
         </div>
@@ -4345,7 +4406,7 @@
                     editBtn.onclick = () => openFixedExpenseModal(item.id);
 
                     const sep = document.createElement('div');
-                    sep.style.cssText = 'width:1px; height:14px; background-color:var(--border-color); margin:0 2px;';
+                    sep.style.cssText = 'width:1px; height:14px; background-color:var(--action-divider); margin:0 2px;';
 
                     const delBtn = document.createElement('button');
                     delBtn.className = 'card-btn delete-btn';
@@ -4737,7 +4798,7 @@
                     editBtn.onclick = () => openCreditInstallmentModal(item.id);
 
                     const sep = document.createElement('div');
-                    sep.style.cssText = 'width: 1px; height: 14px; background-color: var(--border-color); margin: 0 2px;';
+                    sep.style.cssText = 'width: 1px; height: 14px; background-color: var(--action-divider); margin: 0 2px;';
 
                     const delBtn = document.createElement('button');
                     delBtn.className = 'card-btn delete-btn';
@@ -4814,7 +4875,7 @@
                     edit.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>';
                     edit.onclick = () => openCreditInstallmentModal(item.id);
                     const sep = document.createElement('div');
-                    sep.style.cssText = 'width:1px; height:14px; background-color:var(--border-color); margin:0 2px;';
+                    sep.style.cssText = 'width:1px; height:14px; background-color:var(--action-divider); margin:0 2px;';
                     sep.setAttribute('aria-hidden', 'true');
                     const del = document.createElement('button');
                     del.className = 'card-btn delete-btn';
@@ -4889,7 +4950,7 @@
                     edit.onclick = () => openCreditInstallmentModal(item.id);
 
                     const sep = document.createElement('div');
-                    sep.style.cssText = 'width:1px; height:14px; background-color:var(--border-color); margin:0 2px;';
+                    sep.style.cssText = 'width:1px; height:14px; background-color:var(--action-divider); margin:0 2px;';
                     sep.setAttribute('aria-hidden', 'true');
 
                     const del = document.createElement('button');
@@ -5114,7 +5175,7 @@
 
             const sep = document.createElement('div');
             sep.setAttribute('aria-hidden', 'true');
-            sep.style.cssText = 'width:1px; height:14px; background-color:var(--border-color); margin:0 2px;';
+            sep.style.cssText = 'width:1px; height:14px; background-color:var(--action-divider); margin:0 2px;';
 
             const delBtn = document.createElement('button');
             delBtn.className = 'card-btn delete-btn';
@@ -5516,7 +5577,7 @@
                     const comparisonClass = difference > 0 ? 'up' : (difference < 0 ? 'down' : 'neutral');
                     changeHtml = `<span class="monthly-snapshot-change ${comparisonClass}">${comparisonText}</span>`;
                 } else {
-                    changeHtml = '<span class="monthly-snapshot-change neutral">Sem fotografia do mês anterior</span>';
+                    changeHtml = '<span class="monthly-snapshot-change neutral">Sem dados do mês anterior</span>';
                 }
 
                 const envelopeSections = snapshot.envelopes.map(env => {
@@ -5526,7 +5587,7 @@
                 const fixedRows = renderRows(snapshot.fixedExpenses, 'Nenhuma despesa fixa contabilizada neste mês.');
                 const creditRows = renderRows(snapshot.creditInstallments, 'Nenhum parcelamento ativo.');
                 const otherRows = renderRows(snapshot.otherCommitments, 'Nenhum outro compromisso ativo.');
-                const caption = isCurrent ? 'Em andamento' : 'Fotografia salva';
+                const caption = isCurrent ? 'Em andamento' : 'Encerrado';
                 return `
                     <!-- Os cartões começam recolhidos para manter a lista dos meses compacta; toque para ver os detalhes. -->
                     <details class="monthly-snapshot-card">
@@ -5547,7 +5608,7 @@
                             <div class="monthly-snapshot-metric"><span>Outros compromissos</span><strong>${formatCurrency(snapshot.totals.other)}</strong></div>
                         </div>
                         <div class="monthly-snapshot-details">
-                            <div class="monthly-snapshot-section"><h3>Envelopes e gastos</h3>${envelopeSections || '<div class="monthly-snapshot-caption">Nenhum envelope registrado nesta fotografia.</div>'}</div>
+                            <div class="monthly-snapshot-section"><h3>Envelopes e gastos</h3>${envelopeSections || '<div class="monthly-snapshot-caption">Nenhum envelope registrado neste período.</div>'}</div>
                             <div class="monthly-snapshot-section"><h3>Despesas fixas cadastradas</h3>${fixedRows}</div>
                             <div class="monthly-snapshot-section"><h3>Parcelamentos ativos</h3>${creditRows}</div>
                             <div class="monthly-snapshot-section"><h3>Outros compromissos ativos</h3>${otherRows}</div>
@@ -5559,7 +5620,7 @@
             const olderSnapshotExists = archived.length > 0;
             let bodyHtml = '';
             if (monthlySnapshotSaveError) {
-                bodyHtml += '<div class="monthly-history-empty" role="alert">Não foi possível gravar a última fotografia. Faça um backup, libere espaço do navegador e abra novamente o aplicativo para tentar de novo.</div>';
+                bodyHtml += '<div class="monthly-history-empty" role="alert">Não foi possível salvar o histórico do mês anterior. Faça um backup, libere espaço do navegador e abra novamente o aplicativo para tentar de novo.</div>';
             }
             bodyHtml += renderCard(currentSnapshot, true, previousCurrent);
             if (archived.length > 0) {
@@ -5568,7 +5629,7 @@
                     return renderCard(snapshot, false, previous);
                 }).join('');
             } else {
-                bodyHtml += `<div class="monthly-history-empty">Ainda não há fotografias de meses encerrados. O primeiro registro será criado automaticamente quando o aplicativo identificar a próxima virada mensal. ${olderSnapshotExists ? '' : 'Os meses anteriores à ativação deste recurso não podem ser reconstruídos com precisão se nunca foram salvos.'}</div>`;
+                bodyHtml += `<div class="monthly-history-empty">Ainda não há meses encerrados salvos. O primeiro registro será criado automaticamente na próxima virada mensal. ${olderSnapshotExists ? '' : 'Meses anteriores à ativação do histórico não podem ser reconstruídos com precisão se não foram salvos.'}</div>`;
             }
             container.innerHTML = bodyHtml;
         };
@@ -5993,7 +6054,7 @@
                                         <path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
                                     </svg>
                                 </button>
-                                <div style="width: 1px; height: 14px; background-color: var(--border-color); margin: 0 2px;"></div>
+                                <div style="width: 1px; height: 14px; background-color: var(--action-divider); margin: 0 2px;"></div>
                                 <button class="card-btn delete-btn" onclick="deleteEnvelope(${env.id})" title="Excluir Envelope">
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                                         <path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
@@ -6051,12 +6112,12 @@
                 if (grandAvailable >= 0 || grandTotal === 0) {
                     dashAvailableEl.innerText = formatCurrency(grandAvailable);
                     dashAvailableEl.className = 'dash-main-value';
-                    dashStatusLabel.innerText = 'Disponível no Mês';
+                    dashStatusLabel.innerText = 'Disponível';
                     dashProgressFill.style.backgroundColor = 'var(--primary)';
                 } else {
                     dashAvailableEl.innerText = formatCurrency(Math.abs(grandAvailable));
                     dashAvailableEl.className = 'dash-main-value danger';
-                    dashStatusLabel.innerText = 'Orçamento Excedido em';
+                    dashStatusLabel.innerText = 'Excedido';
                     dashProgressFill.style.backgroundColor = 'var(--danger)';
                 }
             }
@@ -6404,7 +6465,7 @@
                         editBtn.onclick = () => openExpenseModal(env.id, exp.id);
 
                         const sep = document.createElement('div');
-                        sep.style.cssText = 'width: 1px; height: 16px; background-color: var(--border-color); margin: 0 2px;';
+                        sep.style.cssText = 'width: 1px; height: 16px; background-color: var(--action-divider); margin: 0 2px;';
 
                         const delBtn = document.createElement('button');
                         delBtn.className = 'btn-hist-action btn-hist-delete';
