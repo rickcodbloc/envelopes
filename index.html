@@ -974,6 +974,13 @@
             color: var(--primary);
         }
 
+        /* Relatório Financeiro: elimina a borda inferior da última despesa
+        de cada detalhamento, preservando as divisórias entre lançamentos
+        e o contorno externo de cada categoria. */
+        #financial-report-body > details.report-details > div:last-child > div:last-child[style*="border-bottom"] {
+            border-bottom: none !important;
+        }
+
         .credit-group-header {
             font-size: 0.85rem;
             font-weight: 700;
@@ -4669,7 +4676,14 @@
                 groupedActive[cardKey].items.push(item);
             });
 
-            Object.values(groupedActive).forEach(group => {
+               Object.values(groupedActive).forEach(group => {
+                // O próximo cabeçalho de banco já separa os grupos.
+                // Remove apenas a borda inferior do último lançamento do banco anterior.
+                const previousRow = list.lastElementChild;
+                if (previousRow && previousRow.classList.contains('history-item')) {
+                    previousRow.style.borderBottom = 'none';
+                }
+
                 const groupHeader = document.createElement('div');
                 groupHeader.className = 'credit-group-header';
                 groupHeader.textContent = `💳 ${group.displayName} (${group.items.length})`;
@@ -4814,71 +4828,83 @@
                 });
                 list.appendChild(details);
             }
-
-
+            
+            // Concluídos: seção discreta e expansível, com etiquetas neutras e sem caixa interna.
+            // Itens encerrados continuam disponíveis para consulta, edição e exclusão.
             if (completedItems.length > 0) {
-                const detailsEl = document.createElement('details');
-                detailsEl.className = 'report-details';
-                detailsEl.style.cssText = 'margin-top: 14px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px; padding: 8px 12px;';
+                // Evita duas linhas entre o último lançamento ativo e a seção Concluídos.
+                const lastRow = list.lastElementChild;
+                if (lastRow && lastRow.classList.contains('history-item')) {
+                    lastRow.style.borderBottom = 'none';
+                }
 
-                const summaryEl = document.createElement('summary');
-                summaryEl.style.cssText = 'font-weight: 600; font-size: 0.88rem; cursor: pointer; color: var(--text-muted); outline: none; display: flex; justify-content: space-between; align-items: center;';
-                summaryEl.innerHTML = `<span>Compras Concluídas (${completedItems.length})</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="report-chevron"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
-                
-                const innerContainer = document.createElement('div');
-                innerContainer.style.cssText = 'margin-top: 8px; padding-top: 6px; border-top: 1px solid var(--border-color);';
+                const details = document.createElement('details');
+                details.className = 'report-details';
+                details.style.cssText = 'margin-top:14px; border-top:1px solid var(--dashed-line); padding-top:10px;';
+                const summary = document.createElement('summary');
+                summary.style.cssText = 'display:flex; justify-content:space-between; align-items:center; gap:8px; padding:4px 8px; list-style:none; cursor:pointer; color:var(--text-muted); font-size:0.88rem; font-weight:600;';
+                summary.innerHTML = `<span>Parcelamentos concluídos (${completedItems.length})</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="report-chevron" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
+                details.appendChild(summary);
 
                 completedItems.forEach(item => {
-                    const compRow = document.createElement('div');
-                    compRow.className = 'history-item';
-                    compRow.style.cssText = 'padding: 8px 4px; opacity: 0.85;';
-                    
-                    const compInfo = document.createElement('div');
-                    compInfo.className = 'history-info';
-                    compInfo.style.cssText = 'min-width: 0; flex: 1; overflow: hidden;';
+                    const row = document.createElement('div');
+                    row.className = 'history-item';
+                    row.style.padding = '10px 8px';
 
-                    const descC = document.createElement('span');
-                    descC.className = 'history-desc';
-                    descC.style.cssText = 'font-weight: 500; font-size: 0.9rem; text-decoration: line-through;';
-                    descC.textContent = item.name;
+                    const info = document.createElement('div');
+                    info.className = 'history-info';
+                    info.style.cssText = 'min-width:0; flex:1; overflow:hidden;';
+                    const name = document.createElement('span');
+                    name.className = 'history-desc';
+                    name.style.cssText = 'font-weight:500; font-size:0.95rem; color:var(--text-muted); display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;';
+                    name.textContent = item.name;
+                    name.title = item.name;
 
-                    const subC = document.createElement('span');
-                    subC.style.cssText = 'font-size: 0.75rem; color: var(--text-muted);';
-                    subC.textContent = `Concluído (${item.totalInstallments}/${item.totalInstallments}) - ${item.cardName || 'Geral'} • ${formatCurrency(item.amount)}`;
+                    const amountLine = document.createElement('div');
+                    amountLine.style.cssText = 'display:flex; align-items:center; gap:8px; margin-top:3px; flex-wrap:wrap;';
+                    const amount = document.createElement('span');
+                    amount.className = 'history-amount';
+                    amount.style.color = 'var(--text-muted)';
+                    amount.textContent = formatCurrency(item.amount);
+                    const badge = document.createElement('span');
+                    badge.style.cssText = 'font-size:0.75rem; color:var(--text-muted); font-weight:600; background:var(--border-color); padding:2px 6px; border-radius:4px;';
+                    badge.textContent = `Concluído ${item.totalInstallments}/${item.totalInstallments}`;
+                    amountLine.append(amount, badge);
 
-                    compInfo.appendChild(descC);
-                    compInfo.appendChild(subC);
+                    const due = document.createElement('span');
+                    due.className = 'history-date';
+                    due.style.cssText = 'display:block; margin-top:3px;';
+                    due.textContent = `${item.cardName || 'Geral'} · Vencimento dia ${item.dueDateDay}`;
+                    info.append(name, amountLine, due);
 
-                    const actionsC = document.createElement('div');
-                    actionsC.style.cssText = 'display: flex; gap: 6px; align-items: center; flex-shrink: 0; margin-left: 8px;';
+                    // Mantém os controles originais de edição e exclusão.
+                    const actions = document.createElement('div');
+                    actions.style.cssText = 'display:flex; gap:6px; align-items:center; flex-shrink:0; margin-left:8px;';
 
-                    const editC = document.createElement('button');
-                    editC.className = 'card-btn edit-btn';
-                    editC.title = 'Editar';
-                    editC.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>';
-                    editC.onclick = () => openCreditInstallmentModal(item.id);
+                    const edit = document.createElement('button');
+                    edit.className = 'card-btn edit-btn';
+                    edit.title = 'Editar';
+                    edit.setAttribute('aria-label', `Editar ${item.name}`);
+                    edit.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>';
+                    edit.onclick = () => openCreditInstallmentModal(item.id);
 
-                    const sepC = document.createElement('div');
-                    sepC.style.cssText = 'width: 1px; height: 14px; background-color: var(--border-color); margin: 0 2px;';
+                    const sep = document.createElement('div');
+                    sep.style.cssText = 'width:1px; height:14px; background-color:var(--border-color); margin:0 2px;';
+                    sep.setAttribute('aria-hidden', 'true');
 
-                    const delC = document.createElement('button');
-                    delC.className = 'card-btn delete-btn';
-                    delC.title = 'Excluir';
-                    delC.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>';
-                    delC.onclick = () => deleteCreditInstallment(item.id);
+                    const del = document.createElement('button');
+                    del.className = 'card-btn delete-btn';
+                    del.title = 'Excluir';
+                    del.setAttribute('aria-label', `Excluir ${item.name}`);
+                    del.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>';
+                    del.onclick = () => deleteCreditInstallment(item.id);
 
-                    actionsC.appendChild(editC);
-                    actionsC.appendChild(sepC);
-                    actionsC.appendChild(delC);
-
-                    compRow.appendChild(compInfo);
-                    compRow.appendChild(actionsC);
-                    innerContainer.appendChild(compRow);
+                    actions.append(edit, sep, del);
+                    row.append(info, actions);
+                    details.appendChild(row);
                 });
 
-                detailsEl.appendChild(summaryEl);
-                detailsEl.appendChild(innerContainer);
-                list.appendChild(detailsEl);
+                list.appendChild(details);
             }
 
             totalEl.innerText = formatCurrency(totalActive);
@@ -5116,8 +5142,11 @@
             const scheduledItems = otherCommitments.filter(i => isScheduledForLater(i, getMonthKey()) && i.currentInstallment <= i.totalInstallments);
             const completedItems = otherCommitments.filter(i => i.currentInstallment > i.totalInstallments);
 
-            if (activeItems.length === 0) {
-                // Texto discreto centralizado quando estiver vazio
+                 if (activeItems.length === 0 && (scheduledItems.length > 0 || completedItems.length > 0)) {
+                // Havendo agendados ou concluídos, o aviso não ocupa espaço excessivo.
+                list.innerHTML = '<p style="text-align:center; color:var(--text-muted); font-size:0.82rem; padding:10px 8px 2px;">Nenhum compromisso ativo neste mês.</p>';
+            } else if (activeItems.length === 0) {
+                // Mantém o aviso completo quando não existe nenhum compromisso cadastrado.
                 // Distingue ausência de cadastro de itens concluídos.
                 const title = (completedItems.length > 0 || scheduledItems.length > 0) ? 'Nenhum compromisso ativo no momento.' : 'Nenhum compromisso cadastrado!';
                 const description = scheduledItems.length > 0 ? 'Os compromissos futuros aparecem na seção Agendados abaixo.' : completedItems.length > 0
@@ -5228,44 +5257,62 @@
             }
 
 
-            // Assim como em Parcelamentos, compromissos concluídos permanecem acessíveis para consulta/edição/exclusão.
+            
+            // Concluídos: seção discreta e expansível, com etiquetas neutras e sem caixa interna.
+            // Itens encerrados continuam disponíveis para consulta, edição e exclusão.
             if (completedItems.length > 0) {
-                const detailsEl = document.createElement('details');
-                detailsEl.className = 'report-details';
-                detailsEl.style.cssText = 'margin-top:14px; background:var(--card-bg); border:1px solid var(--border-color); border-radius:10px; padding:8px 12px;';
+                // Evita duas linhas entre o último lançamento ativo e a seção Concluídos.
+                const lastRow = list.lastElementChild;
+                if (lastRow && lastRow.classList.contains('history-item')) {
+                    lastRow.style.borderBottom = 'none';
+                }
 
-                const summaryEl = document.createElement('summary');
-                summaryEl.style.cssText = 'font-weight:600; font-size:0.88rem; cursor:pointer; color:var(--text-muted); outline:none; display:flex; justify-content:space-between; align-items:center;';
-                summaryEl.innerHTML = `<span>Compromissos Concluídos (${completedItems.length})</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="report-chevron"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
-
-                const innerContainer = document.createElement('div');
-                innerContainer.style.cssText = 'margin-top:8px; padding-top:6px; border-top:1px solid var(--border-color);';
+                const details = document.createElement('details');
+                details.className = 'report-details';
+                details.style.cssText = 'margin-top:14px; border-top:1px solid var(--dashed-line); padding-top:10px;';
+                const summary = document.createElement('summary');
+                summary.style.cssText = 'display:flex; justify-content:space-between; align-items:center; gap:8px; padding:4px 8px; list-style:none; cursor:pointer; color:var(--text-muted); font-size:0.88rem; font-weight:600;';
+                summary.innerHTML = `<span>Compromissos concluídos (${completedItems.length})</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="report-chevron" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
+                details.appendChild(summary);
 
                 completedItems.forEach(item => {
                     const row = document.createElement('div');
                     row.className = 'history-item';
-                    row.style.cssText = 'padding:8px 4px; opacity:0.85;';
+                    row.style.padding = '10px 8px';
+
                     const info = document.createElement('div');
                     info.className = 'history-info';
                     info.style.cssText = 'min-width:0; flex:1; overflow:hidden;';
                     const name = document.createElement('span');
                     name.className = 'history-desc';
-                    name.style.cssText = 'font-weight:500; font-size:0.9rem; text-decoration:line-through;';
+                    name.style.cssText = 'font-weight:500; font-size:0.95rem; color:var(--text-muted); display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;';
                     name.textContent = item.name;
-                    const sub = document.createElement('span');
-                    sub.style.cssText = 'font-size:0.75rem; color:var(--text-muted);';
-                    sub.textContent = `Concluído (${item.totalInstallments}/${item.totalInstallments}) • Venc. dia ${item.dueDateDay} • ${formatCurrency(item.amount)}`;
-                    info.appendChild(name);
-                    info.appendChild(sub);
-                    row.appendChild(info);
-                    row.appendChild(createOtherCommitmentActions(item));
-                    innerContainer.appendChild(row);
+                    name.title = item.name;
+
+                    const amountLine = document.createElement('div');
+                    amountLine.style.cssText = 'display:flex; align-items:center; gap:8px; margin-top:3px; flex-wrap:wrap;';
+                    const amount = document.createElement('span');
+                    amount.className = 'history-amount';
+                    amount.style.color = 'var(--text-muted)';
+                    amount.textContent = formatCurrency(item.amount);
+                    const badge = document.createElement('span');
+                    badge.style.cssText = 'font-size:0.75rem; color:var(--text-muted); font-weight:600; background:var(--border-color); padding:2px 6px; border-radius:4px;';
+                    badge.textContent = `Concluído ${item.totalInstallments}/${item.totalInstallments}`;
+                    amountLine.append(amount, badge);
+
+                    const due = document.createElement('span');
+                    due.className = 'history-date';
+                    due.style.cssText = 'display:block; margin-top:3px;';
+                    due.textContent = `Vencimento dia ${item.dueDateDay}`;
+                    info.append(name, amountLine, due);
+
+                    row.append(info, createOtherCommitmentActions(item));
+                    details.appendChild(row);
                 });
 
-                detailsEl.appendChild(summaryEl);
-                detailsEl.appendChild(innerContainer);
-                list.appendChild(detailsEl);
+                list.appendChild(details);
             }
+
         };
 
         const saveOtherCommitment = () => {
@@ -5710,9 +5757,11 @@
                             <span>💳 ${sanitizeHtml(group.displayName)} (${group.items.length})</span>
                         </div>
                     `;
-                    group.items.forEach(item => {
+                    // O último lançamento de cada banco dispensa a linha inferior.
+                    // O cabeçalho do próximo grupo já realiza a separação visual.
+                    group.items.forEach((item, index) => {
                         creditBreakdownHtml += `
-                            <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.85rem; padding:6px 0; border-bottom:1px solid var(--border-color); gap:8px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.85rem; padding:6px 0; border-bottom:${index === group.items.length - 1 ? 'none' : '1px solid var(--border-color)'}; gap:8px;">
                                 <div style="display:flex; flex-direction:column; min-width:0; flex:1;">
                                     <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-weight:500;">${sanitizeHtml(item.name)}</span>
                                     <span style="font-size:0.75rem; color:var(--text-muted);">Parcela ${item.currentInstallment}/${item.totalInstallments} (Venc. dia ${effectiveDueDay(item.dueDateDay, getMonthKey())})</span>
