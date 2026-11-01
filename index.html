@@ -1680,8 +1680,14 @@
                     </div>
                     <div class="form-group" style="flex: 0 0 96px; min-width: 0;">
                         <label>Venc.</label>
-                        <input type="number" id="fixed-item-dueday" inputmode="numeric" placeholder="1" min="1" max="31" step="1">
+                        <input type="text" id="fixed-item-dueday" inputmode="numeric" pattern="[0-9]*" maxlength="2" oninput="limitIntegerInput(this, 31, 2)" placeholder="1">
                     </div>
+                </div>
+                <!-- Competência inicial opcional: vazio mantém a contabilização imediata. -->
+                <div class="form-group">
+                    <label for="fixed-item-first-month">Início da despesa (opcional)</label>
+                    <input type="text" id="fixed-item-first-month" inputmode="numeric" maxlength="7" placeholder="MM/AAAA" oninput="limitMonthYearInput(this)" autocomplete="off">
+                    <span style="display:block; margin-top:4px; font-size:0.74rem; color:var(--text-muted);">Mês/ano da primeira cobrança. Em branco: mês atual.</span>
                 </div>
                 <div class="modal-buttons">
                     <button class="btn btn-cancel" onclick="closeModal('modal-fixed-expense')">Cancelar</button>
@@ -1705,23 +1711,29 @@
                     </div>
                     <div class="form-group" style="width: 100px; flex-shrink: 0;">
                         <label>Vencimento</label>
-                        <input type="number" id="credit-item-dueday" inputmode="numeric" placeholder="10" min="1" max="31">
+                        <input type="text" id="credit-item-dueday" inputmode="numeric" pattern="[0-9]*" maxlength="2" oninput="limitIntegerInput(this, 31, 2)" placeholder="10">
                     </div>
                 </div>
                 <div style="display: flex; gap: 8px;">
                     <div class="form-group" style="flex: 1; min-width: 0;">
                         <label>Parcela Atual</label>
-                        <input type="number" id="credit-item-current" inputmode="numeric" placeholder="1" min="1" max="99">
+                        <input type="text" id="credit-item-current" inputmode="numeric" pattern="[0-9]*" maxlength="4" oninput="limitIntegerInput(this, 1001, 4)" placeholder="1">
                     </div>
                     <div class="form-group" style="flex: 1; min-width: 0;">
                         <label>Total de Parcelas</label>
-                        <input type="number" id="credit-item-total" inputmode="numeric" placeholder="10" min="1" max="99">
+                        <input type="text" id="credit-item-total" inputmode="numeric" pattern="[0-9]*" maxlength="4" oninput="limitIntegerInput(this, 1000, 4)" placeholder="10">
                     </div>
                 </div>
                 <div class="form-group" style="position: relative;">
                     <label>Banco / Cartão</label>
                     <input type="text" id="credit-item-card-input" placeholder="Ex: Nubank" maxlength="25" autocomplete="off">
                     <div id="custom-bank-dropdown" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: var(--card-bg); border: 1px solid var(--input-border); border-radius: 8px; max-height: 160px; overflow-y: auto; z-index: 100; box-shadow: var(--card-shadow); margin-top: 4px;"></div>
+                </div>
+                <!-- Competência inicial opcional: vazio mantém a contabilização imediata. -->
+                <div class="form-group">
+                    <label for="credit-item-first-month">Primeiro vencimento (opcional)</label>
+                    <input type="text" id="credit-item-first-month" inputmode="numeric" maxlength="7" placeholder="MM/AAAA" oninput="limitMonthYearInput(this)" autocomplete="off">
+                    <span style="display:block; margin-top:4px; font-size:0.74rem; color:var(--text-muted);">Mês/ano da primeira cobrança. Em branco: mês atual.</span>
                 </div>
                 <div class="modal-buttons">
                     <button class="btn btn-cancel" onclick="closeModal('modal-credit-installment')">Cancelar</button>
@@ -1793,18 +1805,24 @@
                 </div>
                 <div class="form-group" style="width: 100px; flex-shrink: 0;">
                     <label>Vencimento</label>
-                    <input type="number" id="other-item-dueday" inputmode="numeric" placeholder="10" min="1" max="31">
+                    <input type="text" id="other-item-dueday" inputmode="numeric" pattern="[0-9]*" maxlength="2" oninput="limitIntegerInput(this, 31, 2)" placeholder="10">
                 </div>
             </div>
             <div style="display: flex; gap: 8px;">
                 <div class="form-group" style="flex: 1; min-width: 0;">
                     <label>Parcela Atual</label>
-                    <input type="number" id="other-item-current" inputmode="numeric" placeholder="1" min="1" max="999">
+                    <input type="text" id="other-item-current" inputmode="numeric" pattern="[0-9]*" maxlength="4" oninput="limitIntegerInput(this, 1001, 4)" placeholder="1">
                 </div>
                 <div class="form-group" style="flex: 1; min-width: 0;">
                     <label>Total de Parcelas</label>
-                    <input type="number" id="other-item-total" inputmode="numeric" placeholder="360" min="1" max="999">
+                    <input type="text" id="other-item-total" inputmode="numeric" pattern="[0-9]*" maxlength="4" oninput="limitIntegerInput(this, 1000, 4)" placeholder="360">
                 </div>
+            </div>
+            <!-- Competência inicial opcional: vazio mantém a contabilização imediata. -->
+            <div class="form-group">
+                <label for="other-item-first-month">Primeiro vencimento (opcional)</label>
+                <input type="text" id="other-item-first-month" inputmode="numeric" maxlength="7" placeholder="MM/AAAA" oninput="limitMonthYearInput(this)" autocomplete="off">
+                <span style="display:block; margin-top:4px; font-size:0.74rem; color:var(--text-muted);">Mês/ano da primeira cobrança. Em branco: mês atual.</span>
             </div>
             <div class="modal-buttons">
                 <button class="btn btn-cancel" onclick="closeModal('modal-other-commitment')">Cancelar</button>
@@ -1993,7 +2011,7 @@
                     <p>Funciona 100% offline, sem servidores externos ou cadastro. Seus dados ficam armazenados localmente no dispositivo, com opções de exportação e importação de backups.</p>
 
                     <div style="border-top: 1px solid var(--border-color); padding-top: 10px; margin-top: 4px; font-size: 0.85rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 4px;">
-                        <span><strong>Versão:</strong> 4.0.2</span>
+                        <span><strong>Versão:</strong> 4.8.3</span>
                         <span><strong>Desenvolvedor:</strong> Ricardo Soares</span>
                         <span>© 2026 | Todos os direitos reservados.</span>
                     </div>
@@ -2225,6 +2243,11 @@
                 </div>
                 <p class="modal-subtitle">Selecione os itens do arquivo para adicionar. (Seus dados atuais serão mantidos).</p>
                 <div id="import-list" class="checkbox-list"></div>
+                <!-- Somente backups completos da versão 9 oferecem restauração integral explícita. -->
+                <label id="import-restore-option" class="modal-checkbox-label" style="margin-top:12px; display:none; align-items:flex-start;">
+                    <input type="checkbox" id="import-restore-cb" style="accent-color:var(--primary); width:19px; height:19px; flex-shrink:0;" onchange="updateImportRestoreView()">
+                    <span>Restaurar backup integral (substituir meus dados atuais pelos dados deste arquivo)</span>
+                </label>
                 <div class="modal-buttons">
                     <button class="btn btn-cancel" onclick="closeModal('modal-import')">Cancelar</button>
                     <button class="btn btn-confirm" onclick="confirmImport()">Adicionar</button>
@@ -2247,7 +2270,7 @@
         let currentSelectedSvg = null;
         let currentHistoryEnvId = null;
         // Inclui Outros Compromissos no estado temporário para manter o fluxo de backup/importação completo.
-        let pendingImportData = { envelopes: [], fixedExpenses: [], creditInstallments: [], otherCommitments: [], monthlySnapshots: [], openMonthlySnapshot: null, fixedAutoSort: null, otherAutoSort: null };
+        let pendingImportData = { envelopes: [], fixedExpenses: [], creditInstallments: [], otherCommitments: [], monthlySnapshots: [], openMonthlySnapshot: null, fixedAutoSort: null, otherAutoSort: null, completeBackup: false, cycleState: null };
         let currentView = 'home'; // 'home', 'despesas-fixas', 'parcelamentos', 'relatorio'
         let otherCommitments = [];
         let tempOtherCommitments = [];
@@ -2308,6 +2331,14 @@
                 : NaN;
 
             return Number.isInteger(day) && day >= 1 && day <= 31 ? day : null;
+        };
+        // Vencimento em 29/30/31 é ajustado somente na exibição dos meses mais curtos.
+        const effectiveDueDay = (day, periodKey) => {
+            const normalized = normalizeFixedDueDay(day);
+            if (normalized === null) return null;
+            const year = Number(periodKey.slice(0, 4));
+            const month = Number(periodKey.slice(5, 7));
+            return Math.min(normalized, new Date(year, month, 0).getDate());
         };
 
         // A ordenação é estável: itens com o mesmo vencimento (ou sem vencimento) mantêm sua ordem relativa.
@@ -2375,6 +2406,53 @@
             return item;
         };
 
+        // Limites efetivos durante a digitação; maxlength sozinho não funciona em input number.
+        // Permite zero apenas como prefixo temporário (a validação do salvamento exige >= 1).
+        const limitIntegerInput = (input, max, digits) => {
+            const clean = input.value.replace(/\D/g, '').slice(0, digits);
+            if (clean !== '' && Number(clean) > max) {
+                input.value = input.dataset.lastValidNumeric || '';
+            } else {
+                input.value = clean;
+                input.dataset.lastValidNumeric = clean;
+            }
+        };
+        const limitMonthYearInput = (input) => {
+            const digits = input.value.replace(/\D/g, '').slice(0, 6);
+            input.value = digits.length > 2 ? digits.slice(0, 2) + '/' + digits.slice(2) : digits;
+        };
+        // Um campo ausente em backups antigos significa início imediato, não uma data inventada.
+        const normalizeFirstDueMonth = value => typeof value === 'string' && /^\d{4}-(0[1-9]|1[0-2])$/.test(value) && Number(value.slice(0, 4)) >= 1900 ? value : null;
+        const displayFirstDueMonth = key => normalizeFirstDueMonth(key) ? `${key.slice(5, 7)}/${key.slice(0, 4)}` : '';
+        const parseFirstDueMonthInput = input => {
+            const raw = input.trim();
+            if (!raw) return null;
+            const match = raw.match(/^(0[1-9]|1[0-2])\/(\d{4})$/);
+            if (!match || Number(match[2]) < 1900) return undefined;
+            return `${match[2]}-${match[1]}`;
+        };
+        const readValidWholeNumber = (id, max) => {
+            const value = document.getElementById(id).value.trim();
+            return /^\d{1,4}$/.test(value) && Number(value) >= 1 && Number(value) <= max ? Number(value) : null;
+        };
+        const isRecurringDueInPeriod = (item, periodKey) => !normalizeFirstDueMonth(item.firstDueMonth) || item.firstDueMonth <= periodKey;
+        // Projeta a parcela sobre o mês consultado sem depender de abrir o aplicativo no vencimento.
+        // Também permite capturar corretamente um mês anterior caso não exista ledger aberto.
+        const installmentNumberForPeriod = (item, periodKey) => {
+            if (!isRecurringDueInPeriod(item, periodKey)) return null;
+            let number = Number(item.currentInstallment);
+            if (Number.isInteger(item.lastYear) && Number.isInteger(item.lastMonth)
+                && item.lastMonth >= 0 && item.lastMonth <= 11) {
+                const reference = `${item.lastYear}-${String(item.lastMonth + 1).padStart(2, '0')}`;
+                number += monthOrdinalForProjection(periodKey) - monthOrdinalForProjection(reference);
+            }
+            return Number.isInteger(number) && number >= 1 && number <= item.totalInstallments ? number : null;
+        };
+        // Independente das rotinas do histórico, inicializadas depois da leitura do armazenamento.
+        const monthOrdinalForProjection = key => Number(key.slice(0, 4)) * 12 + Number(key.slice(5, 7)) - 1;
+        const isInstallmentDueInPeriod = (item, periodKey) => installmentNumberForPeriod(item, periodKey) !== null;
+        const isScheduledForLater = (item, periodKey) => !!normalizeFirstDueMonth(item.firstDueMonth) && item.firstDueMonth > periodKey;
+
         // CARREGAMENTO SEGURO
         try {
             const rawEnv = localStorage.getItem('myEnvelopes');
@@ -2413,7 +2491,8 @@
                             id: Number(item.id),
                             name: item.name.trim(),
                             amount: item.amount,
-                            dueDateDay: normalizeFixedDueDay(item.dueDateDay)
+                            dueDateDay: normalizeFixedDueDay(item.dueDateDay),
+                            firstDueMonth: normalizeFirstDueMonth(item.firstDueMonth)
                         }));
                     // Mantém IDs de despesas fixas válidos e corrige somente os inconsistentes.
                     fixedExpenses = ensureUniqueNumericIds(fixedExpenses, normalized => {
@@ -2439,6 +2518,7 @@
                             name: item.name.trim(),
                             amount: item.amount,
                             dueDateDay: Number.isInteger(Number(item.dueDateDay)) && Number(item.dueDateDay) >= 1 && Number(item.dueDateDay) <= 31 ? Number(item.dueDateDay) : 10,
+                            firstDueMonth: normalizeFirstDueMonth(item.firstDueMonth),
                             currentInstallment: Number.isInteger(Number(item.currentInstallment)) && Number(item.currentInstallment) >= 1 ? Number(item.currentInstallment) : 1,
                             totalInstallments: Number.isInteger(Number(item.totalInstallments)) && Number(item.totalInstallments) >= 1 ? Number(item.totalInstallments) : 1,
                             cardName: item.cardName ? item.cardName.trim() : 'Outros',
@@ -2468,6 +2548,7 @@
                             name: item.name.trim(),
                             amount: item.amount,
                             dueDateDay: Number.isInteger(Number(item.dueDateDay)) && Number(item.dueDateDay) >= 1 && Number(item.dueDateDay) <= 31 ? Number(item.dueDateDay) : 10,
+                            firstDueMonth: normalizeFirstDueMonth(item.firstDueMonth),
                             currentInstallment: Number.isInteger(Number(item.currentInstallment)) && Number(item.currentInstallment) >= 1 ? Number(item.currentInstallment) : 1,
                             totalInstallments: Number.isInteger(Number(item.totalInstallments)) && Number(item.totalInstallments) >= 1 ? Number(item.totalInstallments) : 1,
                             lastYear: typeof item.lastYear === 'number' ? item.lastYear : undefined,
@@ -2820,7 +2901,9 @@
                         icon: typeof item.icon === 'string' ? (item.icon.startsWith('<svg') ? sanitizeSvg(item.icon) : sanitizeHtml(item.icon)) : '📦',
                         total: finiteMoney(item.total) ? item.total : 0,
                         spent,
-                        expenses
+                        expenses,
+                        // Campo explícito para redefinições sem histórico; não é um log de exclusões.
+                        retainedExpenses: normalizeExpenses(item.retainedExpenses, snapshot.periodKey)
                     };
                 });
             const normalizeCommitments = (items, allowCard) => (Array.isArray(items) ? items : [])
@@ -2830,13 +2913,14 @@
                     name: item.name.trim().slice(0, 100),
                     amount: Number(item.amount),
                     dueDateDay: Number.isInteger(Number(item.dueDateDay)) && Number(item.dueDateDay) >= 1 && Number(item.dueDateDay) <= 31 ? Number(item.dueDateDay) : 10,
+                    firstDueMonth: normalizeFirstDueMonth(item.firstDueMonth),
                     currentInstallment: Number.isInteger(Number(item.currentInstallment)) && Number(item.currentInstallment) >= 1 ? Number(item.currentInstallment) : 1,
                     totalInstallments: Number.isInteger(Number(item.totalInstallments)) && Number(item.totalInstallments) >= 1 ? Number(item.totalInstallments) : 1,
                     ...(allowCard ? { cardName: typeof item.cardName === 'string' ? item.cardName.trim().slice(0, 100) : 'Outros' } : {})
                 }));
             const normalizeFixedItems = (Array.isArray(snapshot.fixedExpenses) ? snapshot.fixedExpenses : [])
                 .filter(item => item && typeof item.name === 'string' && finiteMoney(item.amount))
-                .map(item => ({ id: Number(item.id) || 0, name: item.name.trim().slice(0, 100), amount: Number(item.amount), dueDateDay: normalizeFixedDueDay(item.dueDateDay) }));
+                .map(item => ({ id: Number(item.id) || 0, name: item.name.trim().slice(0, 100), amount: Number(item.amount), dueDateDay: normalizeFixedDueDay(item.dueDateDay), firstDueMonth: normalizeFirstDueMonth(item.firstDueMonth) }));
             const totals = {};
             ['variable', 'fixed', 'credit', 'other', 'grandTotal', 'budget'].forEach(key => {
                 totals[key] = finiteMoney(snapshot.totals[key]) ? snapshot.totals[key] : 0;
@@ -3017,6 +3101,15 @@
         const buildMonthlySnapshot = (periodKey, closedAt = new Date().toISOString()) => {
             const envelopeRows = envelopes.map(env => {
                 const expenses = collectEnvelopeExpensesForPeriod(env, periodKey);
+                // Apenas gastos explicitamente preservados numa redefinição sem histórico
+                // sobrevivem à limpeza dos lançamentos ativos. Exclusões não são ressuscitadas.
+                const previousRow = openMonthlySnapshot && openMonthlySnapshot.periodKey === periodKey
+                    ? openMonthlySnapshot.envelopes.find(row => Number(row.id) === Number(env.id)) : null;
+                const retainedExpenses = previousRow && Array.isArray(previousRow.retainedExpenses)
+                    ? previousRow.retainedExpenses.filter(entry => entry && finiteMoney(entry.amount)) : [];
+                retainedExpenses.forEach(expense => {
+                    if (!expenses.some(existing => String(existing.id) === String(expense.id))) expenses.push({ ...expense });
+                });
                 const historyForPeriod = (Array.isArray(env.history) ? env.history : []).find(item => getHistoryPeriodKey(item) === periodKey && finiteMoney(item.total));
                 const total = historyForPeriod ? historyForPeriod.total : (finiteMoney(env.total) ? env.total : 0);
                 return {
@@ -3025,12 +3118,15 @@
                     icon: env.icon || '📦',
                     total,
                     spent: expenses.reduce((sum, expense) => sum + expense.amount, 0),
-                    expenses
+                    expenses,
+                    retainedExpenses
                 };
             });
-            const fixedRows = fixedExpenses.map(item => ({ id: Number(item.id) || 0, name: item.name, amount: item.amount, dueDateDay: normalizeFixedDueDay(item.dueDateDay) }));
-            const creditRows = creditInstallments.filter(item => item.currentInstallment <= item.totalInstallments).map(item => ({ ...item }));
-            const otherRows = otherCommitments.filter(item => item.currentInstallment <= item.totalInstallments).map(item => ({ ...item }));
+            const fixedRows = fixedExpenses.filter(item => isRecurringDueInPeriod(item, periodKey)).map(item => ({ id: Number(item.id) || 0, name: item.name, amount: item.amount, dueDateDay: normalizeFixedDueDay(item.dueDateDay), firstDueMonth: normalizeFirstDueMonth(item.firstDueMonth) }));
+            const creditRows = creditInstallments.filter(item => isInstallmentDueInPeriod(item, periodKey))
+                .map(item => ({ ...item, currentInstallment: installmentNumberForPeriod(item, periodKey) }));
+            const otherRows = otherCommitments.filter(item => isInstallmentDueInPeriod(item, periodKey))
+                .map(item => ({ ...item, currentInstallment: installmentNumberForPeriod(item, periodKey) }));
             const variable = envelopeRows.reduce((sum, env) => sum + env.spent, 0);
             const fixed = fixedRows.reduce((sum, item) => sum + item.amount, 0);
             const credit = creditRows.reduce((sum, item) => sum + item.amount, 0);
@@ -3049,131 +3145,8 @@
             };
         };
 
-        // Mescla o ledger do mês aberto com o estado atual sem duplicar compromissos cujos IDs
-        // tenham sido remapeados na importação. Identidade de compromisso segue as mesmas chaves
-        // lógicas usadas pela importação ativa; snapshots de meses encerrados nunca passam por esta mescla.
-        const mergeMonthlySnapshots = (older, current) => {
-            if (!older || older.periodKey !== current.periodKey) return current;
-            const validId = item => {
-                const id = Number(item && item.id);
-                return Number.isSafeInteger(id) && id > 0 ? id : null;
-            };
-            const mergeRowsById = (oldRows, newRows) => {
-                const result = [];
-                const addRow = (item, overwrite) => {
-                    if (!item || typeof item !== 'object') return;
-                    const id = validId(item);
-                    const idx = result.findIndex(existing => {
-                        const existingId = validId(existing);
-                        return id !== null && existingId !== null
-                            ? id === existingId
-                            : existing.name === item.name;
-                    });
-                    if (idx === -1) result.push({ ...item });
-                    else if (overwrite) result[idx] = { ...result[idx], ...item };
-                };
-                (Array.isArray(oldRows) ? oldRows : []).forEach(item => addRow(item, false));
-                (Array.isArray(newRows) ? newRows : []).forEach(item => addRow(item, true));
-                return result;
-            };
-            const mergeRowsByLogicalKey = (oldRows, newRows, keyFor, signatureFor) => {
-                // Elimina cópias semanticamente idênticas dentro de cada fotografia aberta, mas
-                // preserva itens de mesmo nome que tenham valores/detalhes diferentes.
-                const prepareRows = rows => {
-                    const prepared = [];
-                    const seenSignatures = new Set();
-                    (Array.isArray(rows) ? rows : []).forEach(item => {
-                        if (!item || typeof item !== 'object') return;
-                        const signature = signatureFor(item);
-                        if (signature && seenSignatures.has(signature)) return;
-                        if (signature) seenSignatures.add(signature);
-                        prepared.push({ ...item });
-                    });
-                    return prepared;
-                };
-                const olderRows = prepareRows(oldRows);
-                const currentRows = prepareRows(newRows);
-                const result = olderRows.map(item => ({ ...item }));
-                const matchedOlder = new Set();
-                const countByKey = (rows, key) => key ? rows.filter(item => keyFor(item) === key).length : 0;
-                const countBySignature = (rows, signature) => signature ? rows.filter(item => signatureFor(item) === signature).length : 0;
-
-                currentRows.forEach(item => {
-                    const id = validId(item);
-                    let idx = id === null ? -1 : olderRows.findIndex((existing, index) =>
-                        !matchedOlder.has(index) && validId(existing) === id);
-                    const key = keyFor(item);
-
-                    // Um nome só basta como identidade quando ele é único dos dois lados;
-                    // isso permite reconciliar IDs remapeados sem fundir dois itens legítimos homônimos.
-                    if (idx === -1 && key && countByKey(olderRows, key) === 1 && countByKey(currentRows, key) === 1) {
-                        idx = olderRows.findIndex((existing, index) => !matchedOlder.has(index) && keyFor(existing) === key);
-                    }
-
-                    // Se houver itens homônimos, ainda podemos reconciliar pares cujo conteúdo é idêntico.
-                    const signature = signatureFor(item);
-                    if (idx === -1 && signature && countBySignature(olderRows, signature) === 1 && countBySignature(currentRows, signature) === 1) {
-                        idx = olderRows.findIndex((existing, index) => !matchedOlder.has(index) && signatureFor(existing) === signature);
-                    }
-
-                    if (idx === -1) {
-                        result.push({ ...item });
-                    } else {
-                        result[idx] = { ...result[idx], ...item };
-                        matchedOlder.add(idx);
-                    }
-                });
-                return result;
-            };
-            const normalizeNameKey = item => typeof item?.name === 'string' ? item.name.trim().toLowerCase() : '';
-            const mergeExpenses = (oldRows, newRows) => {
-                const result = [];
-                const addExpense = (expense, overwrite) => {
-                    if (!expense || typeof expense !== 'object') return;
-                    const idx = result.findIndex(existing => String(existing.id) === String(expense.id));
-                    if (idx === -1) result.push({ ...expense });
-                    else if (overwrite) result[idx] = { ...expense };
-                };
-                (Array.isArray(oldRows) ? oldRows : []).forEach(expense => addExpense(expense, false));
-                (Array.isArray(newRows) ? newRows : []).forEach(expense => addExpense(expense, true));
-                return result;
-            };
-            const olderEnvelopes = Array.isArray(older.envelopes) ? older.envelopes : [];
-            const currentEnvelopes = Array.isArray(current.envelopes) ? current.envelopes : [];
-            const envelopesMerged = mergeRowsById(olderEnvelopes, currentEnvelopes).map(row => {
-                const oldRow = olderEnvelopes.find(item => Number(item.id) === Number(row.id));
-                const currentRow = currentEnvelopes.find(item => Number(item.id) === Number(row.id));
-                const expenses = mergeExpenses(oldRow && oldRow.expenses, currentRow && currentRow.expenses);
-                return { ...row, expenses, spent: expenses.reduce((sum, expense) => sum + Number(expense.amount || 0), 0) };
-            });
-            // A identidade lógica permite reconciliar IDs remapeados, sem fundir itens homônimos
-            // com valores diferentes. Fotografias encerradas não passam por esta rotina.
-            const fixedSignature = item => JSON.stringify([
-                normalizeNameKey(item), Number(item.amount || 0), Number(item.dueDateDay || 0)
-            ]);
-            const creditKey = item => {
-                const name = normalizeNameKey(item);
-                return name ? `${name}\u0000${String(item.cardName || 'Outros').trim().toLowerCase()}` : '';
-            };
-            const creditSignature = item => JSON.stringify([
-                creditKey(item), Number(item.amount || 0), Number(item.dueDateDay || 0),
-                Number(item.currentInstallment || 0), Number(item.totalInstallments || 0)
-            ]);
-            const otherSignature = item => JSON.stringify([
-                normalizeNameKey(item), Number(item.amount || 0), Number(item.dueDateDay || 0),
-                Number(item.currentInstallment || 0), Number(item.totalInstallments || 0)
-            ]);
-            const fixedMerged = mergeRowsByLogicalKey(older.fixedExpenses, current.fixedExpenses, normalizeNameKey, fixedSignature);
-            const creditMerged = mergeRowsByLogicalKey(older.creditInstallments, current.creditInstallments, creditKey, creditSignature);
-            const otherMerged = mergeRowsByLogicalKey(older.otherCommitments, current.otherCommitments, normalizeNameKey, otherSignature);
-            const variable = envelopesMerged.reduce((sum, env) => sum + env.spent, 0);
-            const fixed = fixedMerged.reduce((sum, item) => sum + Number(item.amount || 0), 0);
-            const credit = creditMerged.reduce((sum, item) => sum + Number(item.amount || 0), 0);
-            const other = otherMerged.reduce((sum, item) => sum + Number(item.amount || 0), 0);
-            const budget = envelopesMerged.reduce((sum, env) => sum + Number(env.total || 0), 0) + fixed + credit + other;
-            return { ...current, envelopes: envelopesMerged, fixedExpenses: fixedMerged, creditInstallments: creditMerged, otherCommitments: otherMerged,
-                totals: { variable, fixed, credit, other, grandTotal: variable + fixed + credit + other, budget } };
-        };
+        // A mesclagem ampla foi descontinuada: ela ressuscitava registros excluídos.
+        // A competência aberta usa apenas o estado efetivo e retainedExpenses de redefinições.
 
         // Migra fotografias antigas do mês corrente para o ledger aberto, após definir a função de mesclagem.
         // Se houver um ledger de outro mês ainda aberto, preserva-o como histórico antes de substituí-lo.
@@ -3185,9 +3158,10 @@
                     monthlySnapshots = uniqueMonthlySnapshotsByPeriod([...monthlySnapshots, openMonthlySnapshot])
                         .filter(snapshot => snapshot.periodKey !== currentKey).slice(-12);
                 }
+                // A fotografia corrente legada só é retomada quando não existe ledger aberto;
+                // reconstruir a partir do estado ativo eliminará eventuais linhas obsoletas.
                 openMonthlySnapshot = openMonthlySnapshot && openMonthlySnapshot.periodKey === currentKey
-                    ? mergeMonthlySnapshots(recoveredCurrentSnapshotFromArchive, openMonthlySnapshot)
-                    : mergeMonthlySnapshots(recoveredCurrentSnapshotFromArchive, recoveredCurrentSnapshotFromArchive);
+                    ? openMonthlySnapshot : recoveredCurrentSnapshotFromArchive;
                 localStorage.setItem('myOpenMonthlySnapshot', JSON.stringify(openMonthlySnapshot));
                 if (!persistMonthlySnapshots(monthlySnapshots)) {
                     throw new Error('Não foi possível persistir o histórico após a migração.');
@@ -3198,8 +3172,8 @@
             }
         }
 
-        // Mantém um ledger do período aberto para que redefinições sem histórico e exclusões
-        // não eliminem os dados que formarão a fotografia definitiva no fechamento.
+        // O mês aberto é reconstruído dos registros efetivos, não da união de cadastros antigos.
+        // Somente gastos marcados em retainedExpenses durante redefinições são preservados.
         const updateOpenMonthlySnapshot = () => {
             const currentKey = getMonthKey();
             if (monthCycleState.lastObservedCycle !== currentKey) return false;
@@ -3207,8 +3181,7 @@
             const hasData = liveSnapshot.envelopes.length > 0 || liveSnapshot.fixedExpenses.length > 0 || liveSnapshot.creditInstallments.length > 0 || liveSnapshot.otherCommitments.length > 0;
             if (!hasData && !openMonthlySnapshot) return true;
             if (!hasData && openMonthlySnapshot && openMonthlySnapshot.periodKey !== currentKey) return true;
-            const nextSnapshot = openMonthlySnapshot && openMonthlySnapshot.periodKey === currentKey
-                ? mergeMonthlySnapshots(openMonthlySnapshot, liveSnapshot) : liveSnapshot;
+            const nextSnapshot = liveSnapshot;
             try {
                 localStorage.setItem('myOpenMonthlySnapshot', JSON.stringify(nextSnapshot));
                 openMonthlySnapshot = nextSnapshot;
@@ -3232,8 +3205,10 @@
                 return true;
             }
             const builtSnapshot = buildMonthlySnapshot(periodKey);
+            // Na virada, a fotografia aberta é a fonte do período encerrado. A lista atual
+            // pode já estar em outro mês; mesclá-la aqui ressuscitaria dados excluídos.
             const snapshotToSave = openMonthlySnapshot && openMonthlySnapshot.periodKey === periodKey
-                ? mergeMonthlySnapshots(openMonthlySnapshot, builtSnapshot) : builtSnapshot;
+                ? openMonthlySnapshot : builtSnapshot;
             if (!persistMonthlySnapshots([...monthlySnapshots, snapshotToSave])) return false;
             if (openMonthlySnapshot && openMonthlySnapshot.periodKey === periodKey) {
                 try {
@@ -3286,6 +3261,7 @@
             const row = openMonthlySnapshot.envelopes.find(item => Number(item.id) === Number(envId));
             if (!row) return;
             row.expenses = (row.expenses || []).filter(item => String(item.id) !== String(expenseId));
+            row.retainedExpenses = (row.retainedExpenses || []).filter(item => String(item.id) !== String(expenseId));
             row.spent = row.expenses.reduce((sum, item) => sum + Number(item.amount || 0), 0);
             openMonthlySnapshot.totals.variable = openMonthlySnapshot.envelopes.reduce((sum, item) => sum + Number(item.spent || 0), 0);
             openMonthlySnapshot.totals.grandTotal = openMonthlySnapshot.totals.variable + openMonthlySnapshot.totals.fixed + openMonthlySnapshot.totals.credit + openMonthlySnapshot.totals.other;
@@ -3356,6 +3332,21 @@
             return pendingPeriods.length > 0 ? pendingPeriods : [getMonthKey()];
         };
 
+        // Preserva no ledger somente gastos do mês que o usuário redefiniu sem arquivar
+        // no histórico individual. Excluir envelope ou lançamento continua sendo definitivo no mês aberto.
+        const retainOpenExpensesForReset = (env, periodKey, keepHistory) => {
+            if (keepHistory || periodKey !== getMonthKey()) return;
+            // Antes de mutar o envelope, captura os lançamentos efetivos desse período.
+            if (!openMonthlySnapshot || openMonthlySnapshot.periodKey !== periodKey) updateOpenMonthlySnapshot();
+            const row = openMonthlySnapshot && openMonthlySnapshot.envelopes.find(item => Number(item.id) === Number(env.id));
+            if (!row) return;
+            const prior = Array.isArray(row.retainedExpenses) ? row.retainedExpenses : [];
+            const exp = collectEnvelopeExpensesForPeriod(env, periodKey);
+            const ids = new Set(prior.map(item => String(item.id)));
+            exp.forEach(item => { if (!ids.has(String(item.id))) { prior.push({ ...item }); ids.add(String(item.id)); } });
+            row.retainedExpenses = prior;
+        };
+
         const archiveAndRemoveEnvelopePeriods = (env, periodKeys, keepHistory) => {
             const allExpenses = Array.isArray(env.expenses) ? env.expenses : [];
             const periodsToRemove = new Set(periodKeys.filter(isValidMonthKey));
@@ -3365,6 +3356,7 @@
                 const periodExpenses = allExpenses.filter(expense =>
                     getEntryPeriodKey(expense, fallbackKey) === periodKey
                 );
+                retainOpenExpensesForReset(env, periodKey, keepHistory);
                 archiveEnvelopePeriod(env, periodKey, periodExpenses, keepHistory);
             });
 
@@ -3435,90 +3427,41 @@
             return true;
         };
 
-        // Avança parcelas vencidas sem duplicar regras: a mesma rotina atende parcelamentos e outros compromissos.
+        // Competência mensal: o vencimento informa o dia de pagamento, não o momento de avanço.
+        // Atualização por diferença de meses, sem limite artificial de 24 iterações (até 1.000 parcelas).
         const processInstallmentsAutoUpdate = () => {
-            const now = new Date();
-            const curYear = now.getFullYear();
-            const curMonth = now.getMonth();
-            const curDay = now.getDate();
-
+            const currentKey = getMonthKey();
             const processCollection = (items, storageKey) => {
+                const updatedItems = items.map(item => ({ ...item }));
                 let changed = false;
-                const updatedItems = items.map(item => {
-                    if (!item || typeof item.currentInstallment !== 'number' || typeof item.totalInstallments !== 'number') return item;
-                    if (item.currentInstallment > item.totalInstallments) return item;
-
-                    if (item.lastYear === undefined || item.lastMonth === undefined) {
-                        item.lastYear = curYear;
-                        item.lastMonth = curMonth;
+                updatedItems.forEach(item => {
+                    if (!item || !Number.isInteger(item.currentInstallment) || !Number.isInteger(item.totalInstallments)) return;
+                    if (item.currentInstallment > item.totalInstallments || isScheduledForLater(item, currentKey)) return;
+                    if (!Number.isInteger(item.lastYear) || !Number.isInteger(item.lastMonth) || item.lastMonth < 0 || item.lastMonth > 11) {
+                        item.lastYear = Number(currentKey.slice(0, 4));
+                        item.lastMonth = Number(currentKey.slice(5, 7)) - 1;
                         changed = true;
-                        return item;
+                        return;
                     }
-
-                    let lYear = item.lastYear;
-                    let lMonth = item.lastMonth;
-                    item.dueDateDay = typeof item.dueDateDay === 'number' && item.dueDateDay >= 1 && item.dueDateDay <= 31 ? item.dueDateDay : 10;
-
-                    let safetyCounter = 0;
-                    while (safetyCounter < 24) {
-                        safetyCounter++;
-                        let nextMonth = lMonth + 1;
-                        let nextYear = lYear;
-                        if (nextMonth > 11) {
-                            nextMonth = 0;
-                            nextYear++;
-                        }
-
-                        const maxDaysInNextMonth = new Date(nextYear, nextMonth + 1, 0).getDate();
-                        const effectiveDueDay = Math.min(item.dueDateDay, maxDaysInNextMonth);
-
-                        let canAdvance = false;
-                        if (curYear > nextYear) {
-                            canAdvance = true;
-                        } else if (curYear === nextYear) {
-                            if (curMonth > nextMonth) {
-                                canAdvance = true;
-                            } else if (curMonth === nextMonth && curDay >= effectiveDueDay) {
-                                canAdvance = true;
-                            }
-                        }
-
-                        if (canAdvance) {
-                            if (item.currentInstallment <= item.totalInstallments) {
-                                item.currentInstallment++;
-                                lYear = nextYear;
-                                lMonth = nextMonth;
-                                changed = true;
-                            } else {
-                                lYear = nextYear;
-                                lMonth = nextMonth;
-                                changed = true;
-                                break;
-                            }
-                        } else {
-                            break;
-                        }
-                    }
-
-                    item.lastYear = lYear;
-                    item.lastMonth = lMonth;
-                    return item;
+                    const lastKey = `${item.lastYear}-${String(item.lastMonth + 1).padStart(2, '0')}`;
+                    const monthsPassed = monthKeyDifference(lastKey, currentKey);
+                    if (monthsPassed <= 0 || !Number.isFinite(monthsPassed)) return;
+                    item.currentInstallment = Math.min(item.totalInstallments + 1, item.currentInstallment + monthsPassed);
+                    item.lastYear = Number(currentKey.slice(0, 4));
+                    item.lastMonth = Number(currentKey.slice(5, 7)) - 1;
+                    changed = true;
                 });
-
                 if (changed) {
-                    try {
-                        localStorage.setItem(storageKey, JSON.stringify(updatedItems));
-                    } catch (error) {
-                        // Não interrompe a abertura do app se a persistência de parcelas falhar.
+                    try { localStorage.setItem(storageKey, JSON.stringify(updatedItems)); }
+                    catch (error) {
                         console.error(`Não foi possível salvar a atualização automática em ${storageKey}:`, error);
                         alert('As parcelas foram atualizadas apenas nesta sessão porque o armazenamento local falhou. Faça um backup e verifique o espaço disponível.');
                     }
                 }
                 return updatedItems;
             };
-
             creditInstallments = processCollection(creditInstallments, 'myCreditInstallments');
-            // Outros Compromissos têm os mesmos campos de controle de parcela e também avançam por vencimento.
+            // Outros Compromissos compartilham a mesma competência mensal e avanço automático.
             otherCommitments = processCollection(otherCommitments, 'myOtherCommitments');
         };
 
@@ -3752,12 +3695,12 @@
             if (currentChartTab === 'general') {
                 let totalSpentCurrent = 0;
                 envelopes.forEach(env => { totalSpentCurrent += getEnvSpent(env); });
-                let totalFixed = fixedExpenses.reduce((acc, curr) => acc + curr.amount, 0);
+                let totalFixed = fixedExpenses.filter(i => isRecurringDueInPeriod(i, getMonthKey())).reduce((acc, curr) => acc + curr.amount, 0);
                 let activeCreditTotal = creditInstallments
-                    .filter(i => i.currentInstallment <= i.totalInstallments)
+                    .filter(i => isInstallmentDueInPeriod(i, getMonthKey()))
                     .reduce((acc, curr) => acc + curr.amount, 0);
                 const totalOther = otherCommitments
-                    .filter(i => i.currentInstallment <= i.totalInstallments)
+                    .filter(i => isInstallmentDueInPeriod(i, getMonthKey()))
                     .reduce((acc, curr) => acc + curr.amount, 0);
 
                 const grandTotal = totalSpentCurrent + totalFixed + activeCreditTotal + totalOther;
@@ -4302,6 +4245,7 @@
             const nameField = document.getElementById('fixed-item-name');
             const amountField = document.getElementById('fixed-item-amount');
             const dueDayField = document.getElementById('fixed-item-dueday');
+            const startField = document.getElementById('fixed-item-first-month');
 
             if (id) {
                 const item = fixedExpenses.find(i => i.id === id);
@@ -4313,6 +4257,7 @@
                 amountField.value = item.amount.toFixed(2).replace('.', ',');
                 const dueDay = normalizeFixedDueDay(item.dueDateDay);
                 dueDayField.value = dueDay === null ? '' : String(dueDay);
+                startField.value = displayFirstDueMonth(item.firstDueMonth);
             } else {
                 titleEl.innerText = 'Adicionar Despesa Fixa';
                 btnEl.innerText = 'Adicionar';
@@ -4320,8 +4265,11 @@
                 nameField.value = '';
                 amountField.value = '';
                 dueDayField.value = '';
+                startField.value = '';
             }
 
+            // Reinicia o valor permitido após cada abertura do modal (inclusive em edições).
+            document.querySelectorAll('#modal-fixed-expense input[oninput^="limitIntegerInput"]').forEach(field => { field.dataset.lastValidNumeric = field.value; });
             openModal('modal-fixed-expense');
             setTimeout(() => nameField.focus(), 100);
         };
@@ -4338,7 +4286,7 @@
                 list.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding:24px;">Nenhuma despesa fixa cadastrada.</p>';
             } else {
                 fixedExpenses.forEach((item) => {
-                    total += item.amount;
+                    if (isRecurringDueInPeriod(item, getMonthKey())) total += item.amount;
                     const div = document.createElement('div');
                     div.className = 'history-item';
                     div.style.padding = '10px 8px';
@@ -4366,10 +4314,16 @@
                     if (dueDay !== null) {
                         const dueSpan = document.createElement('span');
                         dueSpan.style.cssText = 'font-size:0.82rem; color:var(--text-muted); font-weight:500; white-space:nowrap; flex-shrink:0;';
-                        dueSpan.textContent = `| Venc. ${dueDay}`;
+                        dueSpan.textContent = `| Venc. ${effectiveDueDay(dueDay, getMonthKey())}`;
                         amountRow.appendChild(dueSpan);
                     }
                     infoDiv.appendChild(amountRow);
+                    if (isScheduledForLater(item, getMonthKey())) {
+                        const scheduled = document.createElement('span');
+                        scheduled.className = 'history-date';
+                        scheduled.textContent = `Agendada para ${displayFirstDueMonth(item.firstDueMonth)} · fora do total atual`;
+                        infoDiv.appendChild(scheduled);
+                    }
 
                     const actionsDiv = document.createElement('div');
                     actionsDiv.style.cssText = 'display:flex; gap:6px; align-items:center; flex-shrink:0; margin-left:16px;';
@@ -4442,11 +4396,13 @@
             const amountStr = document.getElementById('fixed-item-amount').value.trim();
             const amount = parseBrNumber(amountStr);
             const dueDayInput = document.getElementById('fixed-item-dueday').value.trim();
+            const firstDueMonth = parseFirstDueMonthInput(document.getElementById('fixed-item-first-month').value);
+            if (firstDueMonth === undefined) { alert('Informe o mês inicial no formato MM/AAAA.'); return; }
             let dueDateDay = null;
 
             if (dueDayInput !== '') {
-                const parsedDay = Number(dueDayInput);
-                if (!Number.isInteger(parsedDay) || parsedDay < 1 || parsedDay > 31) {
+                const parsedDay = readValidWholeNumber('fixed-item-dueday', 31);
+                if (parsedDay === null) {
                     alert('O vencimento deve ser um dia inteiro entre 1 e 31. Deixe o campo vazio se não quiser informar.');
                     return;
                 }
@@ -4465,13 +4421,15 @@
                     nextFixedExpenses[index].name = name;
                     nextFixedExpenses[index].amount = amount;
                     nextFixedExpenses[index].dueDateDay = dueDateDay;
+                    nextFixedExpenses[index].firstDueMonth = firstDueMonth;
                 }
             } else {
                 nextFixedExpenses.push({
                     id: Date.now(),
                     name: name,
                     amount: amount,
-                    dueDateDay: dueDateDay
+                    dueDateDay: dueDateDay,
+                    firstDueMonth
                 });
             }
 
@@ -4622,6 +4580,7 @@
             const dueDayField = document.getElementById('credit-item-dueday');
             const currentField = document.getElementById('credit-item-current');
             const totalField = document.getElementById('credit-item-total');
+            const startField = document.getElementById('credit-item-first-month');
             const cardInput = document.getElementById('credit-item-card-input');
             const dropdown = document.getElementById('custom-bank-dropdown');
 
@@ -4638,6 +4597,7 @@
                 dueDayField.value = item.dueDateDay;
                 currentField.value = item.currentInstallment;
                 totalField.value = item.totalInstallments;
+                startField.value = displayFirstDueMonth(item.firstDueMonth);
                 cardInput.value = item.cardName || 'Outros';
             } else {
                 titleEl.innerText = 'Adicionar Compra Parcelada';
@@ -4648,8 +4608,11 @@
                 dueDayField.value = '';
                 currentField.value = '';
                 totalField.value = '';
+                startField.value = '';
                 cardInput.value = '';
             }
+            // Reinicia o valor permitido após cada abertura do modal (inclusive em edições).
+            document.querySelectorAll('#modal-credit-installment input[oninput^="limitIntegerInput"]').forEach(field => { field.dataset.lastValidNumeric = field.value; });
             openModal('modal-credit-installment');
             setTimeout(() => nameField.focus(), 100);
         };
@@ -4671,7 +4634,8 @@
                 return;
             }
 
-            const activeItems = creditInstallments.filter(i => i.currentInstallment <= i.totalInstallments);
+            const activeItems = creditInstallments.filter(i => isInstallmentDueInPeriod(i, getMonthKey()));
+            const scheduledItems = creditInstallments.filter(i => isScheduledForLater(i, getMonthKey()) && i.currentInstallment <= i.totalInstallments);
             const completedItems = creditInstallments.filter(i => i.currentInstallment > i.totalInstallments);
 
             activeItems.forEach(item => {
@@ -4727,7 +4691,7 @@
                     const dueSpan = document.createElement('span');
                     dueSpan.className = 'history-date';
                     dueSpan.style.cssText = 'display: block; margin-top: 3px;';
-                    dueSpan.textContent = `Vencimento dia ${item.dueDateDay}`;
+                    dueSpan.textContent = `Vencimento dia ${effectiveDueDay(item.dueDateDay, getMonthKey())}`;
 
                     infoDiv.appendChild(descSpan);
                     infoDiv.appendChild(detailsDiv);
@@ -4760,6 +4724,30 @@
                     list.appendChild(histItem);
                 });
             });
+
+            if (scheduledItems.length > 0) {
+                const details = document.createElement('details');
+                details.className = 'report-details';
+                details.style.cssText = 'margin-top:14px; background:var(--card-bg); border:1px solid var(--border-color); border-radius:10px; padding:8px 12px;';
+                const summary = document.createElement('summary');
+                summary.style.cssText = 'cursor:pointer; color:var(--text-main); font-size:0.88rem; font-weight:600;';
+                summary.textContent = `Parcelamentos agendados (${scheduledItems.length})`;
+                details.appendChild(summary);
+                scheduledItems.forEach(item => {
+                    const row = document.createElement('div');
+                    row.className = 'history-item';
+                    const info = document.createElement('div');
+                    info.className = 'history-info';
+                    info.textContent = `${item.name} · ${formatCurrency(item.amount)} · ${item.currentInstallment}/${item.totalInstallments} · Início ${displayFirstDueMonth(item.firstDueMonth)}`;
+                    row.appendChild(info);
+                    const edit = document.createElement('button');
+                    edit.className = 'card-btn edit-btn'; edit.textContent = 'Editar'; edit.onclick = () => openCreditInstallmentModal(item.id);
+                    const del = document.createElement('button');
+                    del.className = 'card-btn delete-btn'; del.textContent = 'Excluir'; del.onclick = () => deleteCreditInstallment(item.id);
+                    row.append(edit, del); details.appendChild(row);
+                });
+                list.appendChild(details);
+            }
 
             if (completedItems.length > 0) {
                 const detailsEl = document.createElement('details');
@@ -4835,20 +4823,18 @@
             const name = document.getElementById('credit-item-name').value.trim();
             const amountStr = document.getElementById('credit-item-amount').value.trim();
             const amount = parseBrNumber(amountStr);
-            const dueDateDay = parseInt(document.getElementById('credit-item-dueday').value, 10);
-            const currentInstallment = parseInt(document.getElementById('credit-item-current').value, 10);
-            const totalInstallments = parseInt(document.getElementById('credit-item-total').value, 10);
+            const dueDateDay = readValidWholeNumber('credit-item-dueday', 31);
+            const currentInstallment = readValidWholeNumber('credit-item-current', 1001);
+            const totalInstallments = readValidWholeNumber('credit-item-total', 1000);
+            const firstDueMonth = parseFirstDueMonthInput(document.getElementById('credit-item-first-month').value);
             const rawCardInput = document.getElementById('credit-item-card-input').value;
             const cardName = normalizeBankName(rawCardInput);
 
-            if (!name || isNaN(amount) || amount <= 0 || isNaN(dueDateDay) || dueDateDay < 1 || dueDateDay > 31 || isNaN(currentInstallment) || isNaN(totalInstallments) || currentInstallment < 1 || totalInstallments < 1) {
+            if (!name || !Number.isFinite(amount) || amount <= 0 || dueDateDay === null || currentInstallment === null || totalInstallments === null || currentInstallment > totalInstallments + 1 || firstDueMonth === undefined) {
                 alert('Preencha todos os campos obrigatórios corretamente.');
                 return;
             }
 
-            const now = new Date();
-            const curYear = now.getFullYear();
-            const curMonth = now.getMonth();
             const nextCreditInstallments = creditInstallments.map(item => ({ ...item }));
 
             if (editId) {
@@ -4858,12 +4844,15 @@
                     item.name = name;
                     item.amount = amount;
                     item.dueDateDay = dueDateDay;
-                    if (item.currentInstallment !== currentInstallment || item.totalInstallments !== totalInstallments) {
-                        item.lastYear = curYear;
-                        item.lastMonth = curMonth;
+                    if (item.currentInstallment !== currentInstallment || item.totalInstallments !== totalInstallments || item.firstDueMonth !== firstDueMonth) {
+                        // Nova referência de competência para edição manual da parcela ou da data inicial.
+                        const anchor = firstDueMonth && firstDueMonth > getMonthKey() ? firstDueMonth : getMonthKey();
+                        item.lastYear = Number(anchor.slice(0, 4));
+                        item.lastMonth = Number(anchor.slice(5, 7)) - 1;
                     }
                     item.currentInstallment = currentInstallment;
                     item.totalInstallments = totalInstallments;
+                    item.firstDueMonth = firstDueMonth;
                     item.cardName = cardName;
                 }
             } else {
@@ -4874,9 +4863,10 @@
                     dueDateDay: dueDateDay,
                     currentInstallment: currentInstallment,
                     totalInstallments: totalInstallments,
+                    firstDueMonth,
                     cardName: cardName,
-                    lastYear: curYear,
-                    lastMonth: curMonth
+                    lastYear: Number((firstDueMonth && firstDueMonth > getMonthKey() ? firstDueMonth : getMonthKey()).slice(0, 4)),
+                    lastMonth: Number((firstDueMonth && firstDueMonth > getMonthKey() ? firstDueMonth : getMonthKey()).slice(5, 7)) - 1
                 });
             }
 
@@ -4982,6 +4972,7 @@
             const dueDayField = document.getElementById('other-item-dueday');
             const currentField = document.getElementById('other-item-current');
             const totalField = document.getElementById('other-item-total');
+            const startField = document.getElementById('other-item-first-month');
 
             if (id !== null && id !== undefined) {
                 const item = otherCommitments.find(i => i.id === id);
@@ -4994,6 +4985,7 @@
                 dueDayField.value = item.dueDateDay;
                 currentField.value = item.currentInstallment;
                 totalField.value = item.totalInstallments;
+                startField.value = displayFirstDueMonth(item.firstDueMonth);
             } else {
                 titleEl.innerText = 'Adicionar Compromisso';
                 btnEl.innerText = 'Adicionar';
@@ -5003,7 +4995,10 @@
                 dueDayField.value = '';
                 currentField.value = '';
                 totalField.value = '';
+                startField.value = '';
             }
+            // Reinicia o valor permitido após cada abertura do modal (inclusive em edições).
+            document.querySelectorAll('#modal-other-commitment input[oninput^="limitIntegerInput"]').forEach(field => { field.dataset.lastValidNumeric = field.value; });
             openModal('modal-other-commitment');
             setTimeout(() => nameField.focus(), 100);
         };
@@ -5046,14 +5041,15 @@
             list.innerHTML = '';
 
             let totalActive = 0;
-            const activeItems = otherCommitments.filter(i => i.currentInstallment <= i.totalInstallments);
+            const activeItems = otherCommitments.filter(i => isInstallmentDueInPeriod(i, getMonthKey()));
+            const scheduledItems = otherCommitments.filter(i => isScheduledForLater(i, getMonthKey()) && i.currentInstallment <= i.totalInstallments);
             const completedItems = otherCommitments.filter(i => i.currentInstallment > i.totalInstallments);
 
             if (activeItems.length === 0) {
                 // Texto discreto centralizado quando estiver vazio
                 // Distingue ausência de cadastro de itens concluídos.
-                const title = completedItems.length > 0 ? 'Nenhum compromisso ativo no momento.' : 'Nenhum compromisso cadastrado!';
-                const description = completedItems.length > 0
+                const title = (completedItems.length > 0 || scheduledItems.length > 0) ? 'Nenhum compromisso ativo no momento.' : 'Nenhum compromisso cadastrado!';
+                const description = scheduledItems.length > 0 ? 'Os compromissos futuros aparecem na seção Agendados abaixo.' : completedItems.length > 0
                     ? 'Os compromissos concluídos continuam disponíveis no histórico abaixo.'
                     : 'Local ideal para adicionar financiamentos, empréstimos, consignados, consórcios e afins.';
                 list.innerHTML = `
@@ -5092,7 +5088,7 @@
                     const dueSpan = document.createElement('span');
                     dueSpan.className = 'history-date';
                     dueSpan.style.cssText = 'display:block; margin-top:3px;';
-                    dueSpan.textContent = `Vencimento dia ${item.dueDateDay}`;
+                    dueSpan.textContent = `Vencimento dia ${effectiveDueDay(item.dueDateDay, getMonthKey())}`;
 
                     infoDiv.appendChild(descSpan);
                     infoDiv.appendChild(detailsDiv);
@@ -5105,6 +5101,27 @@
 
             totalEl.innerText = formatCurrency(totalActive);
             if (countEl) countEl.innerText = activeItems.length;
+
+            // Agendados permanecem acessíveis para edição/exclusão, mas não entram no subtotal.
+            if (scheduledItems.length > 0) {
+                const details = document.createElement('details');
+                details.className = 'report-details';
+                details.style.cssText = 'margin-top:14px; background:var(--card-bg); border:1px solid var(--border-color); border-radius:10px; padding:8px 12px;';
+                const summary = document.createElement('summary');
+                summary.style.cssText = 'cursor:pointer; color:var(--text-main); font-size:0.88rem; font-weight:600;';
+                summary.textContent = `Compromissos agendados (${scheduledItems.length})`;
+                details.appendChild(summary);
+                scheduledItems.forEach(item => {
+                    const row = document.createElement('div');
+                    row.className = 'history-item';
+                    const info = document.createElement('div');
+                    info.className = 'history-info';
+                    info.textContent = `${item.name} · ${formatCurrency(item.amount)} · ${item.currentInstallment}/${item.totalInstallments} · Início ${displayFirstDueMonth(item.firstDueMonth)}`;
+                    row.appendChild(info); row.appendChild(createOtherCommitmentActions(item));
+                    details.appendChild(row);
+                });
+                list.appendChild(details);
+            }
 
             // Assim como em Parcelamentos, compromissos concluídos permanecem acessíveis para consulta/edição/exclusão.
             if (completedItems.length > 0) {
@@ -5150,27 +5167,28 @@
             const editId = document.getElementById('edit-other-id').value;
             const name = document.getElementById('other-item-name').value.trim();
             const amount = parseBrNumber(document.getElementById('other-item-amount').value.trim());
-            const dueDateDay = parseInt(document.getElementById('other-item-dueday').value, 10);
-            const currentInstallment = parseInt(document.getElementById('other-item-current').value, 10);
-            const totalInstallments = parseInt(document.getElementById('other-item-total').value, 10);
+            const dueDateDay = readValidWholeNumber('other-item-dueday', 31);
+            const currentInstallment = readValidWholeNumber('other-item-current', 1001);
+            const totalInstallments = readValidWholeNumber('other-item-total', 1000);
+            const firstDueMonth = parseFirstDueMonthInput(document.getElementById('other-item-first-month').value);
 
-            if (!name || !Number.isFinite(amount) || amount <= 0 || !Number.isInteger(dueDateDay) || dueDateDay < 1 || dueDateDay > 31 || !Number.isInteger(currentInstallment) || currentInstallment < 1 || !Number.isInteger(totalInstallments) || totalInstallments < 1) {
+            if (!name || !Number.isFinite(amount) || amount <= 0 || dueDateDay === null || currentInstallment === null || totalInstallments === null || currentInstallment > totalInstallments + 1 || firstDueMonth === undefined) {
                 alert('Preencha todos os campos obrigatórios corretamente.');
                 return;
             }
 
-            const now = new Date();
             const nextOtherCommitments = otherCommitments.map(item => ({ ...item }));
             if (editId) {
                 const index = nextOtherCommitments.findIndex(i => i.id == editId);
                 if (index !== -1) {
                     const item = nextOtherCommitments[index];
                     // Ao alterar a parcela, reinicia a referência mensal como já ocorre nos parcelamentos.
-                    if (item.currentInstallment !== currentInstallment || item.totalInstallments !== totalInstallments) {
-                        item.lastYear = now.getFullYear();
-                        item.lastMonth = now.getMonth();
+                    if (item.currentInstallment !== currentInstallment || item.totalInstallments !== totalInstallments || item.firstDueMonth !== firstDueMonth) {
+                        const anchor = firstDueMonth && firstDueMonth > getMonthKey() ? firstDueMonth : getMonthKey();
+                        item.lastYear = Number(anchor.slice(0, 4));
+                        item.lastMonth = Number(anchor.slice(5, 7)) - 1;
                     }
-                    Object.assign(item, { name, amount, dueDateDay, currentInstallment, totalInstallments });
+                    Object.assign(item, { name, amount, dueDateDay, currentInstallment, totalInstallments, firstDueMonth });
                 }
             } else {
                 nextOtherCommitments.push({
@@ -5180,8 +5198,9 @@
                     dueDateDay,
                     currentInstallment,
                     totalInstallments,
-                    lastYear: now.getFullYear(),
-                    lastMonth: now.getMonth()
+                    firstDueMonth,
+                    lastYear: Number((firstDueMonth && firstDueMonth > getMonthKey() ? firstDueMonth : getMonthKey()).slice(0, 4)),
+                    lastMonth: Number((firstDueMonth && firstDueMonth > getMonthKey() ? firstDueMonth : getMonthKey()).slice(5, 7)) - 1
                 });
             }
 
@@ -5323,8 +5342,7 @@
             const currentKey = getMonthKey();
             const liveCurrentSnapshot = buildMonthlySnapshot(currentKey);
             const currentSnapshot = openMonthlySnapshot && openMonthlySnapshot.periodKey === currentKey
-                ? mergeMonthlySnapshots(openMonthlySnapshot, liveCurrentSnapshot)
-                : liveCurrentSnapshot;
+                ? openMonthlySnapshot : liveCurrentSnapshot;
             const archived = monthlySnapshots.slice().filter(item => item.periodKey !== currentKey)
                 .sort((a, b) => b.periodKey.localeCompare(a.periodKey));
             const byPeriod = new Map(archived.map(item => [item.periodKey, item]));
@@ -5353,7 +5371,7 @@
                     const expenseRows = (env.expenses || []).map(expense => `<div class="monthly-snapshot-row"><span class="monthly-snapshot-row-name">${sanitizeHtml(expense.desc || 'Gasto sem descrição')}${expense.paymentMethod ? ` · ${sanitizeHtml(expense.paymentMethod)}` : ''}</span><span class="monthly-snapshot-row-value">${formatCurrency(expense.amount)}</span></div>`).join('');
                     return `<div class="monthly-snapshot-row"><span class="monthly-snapshot-row-name">${renderIconHtml(env.icon)} ${sanitizeHtml(env.name)}</span><span class="monthly-snapshot-row-value">${formatCurrency(env.spent)} / ${formatCurrency(env.total)}</span></div>${expenseRows ? `<div style="padding-left:12px;">${expenseRows}</div>` : ''}`;
                 }).join('');
-                const fixedRows = renderRows(snapshot.fixedExpenses, 'Nenhuma despesa fixa cadastrada.');
+                const fixedRows = renderRows(snapshot.fixedExpenses, 'Nenhuma despesa fixa contabilizada neste mês.');
                 const creditRows = renderRows(snapshot.creditInstallments, 'Nenhum parcelamento ativo.');
                 const otherRows = renderRows(snapshot.otherCommitments, 'Nenhum outro compromisso ativo.');
                 const caption = isCurrent ? 'Em andamento' : 'Fotografia salva';
@@ -5422,7 +5440,7 @@
             // 3. Parcelamentos
             let totalCreditCount = creditInstallments.length;
             // Outros compromissos contam como ativos enquanto a parcela atual não ultrapassar o total.
-            const activeOtherCommitments = otherCommitments.filter(i => i.currentInstallment <= i.totalInstallments);
+            const activeOtherCommitments = otherCommitments.filter(i => isInstallmentDueInPeriod(i, getMonthKey()));
             // O contador mostra todos os registros, como em Parcelamentos; o subtotal considera somente os ativos.
             const totalOtherCount = otherCommitments.length;
             // ---------------------------------------------
@@ -5444,9 +5462,9 @@
                 });
             });
 
-            let totalFixed = fixedExpenses.reduce((acc, curr) => acc + curr.amount, 0);
+            let totalFixed = fixedExpenses.filter(i => isRecurringDueInPeriod(i, getMonthKey())).reduce((acc, curr) => acc + curr.amount, 0);
             let activeCreditTotal = creditInstallments
-                .filter(i => i.currentInstallment <= i.totalInstallments)
+                .filter(i => isInstallmentDueInPeriod(i, getMonthKey()))
                 .reduce((acc, curr) => acc + curr.amount, 0);
             // A categoria já era calculada, mas o valor não entrava no consolidado nem na meta mensal.
             const totalOther = activeOtherCommitments.reduce((acc, curr) => acc + curr.amount, 0);
@@ -5547,8 +5565,9 @@
             }
 
             let fixedBreakdownHtml = '';
-            if (fixedExpenses.length > 0) {
-                fixedExpenses.forEach(item => {
+            const activeFixedExpenses = fixedExpenses.filter(item => isRecurringDueInPeriod(item, getMonthKey()));
+            if (activeFixedExpenses.length > 0) {
+                activeFixedExpenses.forEach(item => {
                     fixedBreakdownHtml += `
                         <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.85rem; padding:6px 0; border-bottom:1px solid var(--border-color); gap:8px;">
                             <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0; flex:1;">${sanitizeHtml(item.name)}</span>
@@ -5557,11 +5576,11 @@
                     `;
                 });
             } else {
-                fixedBreakdownHtml = `<span style="color:var(--text-muted); font-size:0.85rem;">Nenhuma despesa fixa cadastrada.</span>`;
+                fixedBreakdownHtml = `<span style="color:var(--text-muted); font-size:0.85rem;">Nenhuma despesa fixa contabilizada neste mês.</span>`;
             }
 
             let creditBreakdownHtml = '';
-            let activeInstallmentsList = creditInstallments.filter(i => i.currentInstallment <= i.totalInstallments);
+            let activeInstallmentsList = creditInstallments.filter(i => isInstallmentDueInPeriod(i, getMonthKey()));
             if (activeInstallmentsList.length > 0) {
                 const groupedActive = Object.create(null);
                 activeInstallmentsList.forEach(item => {
@@ -5584,7 +5603,7 @@
                             <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.85rem; padding:6px 0; border-bottom:1px solid var(--border-color); gap:8px;">
                                 <div style="display:flex; flex-direction:column; min-width:0; flex:1;">
                                     <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-weight:500;">${sanitizeHtml(item.name)}</span>
-                                    <span style="font-size:0.75rem; color:var(--text-muted);">Parcela ${item.currentInstallment}/${item.totalInstallments} (Venc. dia ${item.dueDateDay})</span>
+                                    <span style="font-size:0.75rem; color:var(--text-muted);">Parcela ${item.currentInstallment}/${item.totalInstallments} (Venc. dia ${effectiveDueDay(item.dueDateDay, getMonthKey())})</span>
                                 </div>
                                 <span style="white-space:nowrap; flex-shrink:0;"><strong>${formatCurrency(item.amount)}</strong></span>
                             </div>
@@ -5603,7 +5622,7 @@
                         <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.85rem; padding:6px 0; border-bottom:1px solid var(--border-color); gap:8px;">
                             <div style="display:flex; flex-direction:column; min-width:0; flex:1;">
                                 <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-weight:500;">${sanitizeHtml(item.name)}</span>
-                                <span style="font-size:0.75rem; color:var(--text-muted);">Parcela ${item.currentInstallment}/${item.totalInstallments} (Venc. dia ${item.dueDateDay})</span>
+                                <span style="font-size:0.75rem; color:var(--text-muted);">Parcela ${item.currentInstallment}/${item.totalInstallments} (Venc. dia ${effectiveDueDay(item.dueDateDay, getMonthKey())})</span>
                             </div>
                             <span style="white-space:nowrap; flex-shrink:0;"><strong>${formatCurrency(item.amount)}</strong></span>
                         </div>
@@ -6538,6 +6557,9 @@
         };
 
         const confirmExport = async () => {
+            // A cópia deve refletir o ledger atualizado, inclusive após exclusões.
+            checkMonthCycleBoundary();
+            updateOpenMonthlySnapshot();
             const format = document.getElementById('export-format').value;
             // O nome do backup usa a data local, evitando antecipar o dia em fusos negativos.
             const nowLocal = new Date();
@@ -6578,7 +6600,7 @@
                 }
 
                 const dataToExport = {
-                    version: 8,
+                    version: 9,
                     envelopes: envelopes.filter(env => selectedIds.includes(env.id)),
                     fixedExpenses: exportFixed ? fixedExpenses : [],
                     fixedAutoSort: exportFixed ? isFixedAutoSort : null,
@@ -6586,7 +6608,10 @@
                     otherCommitments: exportOther ? otherCommitments : [],
                     otherAutoSort: exportOther ? isOtherAutoSort : null,
                     monthlySnapshots: exportHistory ? monthlySnapshots : [],
-                    openMonthlySnapshot: exportHistory ? openMonthlySnapshot : null
+                    openMonthlySnapshot: exportHistory ? openMonthlySnapshot : null,
+                    // Restauração integral só é oferecida para backups completos e identificados.
+                    completeBackup: isCompleteJsonBackup,
+                    cycleState: isCompleteJsonBackup ? monthCycleState : null
                 };
 
                 fileContent = JSON.stringify(dataToExport, null, 2);
@@ -6734,6 +6759,8 @@
                     let rawOpenSnapshot = null;
                     let rawFixedAutoSort = null;
                     let rawOtherAutoSort = null;
+                    let rawCycleState = null;
+                    let completeBackup = false;
 
                     if (Array.isArray(imported)) {
                         rawEnvelopes = imported;
@@ -6746,6 +6773,16 @@
                         rawOpenSnapshot = normalizeMonthlySnapshot(imported.openMonthlySnapshot);
                         rawFixedAutoSort = typeof imported.fixedAutoSort === 'boolean' ? imported.fixedAutoSort : null;
                         rawOtherAutoSort = typeof imported.otherAutoSort === 'boolean' ? imported.otherAutoSort : null;
+                        completeBackup = imported.version >= 9 && imported.completeBackup === true;
+                        if (imported.cycleState && typeof imported.cycleState === 'object' && isValidMonthKey(imported.cycleState.lastObservedCycle)) {
+                            rawCycleState = {
+                                lastObservedCycle: imported.cycleState.lastObservedCycle,
+                                pendingCycles: Array.isArray(imported.cycleState.pendingCycles)
+                                    ? [...new Set(imported.cycleState.pendingCycles.filter(isValidMonthKey))].slice(-12) : [],
+                                bannerDismissedFor: isValidMonthKey(imported.cycleState.bannerDismissedFor)
+                                    ? imported.cycleState.bannerDismissedFor : null
+                            };
+                        }
                     }
 
                     const validEnvelopes = rawEnvelopes
@@ -6767,7 +6804,8 @@
                             id: Number(item.id),
                             name: item.name.trim(),
                             amount: item.amount,
-                            dueDateDay: normalizeFixedDueDay(item.dueDateDay)
+                            dueDateDay: normalizeFixedDueDay(item.dueDateDay),
+                            firstDueMonth: normalizeFirstDueMonth(item.firstDueMonth)
                         }));
                     ensureUniqueNumericIds(validFixed);
 
@@ -6778,6 +6816,7 @@
                             name: item.name.trim(),
                             amount: item.amount,
                             dueDateDay: Number.isInteger(Number(item.dueDateDay)) && Number(item.dueDateDay) >= 1 && Number(item.dueDateDay) <= 31 ? Number(item.dueDateDay) : 10,
+                            firstDueMonth: normalizeFirstDueMonth(item.firstDueMonth),
                             currentInstallment: Number.isInteger(Number(item.currentInstallment)) && Number(item.currentInstallment) >= 1 ? Number(item.currentInstallment) : 1,
                             totalInstallments: Number.isInteger(Number(item.totalInstallments)) && Number(item.totalInstallments) >= 1 ? Number(item.totalInstallments) : 1,
                             cardName: item.cardName ? item.cardName.trim() : 'Outros',
@@ -6798,6 +6837,7 @@
                                 name: item.name.trim(),
                                 amount: item.amount,
                                 dueDateDay: Number.isInteger(dueDay) && dueDay >= 1 && dueDay <= 31 ? dueDay : 10,
+                                firstDueMonth: normalizeFirstDueMonth(item.firstDueMonth),
                                 currentInstallment: Number.isInteger(current) && current >= 1 ? current : 1,
                                 totalInstallments: Number.isInteger(total) && total >= 1 ? total : 1,
                                 lastYear: Number.isInteger(item.lastYear) ? item.lastYear : undefined,
@@ -6823,7 +6863,9 @@
                         monthlySnapshots: validSnapshots,
                         openMonthlySnapshot: validOpenSnapshot,
                         fixedAutoSort: rawFixedAutoSort,
-                        otherAutoSort: rawOtherAutoSort
+                        otherAutoSort: rawOtherAutoSort,
+                        completeBackup,
+                        cycleState: rawCycleState
                     };
                     
                     const importListEl = document.getElementById('import-list');
@@ -6920,6 +6962,11 @@
                         importListEl.appendChild(itemLabel);
                     });
 
+                    const restoreOption = document.getElementById('import-restore-option');
+                    const restoreCheckbox = document.getElementById('import-restore-cb');
+                    restoreOption.style.display = completeBackup ? 'flex' : 'none';
+                    restoreCheckbox.checked = false;
+                    updateImportRestoreView();
                     openModal('modal-import');
                 } catch (err) {
                     alert('Erro ao carregar o arquivo. Certifique-se de que é um JSON válido gerado pelo aplicativo.');
@@ -6927,6 +6974,21 @@
                 event.target.value = ''; 
             };
             reader.readAsText(file);
+        };
+
+        // Adicionar continua sendo o comportamento original. Restauração integral exige opção
+        // expressa e desativa a seleção parcial para impedir perdas acidentais.
+        const updateImportRestoreView = () => {
+            const restoring = document.getElementById('import-restore-cb').checked;
+            const subtitle = document.querySelector('#modal-import .modal-subtitle');
+            if (subtitle) subtitle.textContent = restoring
+                ? 'Atenção: todos os dados atuais serão substituídos pelo backup completo selecionado.'
+                : 'Selecione os itens do arquivo para adicionar. (Seus dados atuais serão mantidos).';
+            document.querySelectorAll('#import-list input[type="checkbox"]').forEach(cb => {
+                cb.disabled = restoring;
+                if (restoring) cb.checked = true;
+            });
+            document.querySelector('#modal-import .btn-confirm').textContent = restoring ? 'Restaurar' : 'Adicionar';
         };
 
         const confirmImport = () => {
@@ -6940,7 +7002,9 @@
             const importCredit = creditCb ? creditCb.checked : false;
             const importOther = otherCb ? otherCb.checked : false;
             const importHistory = historyCb ? historyCb.checked : false;
-            
+            const restoreComplete = document.getElementById('import-restore-cb').checked && pendingImportData.completeBackup;
+            if (restoreComplete && !confirm('Restaurar este backup substituirá todos os dados atuais, incluindo o histórico mensal. Deseja continuar?')) return;
+
             if (selectedIndices.length === 0 && !importFixed && !importCredit && !importOther && !importHistory) {
                 alert('Selecione pelo menos um item para importar.');
                 return;
@@ -6949,7 +7013,7 @@
             // Guarda as chaves e o estado atual antes de importar. Se uma gravação falhar, tentamos reverter a operação inteira.
             const importStorageKeys = [
                 'myEnvelopes', 'myFixedExpenses', 'myFixedAutoSort', 'myCreditInstallments',
-                'myOtherCommitments', 'myOtherAutoSort', MONTHLY_SNAPSHOTS_KEY, 'myOpenMonthlySnapshot'
+                'myOtherCommitments', 'myOtherAutoSort', MONTHLY_SNAPSHOTS_KEY, 'myOpenMonthlySnapshot', MONTH_CYCLE_STATE_KEY
             ];
             const importStorageBefore = Object.create(null);
             try {
@@ -6968,10 +7032,55 @@
                 openMonthlySnapshot: openMonthlySnapshot ? JSON.parse(JSON.stringify(openMonthlySnapshot)) : null,
                 monthlySnapshotSaveError,
                 isFixedAutoSort,
-                isOtherAutoSort
+                isOtherAutoSort,
+                monthCycleState: JSON.parse(JSON.stringify(monthCycleState)),
+                cycleStateWasStored
             };
 
             try {
+            if (restoreComplete) {
+                // Substituição atômica em termos lógicos: o catch abaixo restaura armazenamento e memória.
+                envelopes = JSON.parse(JSON.stringify(pendingImportData.envelopes));
+                fixedExpenses = JSON.parse(JSON.stringify(pendingImportData.fixedExpenses));
+                creditInstallments = JSON.parse(JSON.stringify(pendingImportData.creditInstallments));
+                otherCommitments = JSON.parse(JSON.stringify(pendingImportData.otherCommitments));
+                isFixedAutoSort = typeof pendingImportData.fixedAutoSort === 'boolean' ? pendingImportData.fixedAutoSort : true;
+                isOtherAutoSort = typeof pendingImportData.otherAutoSort === 'boolean' ? pendingImportData.otherAutoSort : true;
+                sortFixedExpensesIfNeeded();
+                sortOtherCommitmentsIfNeeded();
+                monthlySnapshots = uniqueMonthlySnapshotsByPeriod(pendingImportData.monthlySnapshots).slice(-12);
+                openMonthlySnapshot = pendingImportData.openMonthlySnapshot;
+                const restoredCycle = pendingImportData.cycleState;
+                const fallbackPeriod = openMonthlySnapshot && isValidMonthKey(openMonthlySnapshot.periodKey)
+                    && openMonthlySnapshot.periodKey <= getMonthKey() ? openMonthlySnapshot.periodKey : getMonthKey();
+                monthCycleState = restoredCycle && restoredCycle.lastObservedCycle <= getMonthKey()
+                    ? JSON.parse(JSON.stringify(restoredCycle))
+                    : { lastObservedCycle: fallbackPeriod, pendingCycles: [], bannerDismissedFor: null };
+                cycleStateWasStored = true;
+                monthlySnapshotSaveError = false;
+                [
+                    ['myEnvelopes', envelopes],
+                    ['myFixedExpenses', fixedExpenses],
+                    ['myCreditInstallments', creditInstallments],
+                    ['myOtherCommitments', otherCommitments],
+                    [MONTHLY_SNAPSHOTS_KEY, monthlySnapshots],
+                    ['myOpenMonthlySnapshot', openMonthlySnapshot],
+                    [MONTH_CYCLE_STATE_KEY, monthCycleState]
+                ].forEach(([key, value]) => localStorage.setItem(key, JSON.stringify(value)));
+                localStorage.setItem('myFixedAutoSort', String(isFixedAutoSort));
+                localStorage.setItem('myOtherAutoSort', String(isOtherAutoSort));
+                // Se o backup foi feito em mês anterior, fecha-o antes de avançar parcelas.
+                checkMonthCycleBoundary();
+                if (monthlySnapshotSaveError) throw new Error('Não foi possível restaurar as fotografias mensais.');
+                processInstallmentsAutoUpdate();
+                normalizeLegacyExpensePeriods();
+                if (!updateApp({ suppressSaveAlert: true }) || !updateOpenMonthlySnapshot()) throw new Error('Não foi possível concluir a restauração.');
+                closeModal('modal-import');
+                alert('Backup integral restaurado com sucesso.');
+                pendingImportData = { envelopes: [], fixedExpenses: [], creditInstallments: [], otherCommitments: [], monthlySnapshots: [], openMonthlySnapshot: null, fixedAutoSort: null, otherAutoSort: null, completeBackup: false, cycleState: null };
+                updateStorageMonitor(true);
+                return;
+            }
             let addedEnvelopesCount = 0;
             selectedIndices.forEach(index => {
                 const envToImport = JSON.parse(JSON.stringify(pendingImportData.envelopes[index]));
@@ -7045,9 +7154,7 @@
                 const importedCurrentFromArchive = importedSnapshots.find(snapshot => snapshot.periodKey === currentKey) || null;
                 const importedOpen = pendingImportData.openMonthlySnapshot;
                 const importedOpenIsCurrent = importedOpen && importedOpen.periodKey === currentKey;
-                const incomingCurrentSnapshot = importedOpenIsCurrent
-                    ? (importedCurrentFromArchive ? mergeMonthlySnapshots(importedCurrentFromArchive, importedOpen) : importedOpen)
-                    : importedCurrentFromArchive;
+                const incomingCurrentSnapshot = importedOpenIsCurrent ? importedOpen : importedCurrentFromArchive;
 
                 // Meses encerrados são fotografias independentes: o backup substitui o registro do
                 // mesmo periodKey por inteiro, nunca soma suas linhas nem cria dois cartões para o mês.
@@ -7071,16 +7178,14 @@
                 const localOpenIsCurrent = openMonthlySnapshot && openMonthlySnapshot.periodKey === currentKey;
                 let currentBase = localCurrentFromArchive;
                 if (localOpenIsCurrent) {
-                    currentBase = currentBase
-                        ? mergeMonthlySnapshots(currentBase, openMonthlySnapshot)
-                        : openMonthlySnapshot;
+                    currentBase = openMonthlySnapshot;
                 }
                 if (incomingCurrentSnapshot) {
-                    openMonthlySnapshot = currentBase
-                        ? mergeMonthlySnapshots(currentBase, incomingCurrentSnapshot)
-                        : mergeMonthlySnapshots(incomingCurrentSnapshot, incomingCurrentSnapshot);
+                    // A fotografia selecionada substitui o ledger do período no backup;
+                    // o próximo render reconciliará seu conteúdo com os cadastros importados.
+                    openMonthlySnapshot = incomingCurrentSnapshot;
                 } else if (currentBase) {
-                    openMonthlySnapshot = mergeMonthlySnapshots(currentBase, currentBase);
+                    openMonthlySnapshot = currentBase;
                 }
 
                 if (!persistMonthlySnapshots([...snapshotsByPeriod.values()])) {
@@ -7097,6 +7202,8 @@
             }
 
             // Novos registros importados também recebem referência de mês antes da próxima renderização.
+            // Ajusta a competência dos novos parcelamentos já vencidos sem tocar fotografias fechadas.
+            processInstallmentsAutoUpdate();
             normalizeLegacyExpensePeriods();
             if (!updateApp({ suppressSaveAlert: true })) {
                 throw new Error('Não foi possível salvar os envelopes importados.');
@@ -7105,7 +7212,7 @@
             alert(`Importação concluída! (${addedEnvelopesCount} envelope(s), ${addedFixedCount} despesa(s) fixa(s), ${addedCreditCount} parcelamento(s), ${addedOtherCount} outro(s) compromisso(s) e ${addedSnapshotsCount} fotografia(s) mensal(is) adicionados).`);
             // Consulta o volume somente após a importação concluída; não interfere no rollback.
             setTimeout(() => updateStorageMonitor(true), 0);
-            pendingImportData = { envelopes: [], fixedExpenses: [], creditInstallments: [], otherCommitments: [], monthlySnapshots: [], openMonthlySnapshot: null, fixedAutoSort: null, otherAutoSort: null };
+            pendingImportData = { envelopes: [], fixedExpenses: [], creditInstallments: [], otherCommitments: [], monthlySnapshots: [], openMonthlySnapshot: null, fixedAutoSort: null, otherAutoSort: null, completeBackup: false, cycleState: null };
             } catch (error) {
                 console.error('Importação cancelada; restaurando os dados anteriores:', error);
                 envelopes = importStateBefore.envelopes;
@@ -7117,6 +7224,8 @@
                 monthlySnapshotSaveError = importStateBefore.monthlySnapshotSaveError;
                 isFixedAutoSort = importStateBefore.isFixedAutoSort;
                 isOtherAutoSort = importStateBefore.isOtherAutoSort;
+                monthCycleState = importStateBefore.monthCycleState;
+                cycleStateWasStored = importStateBefore.cycleStateWasStored;
 
                 let storageRollbackSucceeded = true;
                 // Remove primeiro as chaves tocadas para liberar espaço antes de restaurar os valores anteriores.
