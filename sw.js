@@ -1,5 +1,5 @@
-// v18: atualiza o cache offline após validações, competência mensal e histórico/backup íntegros.
-const CACHE_NAME = 'envelopes-cache-v18';
+// v20: atualiza o cache offline para incluir a padronização visual dos agendamentos.
+const CACHE_NAME = 'envelopes-cache-v20';
 
 const ASSETS_TO_CACHE = [
   './',

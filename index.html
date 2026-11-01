@@ -1729,8 +1729,9 @@
                     <input type="text" id="credit-item-card-input" placeholder="Ex: Nubank" maxlength="25" autocomplete="off">
                     <div id="custom-bank-dropdown" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: var(--card-bg); border: 1px solid var(--input-border); border-radius: 8px; max-height: 160px; overflow-y: auto; z-index: 100; box-shadow: var(--card-shadow); margin-top: 4px;"></div>
                 </div>
-                <!-- Competência inicial opcional: vazio mantém a contabilização imediata. -->
-                <div class="form-group">
+                <!-- Primeiro vencimento: acionador de abertura única; campo e estilos originais preservados. -->
+                <button type="button" class="toggle-desc" id="credit-first-month-toggle" onclick="setFirstDueMonthFieldVisible('credit', true)" style="background:none; border:0; padding:0; text-align:left;">+ Definir primeiro vencimento</button>
+                <div class="form-group" id="credit-first-month-container" style="display:none; margin-top:12px;">
                     <label for="credit-item-first-month">Primeiro vencimento (opcional)</label>
                     <input type="text" id="credit-item-first-month" inputmode="numeric" maxlength="7" placeholder="MM/AAAA" oninput="limitMonthYearInput(this)" autocomplete="off">
                     <span style="display:block; margin-top:4px; font-size:0.74rem; color:var(--text-muted);">Mês/ano da primeira cobrança. Em branco: mês atual.</span>
@@ -1818,8 +1819,9 @@
                     <input type="text" id="other-item-total" inputmode="numeric" pattern="[0-9]*" maxlength="4" oninput="limitIntegerInput(this, 1000, 4)" placeholder="360">
                 </div>
             </div>
-            <!-- Competência inicial opcional: vazio mantém a contabilização imediata. -->
-            <div class="form-group">
+            <!-- Primeiro vencimento: acionador de abertura única; campo e estilos originais preservados. -->
+            <button type="button" class="toggle-desc" id="other-first-month-toggle" onclick="setFirstDueMonthFieldVisible('other', true)" style="background:none; border:0; padding:0; text-align:left;">+ Definir primeiro vencimento</button>
+            <div class="form-group" id="other-first-month-container" style="display:none; margin-top:12px;">
                 <label for="other-item-first-month">Primeiro vencimento (opcional)</label>
                 <input type="text" id="other-item-first-month" inputmode="numeric" maxlength="7" placeholder="MM/AAAA" oninput="limitMonthYearInput(this)" autocomplete="off">
                 <span style="display:block; margin-top:4px; font-size:0.74rem; color:var(--text-muted);">Mês/ano da primeira cobrança. Em branco: mês atual.</span>
@@ -4571,6 +4573,16 @@
             renderCreditInstallmentsList();
         };
 
+        // Exibe o primeiro vencimento uma única vez por abertura do modal.
+        // No cadastro inicia recolhido; na edição com data gravada, abre preenchido.
+        const setFirstDueMonthFieldVisible = (section, visible) => {
+            const trigger = document.getElementById(`${section}-first-month-toggle`);
+            const container = document.getElementById(`${section}-first-month-container`);
+            if (!trigger || !container) return;
+            trigger.style.display = visible ? 'none' : 'inline-block';
+            container.style.display = visible ? 'block' : 'none';
+        };
+
         const openCreditInstallmentModal = (id = null) => {
             const titleEl = document.getElementById('credit-modal-title');
             const btnEl = document.getElementById('credit-submit-btn');
@@ -4611,6 +4623,10 @@
                 startField.value = '';
                 cardInput.value = '';
             }
+
+            // Cada abertura reinicia o acionador, exceto ao editar um vencimento já definido.
+            setFirstDueMonthFieldVisible('credit', !!startField.value.trim());
+
             // Reinicia o valor permitido após cada abertura do modal (inclusive em edições).
             document.querySelectorAll('#modal-credit-installment input[oninput^="limitIntegerInput"]').forEach(field => { field.dataset.lastValidNumeric = field.value; });
             openModal('modal-credit-installment');
@@ -4725,29 +4741,80 @@
                 });
             });
 
+            
+            // Agendados: divisor simples, seta animada existente e linhas no padrão dos itens ativos.
+            // Esta apresentação não altera cálculos, competência ou persistência dos parcelamentos.
+            
             if (scheduledItems.length > 0) {
+                // Evita a segunda linha entre o último lançamento ativo e a seção Agendados.
+                if (activeItems.length > 0) {
+                    const lastActiveRow = list.lastElementChild;
+                    if (lastActiveRow && lastActiveRow.classList.contains('history-item')) {
+                        lastActiveRow.style.borderBottom = 'none';
+                    }
+                }
+
                 const details = document.createElement('details');
+
                 details.className = 'report-details';
-                details.style.cssText = 'margin-top:14px; background:var(--card-bg); border:1px solid var(--border-color); border-radius:10px; padding:8px 12px;';
+                details.style.cssText = 'margin-top:14px; border-top:1px solid var(--dashed-line); padding-top:10px;';
                 const summary = document.createElement('summary');
-                summary.style.cssText = 'cursor:pointer; color:var(--text-main); font-size:0.88rem; font-weight:600;';
-                summary.textContent = `Parcelamentos agendados (${scheduledItems.length})`;
+                summary.style.cssText = 'display:flex; justify-content:space-between; align-items:center; gap:8px; padding:4px 8px; list-style:none; cursor:pointer; color:var(--text-main); font-size:0.88rem; font-weight:600;';
+                summary.innerHTML = `<span>Parcelamentos agendados (${scheduledItems.length})</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="report-chevron" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
                 details.appendChild(summary);
+
                 scheduledItems.forEach(item => {
                     const row = document.createElement('div');
                     row.className = 'history-item';
+                    row.style.padding = '10px 8px';
+
                     const info = document.createElement('div');
                     info.className = 'history-info';
-                    info.textContent = `${item.name} · ${formatCurrency(item.amount)} · ${item.currentInstallment}/${item.totalInstallments} · Início ${displayFirstDueMonth(item.firstDueMonth)}`;
-                    row.appendChild(info);
+                    info.style.cssText = 'min-width:0; flex:1; overflow:hidden;';
+                    const name = document.createElement('span');
+                    name.className = 'history-desc';
+                    name.style.cssText = 'font-weight:600; font-size:0.95rem; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;';
+                    name.textContent = item.name;
+                    name.title = item.name;
+                    const amountLine = document.createElement('div');
+                    amountLine.style.cssText = 'display:flex; align-items:center; gap:8px; margin-top:3px; flex-wrap:wrap;';
+                    const amount = document.createElement('span');
+                    amount.className = 'history-amount';
+                    amount.textContent = formatCurrency(item.amount);
+                    const badge = document.createElement('span');
+                    badge.style.cssText = 'font-size:0.75rem; color:var(--primary); font-weight:600; background:var(--primary-light-bg); padding:2px 6px; border-radius:4px;';
+                    badge.textContent = `Parc. ${item.currentInstallment}/${item.totalInstallments}`;
+                    amountLine.append(amount, badge);
+                    const due = document.createElement('span');
+                    due.className = 'history-date';
+                    due.style.cssText = 'display:block; margin-top:3px;';
+                    due.textContent = `Início ${displayFirstDueMonth(item.firstDueMonth)} · Vencimento dia ${effectiveDueDay(item.dueDateDay, item.firstDueMonth)}`;
+                    info.append(name, amountLine, due);
+
+                    const actions = document.createElement('div');
+                    actions.style.cssText = 'display:flex; gap:6px; align-items:center; flex-shrink:0; margin-left:8px;';
                     const edit = document.createElement('button');
-                    edit.className = 'card-btn edit-btn'; edit.textContent = 'Editar'; edit.onclick = () => openCreditInstallmentModal(item.id);
+                    edit.className = 'card-btn edit-btn';
+                    edit.title = 'Editar';
+                    edit.setAttribute('aria-label', `Editar ${item.name}`);
+                    edit.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>';
+                    edit.onclick = () => openCreditInstallmentModal(item.id);
+                    const sep = document.createElement('div');
+                    sep.style.cssText = 'width:1px; height:14px; background-color:var(--border-color); margin:0 2px;';
+                    sep.setAttribute('aria-hidden', 'true');
                     const del = document.createElement('button');
-                    del.className = 'card-btn delete-btn'; del.textContent = 'Excluir'; del.onclick = () => deleteCreditInstallment(item.id);
-                    row.append(edit, del); details.appendChild(row);
+                    del.className = 'card-btn delete-btn';
+                    del.title = 'Excluir';
+                    del.setAttribute('aria-label', `Excluir ${item.name}`);
+                    del.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>';
+                    del.onclick = () => deleteCreditInstallment(item.id);
+                    actions.append(edit, sep, del);
+                    row.append(info, actions);
+                    details.appendChild(row);
                 });
                 list.appendChild(details);
             }
+
 
             if (completedItems.length > 0) {
                 const detailsEl = document.createElement('details');
@@ -4997,6 +5064,10 @@
                 totalField.value = '';
                 startField.value = '';
             }
+
+            // Cada abertura reinicia o acionador, exceto ao editar um vencimento já definido.
+            setFirstDueMonthFieldVisible('other', !!startField.value.trim());
+
             // Reinicia o valor permitido após cada abertura do modal (inclusive em edições).
             document.querySelectorAll('#modal-other-commitment input[oninput^="limitIntegerInput"]').forEach(field => { field.dataset.lastValidNumeric = field.value; });
             openModal('modal-other-commitment');
@@ -5102,26 +5173,60 @@
             totalEl.innerText = formatCurrency(totalActive);
             if (countEl) countEl.innerText = activeItems.length;
 
-            // Agendados permanecem acessíveis para edição/exclusão, mas não entram no subtotal.
+            
+            // Agendados: divisor simples, seta animada existente e apresentação igual à dos itens ativos.
+            // Continuam acessíveis para edição/exclusão e fora do subtotal mensal.
+            
             if (scheduledItems.length > 0) {
+                // Evita a segunda linha entre o último lançamento ativo e a seção Agendados.
+                if (activeItems.length > 0) {
+                    const lastActiveRow = list.lastElementChild;
+                    if (lastActiveRow && lastActiveRow.classList.contains('history-item')) {
+                        lastActiveRow.style.borderBottom = 'none';
+                    }
+                }
+
                 const details = document.createElement('details');
+
                 details.className = 'report-details';
-                details.style.cssText = 'margin-top:14px; background:var(--card-bg); border:1px solid var(--border-color); border-radius:10px; padding:8px 12px;';
+                details.style.cssText = 'margin-top:14px; border-top:1px solid var(--dashed-line); padding-top:10px;';
                 const summary = document.createElement('summary');
-                summary.style.cssText = 'cursor:pointer; color:var(--text-main); font-size:0.88rem; font-weight:600;';
-                summary.textContent = `Compromissos agendados (${scheduledItems.length})`;
+                summary.style.cssText = 'display:flex; justify-content:space-between; align-items:center; gap:8px; padding:4px 8px; list-style:none; cursor:pointer; color:var(--text-main); font-size:0.88rem; font-weight:600;';
+                summary.innerHTML = `<span>Compromissos agendados (${scheduledItems.length})</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="report-chevron" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
                 details.appendChild(summary);
+
                 scheduledItems.forEach(item => {
                     const row = document.createElement('div');
                     row.className = 'history-item';
+                    row.style.padding = '10px 8px';
                     const info = document.createElement('div');
                     info.className = 'history-info';
-                    info.textContent = `${item.name} · ${formatCurrency(item.amount)} · ${item.currentInstallment}/${item.totalInstallments} · Início ${displayFirstDueMonth(item.firstDueMonth)}`;
-                    row.appendChild(info); row.appendChild(createOtherCommitmentActions(item));
+                    info.style.cssText = 'min-width:0; flex:1; overflow:hidden;';
+                    const name = document.createElement('span');
+                    name.className = 'history-desc';
+                    name.style.cssText = 'font-weight:600; font-size:0.95rem; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;';
+                    name.textContent = item.name;
+                    name.title = item.name;
+                    const amountLine = document.createElement('div');
+                    amountLine.style.cssText = 'display:flex; align-items:center; gap:8px; margin-top:3px; flex-wrap:wrap;';
+                    const amount = document.createElement('span');
+                    amount.className = 'history-amount';
+                    amount.textContent = formatCurrency(item.amount);
+                    const badge = document.createElement('span');
+                    badge.style.cssText = 'font-size:0.75rem; color:var(--primary); font-weight:600; background:var(--primary-light-bg); padding:2px 6px; border-radius:4px;';
+                    badge.textContent = `Parc. ${item.currentInstallment}/${item.totalInstallments}`;
+                    amountLine.append(amount, badge);
+                    const due = document.createElement('span');
+                    due.className = 'history-date';
+                    due.style.cssText = 'display:block; margin-top:3px;';
+                    due.textContent = `Início ${displayFirstDueMonth(item.firstDueMonth)} · Vencimento dia ${effectiveDueDay(item.dueDateDay, item.firstDueMonth)}`;
+                    info.append(name, amountLine, due);
+                    row.append(info, createOtherCommitmentActions(item));
                     details.appendChild(row);
                 });
                 list.appendChild(details);
             }
+
 
             // Assim como em Parcelamentos, compromissos concluídos permanecem acessíveis para consulta/edição/exclusão.
             if (completedItems.length > 0) {
@@ -5431,18 +5536,25 @@
                 return;
             }
 
+            
             // 1. Despesas Variáveis (Quantidade de Envelopes)
-            let totalVariableCount = envelopes.length; 
+            let totalVariableCount = envelopes.length;
+
+            // Contadores do Relatório Financeiro:
+            // Consideram somente os compromissos ativos na competência mensal vigente.
+            // Agendamentos futuros e itens concluídos permanecem preservados,
+            // mas não integram as quantidades exibidas no relatório.
 
             // 2. Despesas Fixas
-            let totalFixedCount = fixedExpenses.length;
+            const totalFixedCount = fixedExpenses.filter(i => isRecurringDueInPeriod(i, getMonthKey())).length;
 
             // 3. Parcelamentos
-            let totalCreditCount = creditInstallments.length;
-            // Outros compromissos contam como ativos enquanto a parcela atual não ultrapassar o total.
+            const totalCreditCount = creditInstallments.filter(i => isInstallmentDueInPeriod(i, getMonthKey())).length;
+
+            // 4. Outros Compromissos
             const activeOtherCommitments = otherCommitments.filter(i => isInstallmentDueInPeriod(i, getMonthKey()));
-            // O contador mostra todos os registros, como em Parcelamentos; o subtotal considera somente os ativos.
-            const totalOtherCount = otherCommitments.length;
+            const totalOtherCount = activeOtherCommitments.length;
+
             // ---------------------------------------------
 
             let totalSpentCurrent = 0;
