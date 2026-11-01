@@ -1,5 +1,5 @@
-// v16: atualiza o cache offline após a implementação do lembrete de backup nas configurações.
-const CACHE_NAME = 'envelopes-cache-v16';
+// v17: atualiza o cache offline após a implementação do lembrete de backup nas configurações.
+const CACHE_NAME = 'envelopes-cache-v17';
 
 const ASSETS_TO_CACHE = [
   './',
