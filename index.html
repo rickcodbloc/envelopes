@@ -1472,9 +1472,29 @@
             gap: 8px;
             margin-top: 11px;
         }
-        .monthly-snapshot-metric { min-width: 0; padding: 8px; border-radius: 8px; background: var(--bg); }
-        .monthly-snapshot-metric span { display: block; color: var(--text-muted); font-size: 0.7rem; margin-bottom: 3px; }
-        .monthly-snapshot-metric strong { display: block; color: var(--text-main); font-size: 0.8rem; overflow-wrap: anywhere; }
+        
+        /* Histórico mensal: superfície dos totais, contorno suave e melhor leitura. */
+        .monthly-snapshot-metric {
+            min-width: 0;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: color-mix(in srgb, var(--card-bg) 94%, var(--text-main) 6%);
+        }
+
+        .monthly-snapshot-metric span {
+            display: block;
+            color: color-mix(in srgb, var(--text-main) 25%, var(--text-muted) 75%);
+            font-size: 0.75rem;
+            margin-bottom: 3px;
+        }
+
+        .monthly-snapshot-metric strong {
+            display: block;
+            color: var(--text-main);
+            font-size: 0.95rem;
+            overflow-wrap: anywhere;
+        }
         .monthly-snapshot-details { border-top: 1px solid var(--border-color); margin-top: 11px; padding-top: 10px; }
         .monthly-snapshot-section { margin-top: 11px; }
         .monthly-snapshot-section:first-child { margin-top: 0; }
