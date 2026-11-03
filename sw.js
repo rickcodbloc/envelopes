@@ -1,5 +1,5 @@
-// v21: atualiza o cache offline para incluir a padronização visual dos agendamentos/Refinamentos visuais atuais.
-const CACHE_NAME = 'envelopes-cache-v21';
+// v23: atualiza os temas roxo, azul e rosa nos modos claro e escuro.
+const CACHE_NAME = 'envelopes-cache-v23';
 
 const ASSETS_TO_CACHE = [
   './',

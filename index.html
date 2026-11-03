@@ -19,25 +19,37 @@
     <title>Meus Envelopes</title>
 <style>
         /* Temas de Cores Oficiais */
+        /* Refinamento dos temas: --primary define textos, ícones, contornos e indicadores;
+           --primary-fill usa o tom aprovado para superfícies com texto branco;
+           --primary-chart distingue as áreas dos gráficos sem alterar seus cálculos. */
         :root, body[data-theme="purple"] {
             --primary: #8A05BE;
+            --primary-fill: #8A05BE;
+            --primary-chart: #8A05BE;
             --primary-dark: #690491;
             --primary-light-bg: rgba(138, 5, 190, 0.12);
         }
 
         body[data-theme="blue"] {
-            --primary: #007AFF;
-            --primary-dark: #0056B3;
-            --primary-light-bg: rgba(0, 122, 255, 0.12);
+            --primary: #225CAF;
+            --primary-fill: #286DCC;
+            --primary-chart: #286DCC;
+            --primary-dark: #2059AA;
+            --primary-light-bg: rgba(40, 109, 204, 0.12);
         }
 
         body[data-theme="pink"] {
-            --primary: #E91C5D;
-            --primary-dark: #C21248;
-            --primary-light-bg: rgba(233, 28, 93, 0.12);
+            --primary: #AD2F61;
+            --primary-fill: #C43D72;
+            --primary-chart: #C43D72;
+            --primary-dark: #A62F5F;
+            --primary-light-bg: rgba(196, 61, 114, 0.12);
         }
 
         :root {
+            --chart-purple: #8A05BE;
+            --chart-blue: #286DCC;
+            --chart-pink: #C43D72;
             --bg: #F0F1F5;
             --card-bg: #FFFFFF;
             --text-main: #333333;
@@ -55,19 +67,28 @@
         /* Suporte a Dark Mode (Automático via Sistema ou Forçado por Preferência) */
         @media (prefers-color-scheme: dark) {
             body:not([data-color-mode="light"]) {
-                --primary: #9B30F5;
-                --primary-dark: #B055FF;
-                --primary-light-bg: rgba(155, 48, 245, 0.18);
+                --primary: #CD9AF2;
+                --primary-fill: #9B3BD3;
+                --primary-chart: #CD9AF2;
+                --chart-purple: #CD9AF2;
+                --chart-blue: #77A9F0;
+                --chart-pink: #F395B6;
+                --primary-dark: #7E29B1;
+                --primary-light-bg: rgba(205, 154, 242, 0.14);
             }
             body[data-theme="blue"]:not([data-color-mode="light"]) {
-                --primary: #0A84FF;
-                --primary-dark: #409CFF;
-                --primary-light-bg: rgba(10, 132, 255, 0.18);
+                --primary: #77A9F0;
+                --primary-fill: #2E6BC4;
+                --primary-chart: #77A9F0;
+                --primary-dark: #2457A4;
+                --primary-light-bg: rgba(119, 169, 240, 0.14);
             }
             body[data-theme="pink"]:not([data-color-mode="light"]) {
-                --primary: #FF375F;
-                --primary-dark: #FF6482;
-                --primary-light-bg: rgba(255, 55, 95, 0.18);
+                --primary: #F395B6;
+                --primary-fill: #B83E6C;
+                --primary-chart: #F395B6;
+                --primary-dark: #9D2F59;
+                --primary-light-bg: rgba(243, 149, 182, 0.14);
             }
 
             body:not([data-color-mode="light"]) {
@@ -85,6 +106,10 @@
                 --card-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
             }
 
+            body:not([data-color-mode="light"]) .settings-color-swatch {
+                background-color: var(--theme-swatch-dark);
+            }
+
                 body:not([data-color-mode="light"]) .envelope-card {
                 border: 1px solid rgba(255, 255, 255, 0.16) !important;
             }
@@ -92,9 +117,14 @@
 
         /* Modo Escuro Forçado Manualmente */
         body[data-color-mode="dark"] {
-            --primary: #9B30F5;
-            --primary-dark: #B055FF;
-            --primary-light-bg: rgba(155, 48, 245, 0.18);
+            --primary: #CD9AF2;
+            --primary-fill: #9B3BD3;
+            --primary-chart: #CD9AF2;
+            --chart-purple: #CD9AF2;
+            --chart-blue: #77A9F0;
+            --chart-pink: #F395B6;
+            --primary-dark: #7E29B1;
+            --primary-light-bg: rgba(205, 154, 242, 0.14);
             --bg: #000000;
             --card-bg: #1C1C1E;
             --text-main: #F2F2F7;
@@ -109,14 +139,21 @@
             --card-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
         }
         body[data-theme="blue"][data-color-mode="dark"] {
-            --primary: #0A84FF;
-            --primary-dark: #409CFF;
-            --primary-light-bg: rgba(10, 132, 255, 0.18);
+            --primary: #77A9F0;
+            --primary-fill: #2E6BC4;
+            --primary-chart: #77A9F0;
+            --primary-dark: #2457A4;
+            --primary-light-bg: rgba(119, 169, 240, 0.14);
         }
         body[data-theme="pink"][data-color-mode="dark"] {
-            --primary: #FF375F;
-            --primary-dark: #FF6482;
-            --primary-light-bg: rgba(255, 55, 95, 0.18);
+            --primary: #F395B6;
+            --primary-fill: #B83E6C;
+            --primary-chart: #F395B6;
+            --primary-dark: #9D2F59;
+            --primary-light-bg: rgba(243, 149, 182, 0.14);
+        }
+        body[data-color-mode="dark"] .settings-color-swatch {
+            background-color: var(--theme-swatch-dark);
         }
         body[data-color-mode="dark"] .envelope-card {
             border: 1px solid rgba(255, 255, 255, 0.16) !important;
@@ -184,7 +221,7 @@
         }
 
         header {
-        background-color: var(--primary);
+        background-color: var(--primary-fill);
         color: white;
         padding-top: max(14px, calc(8px + env(safe-area-inset-top)));
         padding-bottom: 10px;
@@ -900,7 +937,7 @@
 
         .btn:active { transform: scale(0.97); opacity: 0.9; }
         .btn-cancel { background-color: var(--border-color); color: var(--text-main); }
-        .btn-confirm { background-color: var(--primary); color: white; }
+        .btn-confirm { background-color: var(--primary-fill); color: white; }
         .btn-danger { background-color: var(--danger); color: white; }
 
         #history-list {
@@ -999,7 +1036,7 @@
         .checkbox-item input[type="checkbox"] {
             width: 20px;
             height: 20px;
-            accent-color: var(--primary);
+            accent-color: var(--primary-fill);
             flex-shrink: 0;
         }
         .checkbox-item-title {
@@ -1080,7 +1117,7 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
         input:checked + .slider {
-            background-color: var(--primary);
+            background-color: var(--primary-fill);
         }
         input:checked + .slider:before {
             transform: translateX(22px);
@@ -1139,7 +1176,9 @@
             outline-offset: -3px;
             z-index: 1;
         }
+        /* As amostras seguem a aparência efetiva, mantendo os nomes e os comandos do seletor. */
         .settings-color-swatch {
+            background-color: var(--theme-swatch-light);
             width: 19px;
             height: 19px;
             border-radius: 50%;
@@ -1695,7 +1734,7 @@
 
                 <!-- Botões de Alternância (Pílula) -->
                 <div style="display: flex; background: var(--border-color); padding: 4px; border-radius: 10px; margin-bottom: 16px;">
-                    <button class="btn chart-tab-pill" id="chart-tab-general" onclick="switchChartTab('general')" style="flex: 1; padding: 8px 4px; font-size: 0.85rem; white-space: nowrap; background: var(--primary); color: white; border-radius: 8px;">Geral</button>
+                    <button class="btn chart-tab-pill" id="chart-tab-general" onclick="switchChartTab('general')" style="flex: 1; padding: 8px 4px; font-size: 0.85rem; white-space: nowrap; background: var(--primary-fill); color: white; border-radius: 8px;">Geral</button>
                     <button class="btn chart-tab-pill" id="chart-tab-envelopes" onclick="switchChartTab('envelopes')" style="flex: 1; padding: 8px 4px; font-size: 0.85rem; white-space: nowrap; background: transparent; color: var(--text-main); border-radius: 8px;">Envelopes</button>
                 </div>
 
@@ -1834,7 +1873,7 @@
                 </div>
                 <p class="modal-subtitle">Ajuste a ordem das suas despesas fixas:</p>
                 <label for="fixed-auto-sort-cb" style="display:flex; align-items:center; gap:8px; margin:0 0 12px; padding:8px 10px; border-radius:8px; background:var(--border-color); min-width:0; cursor:pointer;">
-                    <input type="checkbox" id="fixed-auto-sort-cb" onchange="toggleFixedAutoSort(this)" style="width:18px; height:18px; flex-shrink:0; accent-color:var(--primary); cursor:pointer;">
+                    <input type="checkbox" id="fixed-auto-sort-cb" onchange="toggleFixedAutoSort(this)" style="width:18px; height:18px; flex-shrink:0; accent-color:var(--primary-fill); cursor:pointer;">
                     <span id="fixed-auto-sort-label" style="font-size:0.8rem; font-weight:600; line-height:1.2; color:var(--text-main);">Auto por vencimento</span>
                 </label>
                 <div id="fixed-reorder-list" class="checkbox-list" style="padding: 8px;"></div>
@@ -1908,7 +1947,7 @@
         </div>
         <p class="modal-subtitle">Ajuste a ordem dos seus compromissos:</p>
         <label for="other-auto-sort-cb" style="display:flex; align-items:center; gap:8px; margin:0 0 12px; padding:8px 10px; border-radius:8px; background:var(--border-color); cursor:pointer;">
-            <input type="checkbox" id="other-auto-sort-cb" onchange="toggleOtherAutoSort(this)" style="width:18px; height:18px; flex-shrink:0; accent-color:var(--primary); cursor:pointer;">
+            <input type="checkbox" id="other-auto-sort-cb" onchange="toggleOtherAutoSort(this)" style="width:18px; height:18px; flex-shrink:0; accent-color:var(--primary-fill); cursor:pointer;">
             <span id="other-auto-sort-label" style="font-size:0.8rem; font-weight:600; color:var(--text-main);">Auto por vencimento</span>
         </label>
         <div id="other-reorder-list" class="checkbox-list" style="padding: 8px;"></div>
@@ -1954,7 +1993,7 @@
                     <div style="width:20px; height:20px; display:flex; align-items:center; justify-content:center; color:var(--danger);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg></div>
                     <h2 style="margin:0;">Redefinir aplicativo</h2>
                 </div>
-                <p class="modal-subtitle" style="color: var(--danger); font-weight: 600;">Atenção: Esta ação apagará todos os envelopes, gastos, despesas fixas, parcelamentos, históricos e configurações locais, retornando o aplicativo ao estado inicial.</p>
+                <p class="modal-subtitle" style="color: var(--danger); font-weight: 600;">Atenção: Esta ação apagará envelopes, gastos, despesas fixas, parcelamentos, outros compromissos e históricos, além de redefinir o tema e as ordenações. O modo claro/escuro e a preferência de zoom serão mantidos.</p>
                 <div class="modal-buttons">
                     <button class="btn btn-cancel" onclick="closeModal('modal-restore')">Cancelar</button>
                     <button class="btn btn-danger" onclick="confirmRestoreApp()">Restaurar</button>
@@ -1974,13 +2013,13 @@
                     <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">Tema de Cores</label>
                     <div class="settings-color-options" role="group" aria-label="Tema de cores">
                         <button type="button" class="settings-color-option" data-theme-option="purple" onclick="setAppTheme('purple')" aria-pressed="false" title="Roxo padrão">
-                            <span class="settings-color-swatch" style="background:#8A05BE;" aria-hidden="true"></span>Roxo
+                            <span class="settings-color-swatch" style="--theme-swatch-light:#8A05BE; --theme-swatch-dark:#9B3BD3;" aria-hidden="true"></span>Roxo
                         </button>
                         <button type="button" class="settings-color-option" data-theme-option="blue" onclick="setAppTheme('blue')" aria-pressed="false" title="Azul elegante">
-                            <span class="settings-color-swatch" style="background:#007AFF;" aria-hidden="true"></span>Azul
+                            <span class="settings-color-swatch" style="--theme-swatch-light:#286DCC; --theme-swatch-dark:#2E6BC4;" aria-hidden="true"></span>Azul
                         </button>
                         <button type="button" class="settings-color-option" data-theme-option="pink" onclick="setAppTheme('pink')" aria-pressed="false" title="Rosa vibrante">
-                            <span class="settings-color-swatch" style="background:#E91C5D;" aria-hidden="true"></span>Rosa
+                            <span class="settings-color-swatch" style="--theme-swatch-light:#C43D72; --theme-swatch-dark:#B83E6C;" aria-hidden="true"></span>Rosa
                         </button>
                     </div>
                 </div>
@@ -2123,10 +2162,10 @@
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
                         </div>
                         
-<!-- Transporte -->
-<div class="icon-option" onclick="selectSvgIcon('<svg width=\'20\' height=\'20\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.8\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><circle cx=\'7\' cy=\'17\' r=\'2\'/><circle cx=\'17\' cy=\'17\' r=\'2\'/><path d=\'M5 17H3v-6l2-5h9l4 5h1a2 2 0 0 1 2 2v4h-2m-4 0H9m-6-6h15m-6 0V6\'/></svg>', this)" title="Transporte">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/><path d="M5 17H3v-6l2-5h9l4 5h1a2 2 0 0 1 2 2v4h-2m-4 0H9m-6-6h15m-6 0V6"/></svg>
-</div>
+                    <!-- Transporte -->
+                    <div class="icon-option" onclick="selectSvgIcon('<svg width=\'20\' height=\'20\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.8\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><circle cx=\'7\' cy=\'17\' r=\'2\'/><circle cx=\'17\' cy=\'17\' r=\'2\'/><path d=\'M5 17H3v-6l2-5h9l4 5h1a2 2 0 0 1 2 2v4h-2m-4 0H9m-6-6h15m-6 0V6\'/></svg>', this)" title="Transporte">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/><path d="M5 17H3v-6l2-5h9l4 5h1a2 2 0 0 1 2 2v4h-2m-4 0H9m-6-6h15m-6 0V6"/></svg>
+                    </div>
 
                         <!-- Alimentação (Café / Lanche do dia a dia) -->
                         <div class="icon-option" onclick="selectSvgIcon('<svg width=\'20\' height=\'20\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.8\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><path d=\'M18 8h1a4 4 0 0 1 0 8h-1\'/><path d=\'M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z\'/><line x1=\'6\' y1=\'1\' x2=\'6\' y2=\'4\'/><line x1=\'10\' y1=\'1\' x2=\'10\' y2=\'4\'/><line x1=\'14\' y1=\'1\' x2=\'14\' y2=\'4\'/></svg>', this)" title="Alimentação">
@@ -2264,7 +2303,7 @@
                         Virar o Mês
                     </h2>
                     <label class="modal-checkbox-label">
-                        <input type="checkbox" id="reset-keep-history" checked style="width: 20px; height: 20px; accent-color: var(--primary); cursor: pointer;"> Manter histórico
+                        <input type="checkbox" id="reset-keep-history" checked style="width: 20px; height: 20px; accent-color: var(--primary-fill); cursor: pointer;"> Manter histórico
                     </label>
                 </div>
                 <p id="reset-envelope-name" style="margin-bottom:12px; color:var(--primary); font-weight:bold;"></p>
@@ -2317,7 +2356,7 @@
                 <div id="import-list" class="checkbox-list"></div>
                 <!-- Somente backups completos da versão 9 oferecem restauração integral explícita. -->
                 <label id="import-restore-option" class="modal-checkbox-label" style="margin-top:12px; display:none; align-items:flex-start;">
-                    <input type="checkbox" id="import-restore-cb" style="accent-color:var(--primary); width:19px; height:19px; flex-shrink:0;" onchange="updateImportRestoreView()">
+                    <input type="checkbox" id="import-restore-cb" style="accent-color:var(--primary-fill); width:19px; height:19px; flex-shrink:0;" onchange="updateImportRestoreView()">
                     <span>Restaurar backup integral (substituir meus dados atuais pelos dados deste arquivo)</span>
                 </label>
                 <div class="modal-buttons">
@@ -2331,13 +2370,121 @@
     <script>
         const svgDefault = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4H3a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h18a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2Z"/><path d="M16 12h2"/><path d="M12 12h.01"/></svg>';
 
+        // Integridade local: gravações financeiras relacionadas usam um registro de recuperação.
+        // O formato dos dados e dos backups permanece igual; este registro interno guarda apenas
+        // os valores anteriores até que todas as chaves tenham sido gravadas com sucesso.
+        const FINANCIAL_STORAGE_KEYS = [
+            'myEnvelopes', 'myFixedExpenses', 'myFixedAutoSort', 'myCreditInstallments',
+            'myOtherCommitments', 'myOtherAutoSort', 'myMonthlySnapshots',
+            'myOpenMonthlySnapshot', 'myCycleState'
+        ];
+        const FINANCIAL_RECOVERY_KEY = 'myPendingFinancialWrite';
+        const storageReadProblems = new Set();
+        let storageRecoveryPending = false;
+        let allowUnreadableReplacement = false;
+        let activeStorageTransaction = null;
+        let suspendMonthlySnapshotUpdates = false;
+
+        const restoreStoredValues = (entries) => {
+            let restored = true;
+            // Só restaura valores que realmente mudaram; nunca remove previamente dados intactos.
+            entries.slice().reverse().forEach(([key, value]) => {
+                try {
+                    if (localStorage.getItem(key) === value) return;
+                    if (value === null) localStorage.removeItem(key);
+                    else localStorage.setItem(key, value);
+                } catch (error) {
+                    restored = false;
+                    console.error('Não foi possível recuperar o armazenamento:', key, error);
+                }
+            });
+            return restored;
+        };
+
+        // Uma interrupção entre escritas é recuperada antes de carregar qualquer coleção.
+        try {
+            const rawRecovery = localStorage.getItem(FINANCIAL_RECOVERY_KEY);
+            if (rawRecovery !== null) {
+                storageRecoveryPending = true;
+                const recovery = JSON.parse(rawRecovery);
+                if (!recovery || recovery.version !== 1 || !Array.isArray(recovery.values)
+                    || !recovery.values.every(entry => Array.isArray(entry) && entry.length === 2
+                        && FINANCIAL_STORAGE_KEYS.includes(entry[0]) && (entry[1] === null || typeof entry[1] === 'string'))
+                    || new Set(recovery.values.map(entry => entry[0])).size !== recovery.values.length) {
+                    throw new Error('Registro de recuperação inválido; conteúdo original preservado.');
+                }
+                if (!restoreStoredValues(recovery.values)) throw new Error('Recuperação pendente.');
+                localStorage.removeItem(FINANCIAL_RECOVERY_KEY);
+                storageRecoveryPending = false;
+            }
+        } catch (error) {
+            storageRecoveryPending = true;
+            console.error('Não foi possível concluir a recuperação local:', error);
+        }
+
+        const readStoredValue = (key) => {
+            if (activeStorageTransaction && activeStorageTransaction.has(key)) return activeStorageTransaction.get(key);
+            try { return localStorage.getItem(key); }
+            catch (error) {
+                storageReadProblems.add(key);
+                console.error('Não foi possível ler o armazenamento:', key, error);
+                return null;
+            }
+        };
+
+        const commitStoredChanges = (changes) => {
+            if ((storageReadProblems.size && !allowUnreadableReplacement) || storageRecoveryPending) throw new Error('Armazenamento protegido para preservar os dados não recuperados.');
+            const changed = [...changes].filter(([key, value]) => localStorage.getItem(key) !== value);
+            if (!changed.length) return;
+            const previous = changed.map(([key]) => [key, localStorage.getItem(key)]);
+            // Se não houver espaço nem para preparar a recuperação, nenhuma chave financeira é alterada.
+            localStorage.setItem(FINANCIAL_RECOVERY_KEY, JSON.stringify({ version: 1, values: previous }));
+            try {
+                changed.forEach(([key, value]) => {
+                    if (value === null) localStorage.removeItem(key);
+                    else localStorage.setItem(key, value);
+                });
+                localStorage.removeItem(FINANCIAL_RECOVERY_KEY);
+            } catch (error) {
+                storageRecoveryPending = !restoreStoredValues(previous);
+                if (!storageRecoveryPending) {
+                    try { localStorage.removeItem(FINANCIAL_RECOVERY_KEY); }
+                    catch (cleanupError) { storageRecoveryPending = true; console.error(cleanupError); }
+                }
+                // Se a reversão também falhar, o registro permanece para a próxima abertura.
+                throw error;
+            }
+        };
+
+        const writeStoredValue = (key, value) => {
+            if (!FINANCIAL_STORAGE_KEYS.includes(key)) { localStorage.setItem(key, String(value)); return; }
+            if (activeStorageTransaction) activeStorageTransaction.set(key, String(value));
+            else commitStoredChanges(new Map([[key, String(value)]]));
+        };
+        const removeStoredValue = (key) => {
+            if (!FINANCIAL_STORAGE_KEYS.includes(key)) { localStorage.removeItem(key); return; }
+            if (activeStorageTransaction) activeStorageTransaction.set(key, null);
+            else commitStoredChanges(new Map([[key, null]]));
+        };
+        const withStorageTransaction = (action) => {
+            if (activeStorageTransaction) return action();
+            const changes = new Map();
+            activeStorageTransaction = changes;
+            try {
+                const result = action();
+                activeStorageTransaction = null;
+                commitStoredChanges(changes);
+                return result;
+            } finally { activeStorageTransaction = null; }
+        };
+
         let envelopes = [];
         let fixedExpenses = [];
         let creditInstallments = [];
         let tempEnvelopes = [];
         let tempFixedExpenses = [];
         let tempCreditInstallments = [];
-        let isFixedAutoSort = localStorage.getItem('myFixedAutoSort') !== 'false';
+        let isFixedAutoSort = readStoredValue('myFixedAutoSort') !== 'false';
         let tempIsFixedAutoSort = isFixedAutoSort;
         let currentSelectedSvg = null;
         let currentHistoryEnvId = null;
@@ -2346,7 +2493,7 @@
         let currentView = 'home'; // 'home', 'despesas-fixas', 'parcelamentos', 'relatorio'
         let otherCommitments = [];
         let tempOtherCommitments = [];
-        let isOtherAutoSort = localStorage.getItem('myOtherAutoSort') !== 'false';
+        let isOtherAutoSort = readStoredValue('myOtherAutoSort') !== 'false';
         let tempIsOtherAutoSort = isOtherAutoSort;
 
         // Ordenação estável por vencimento para Outros Compromissos.
@@ -2525,9 +2672,80 @@
         const isInstallmentDueInPeriod = (item, periodKey) => installmentNumberForPeriod(item, periodKey) !== null;
         const isScheduledForLater = (item, periodKey) => !!normalizeFirstDueMonth(item.firstDueMonth) && item.firstDueMonth > periodKey;
 
+        // Validação conservadora: informa dados inválidos sem descartar linhas silenciosamente.
+        // Zero é aceito em registros legados; os formulários continuam exigindo valores positivos.
+        const validateDataCollections = (data) => {
+            const money = value => typeof value === 'number' && Number.isFinite(value) && value >= 0;
+            const optionalText = value => value == null || typeof value === 'string';
+            const require = (condition, message) => { if (!condition) throw new Error(message); };
+            const entries = (items, label) => {
+                require(items == null || Array.isArray(items), `${label}: lista inválida.`);
+                const ids = new Set();
+                (items || []).forEach(item => {
+                    require(item && typeof item === 'object' && money(item.amount), `${label}: valor inválido.`);
+                    require(optionalText(item.date) && optionalText(item.desc) && optionalText(item.paymentMethod), `${label}: campos inválidos.`);
+                    if (item.id != null) {
+                        require((typeof item.id === 'number' && Number.isFinite(item.id)) || typeof item.id === 'string', `${label}: identificador inválido.`);
+                        require(!ids.has(String(item.id)), `${label}: identificadores de gastos duplicados.`);
+                        ids.add(String(item.id));
+                    }
+                });
+            };
+            ['envelopes', 'fixedExpenses', 'creditInstallments', 'otherCommitments', 'monthlySnapshots'].forEach(key => {
+                require(data[key] === undefined || Array.isArray(data[key]), `${key}: lista inválida.`);
+            });
+            (data.envelopes || []).forEach(env => {
+                require(env && typeof env.name === 'string' && env.name.trim() && money(env.total) && optionalText(env.icon), 'Envelope com nome, orçamento ou ícone inválido.');
+                entries(env.expenses, 'Gastos do envelope');
+                require(env.history == null || Array.isArray(env.history), 'Histórico individual inválido.');
+                (env.history || []).forEach(history => {
+                    require(history && Array.isArray(history.expenses) && (history.total == null || money(history.total)), 'Período do histórico individual inválido.');
+                    entries(history.expenses, 'Gastos do histórico');
+                });
+            });
+            ['fixedExpenses', 'creditInstallments', 'otherCommitments'].forEach(key => (data[key] || []).forEach(item => {
+                require(item && typeof item.name === 'string' && item.name.trim() && money(item.amount), 'Compromisso com nome ou valor inválido.');
+                require(optionalText(item.cardName), 'Nome do banco inválido.');
+            }));
+            const snapshots = [...(data.monthlySnapshots || []), ...(data.openMonthlySnapshot == null ? [] : [data.openMonthlySnapshot])];
+            if (data.cycleState != null) {
+                require(typeof data.cycleState === 'object' && typeof data.cycleState.lastObservedCycle === 'string'
+                    && /^\d{4}-(0[1-9]|1[0-2])$/.test(data.cycleState.lastObservedCycle), 'Estado do ciclo mensal inválido.');
+                require(data.cycleState.pendingCycles == null || Array.isArray(data.cycleState.pendingCycles), 'Lista de ciclos pendentes inválida.');
+            }
+            snapshots.forEach(snapshot => {
+                require(snapshot && typeof snapshot.periodKey === 'string' && /^\d{4}-(0[1-9]|1[0-2])$/.test(snapshot.periodKey)
+                    && snapshot.totals && typeof snapshot.totals === 'object', 'Registro mensal inválido.');
+                Object.values(snapshot.totals).forEach(value => require(money(value), 'Valor inválido no registro mensal.'));
+                ['envelopes', 'fixedExpenses', 'creditInstallments', 'otherCommitments'].forEach(key => require(snapshot[key] == null || Array.isArray(snapshot[key]), 'Lista inválida no registro mensal.'));
+                (snapshot.envelopes || []).forEach(row => {
+                    require(row && typeof row.name === 'string' && optionalText(row.icon) && (row.total == null || money(row.total)) && (row.spent == null || money(row.spent)), 'Envelope inválido no registro mensal.');
+                    entries(row.expenses, 'Gastos mensais');
+                    entries(row.retainedExpenses, 'Gastos preservados');
+                });
+                ['fixedExpenses', 'creditInstallments', 'otherCommitments'].forEach(key => (snapshot[key] || []).forEach(item => {
+                    require(item && typeof item.name === 'string' && money(item.amount) && optionalText(item.cardName), 'Compromisso inválido no registro mensal.');
+                }));
+            });
+        };
+
+        // Verifica todas as coleções antes de qualquer migração automática. Ausência é diferente
+        // de conteúdo ilegível: nesse caso, preserva as strings e bloqueia novas gravações financeiras.
+        const storedCollectionFields = {
+            myEnvelopes: 'envelopes', myFixedExpenses: 'fixedExpenses',
+            myCreditInstallments: 'creditInstallments', myOtherCommitments: 'otherCommitments',
+            myMonthlySnapshots: 'monthlySnapshots', myOpenMonthlySnapshot: 'openMonthlySnapshot', myCycleState: 'cycleState'
+        };
+        Object.entries(storedCollectionFields).forEach(([key, field]) => {
+            const raw = readStoredValue(key);
+            if (raw === null) return;
+            try { validateDataCollections({ [field]: JSON.parse(raw) }); }
+            catch (error) { storageReadProblems.add(key); console.error('Conteúdo local preservado para recuperação:', key, error); }
+        });
+
         // CARREGAMENTO SEGURO
         try {
-            const rawEnv = localStorage.getItem('myEnvelopes');
+            const rawEnv = storageReadProblems.has('myEnvelopes') ? null : readStoredValue('myEnvelopes');
             if (rawEnv) {
                 const parsed = JSON.parse(rawEnv);
                 if (Array.isArray(parsed)) {
@@ -2543,7 +2761,7 @@
                         }));
                     // Corrige IDs legados fracionários/duplicados sem alterar IDs válidos.
                     envelopes = ensureUniqueNumericIds(envelopes, normalized => {
-                        try { localStorage.setItem('myEnvelopes', JSON.stringify(normalized)); }
+                        try { writeStoredValue('myEnvelopes', JSON.stringify(normalized)); }
                         catch (error) { console.error('Não foi possível persistir os IDs corrigidos dos envelopes:', error); }
                     });
                 }
@@ -2553,7 +2771,7 @@
         }
 
         try {
-            const rawFixed = localStorage.getItem('myFixedExpenses');
+            const rawFixed = storageReadProblems.has('myFixedExpenses') ? null : readStoredValue('myFixedExpenses');
             if (rawFixed) {
                 const parsed = JSON.parse(rawFixed);
                 if (Array.isArray(parsed)) {
@@ -2568,7 +2786,7 @@
                         }));
                     // Mantém IDs de despesas fixas válidos e corrige somente os inconsistentes.
                     fixedExpenses = ensureUniqueNumericIds(fixedExpenses, normalized => {
-                        try { localStorage.setItem('myFixedExpenses', JSON.stringify(normalized)); }
+                        try { writeStoredValue('myFixedExpenses', JSON.stringify(normalized)); }
                         catch (error) { console.error('Não foi possível persistir os IDs corrigidos das despesas fixas:', error); }
                     });
                     sortFixedExpensesIfNeeded();
@@ -2579,7 +2797,7 @@
         }
 
         try {
-            const rawCredit = localStorage.getItem('myCreditInstallments');
+            const rawCredit = storageReadProblems.has('myCreditInstallments') ? null : readStoredValue('myCreditInstallments');
             if (rawCredit) {
                 const parsed = JSON.parse(rawCredit);
                 if (Array.isArray(parsed)) {
@@ -2599,7 +2817,7 @@
                         }));
                     // IDs inteiros e únicos evitam divergência entre lookup, edição e exclusão.
                     creditInstallments = ensureUniqueNumericIds(creditInstallments, normalized => {
-                        try { localStorage.setItem('myCreditInstallments', JSON.stringify(normalized)); }
+                        try { writeStoredValue('myCreditInstallments', JSON.stringify(normalized)); }
                         catch (error) { console.error('Não foi possível persistir os IDs corrigidos dos parcelamentos:', error); }
                     });
                 }
@@ -2609,7 +2827,7 @@
         }
 
         try {
-            const rawOther = localStorage.getItem('myOtherCommitments');
+            const rawOther = storageReadProblems.has('myOtherCommitments') ? null : readStoredValue('myOtherCommitments');
             if (rawOther) {
                 const parsed = JSON.parse(rawOther);
                 if (Array.isArray(parsed)) {
@@ -2628,7 +2846,7 @@
                         }));
                     // IDs inteiros e únicos evitam divergência entre lookup, edição e exclusão.
                     otherCommitments = ensureUniqueNumericIds(otherCommitments, normalized => {
-                        try { localStorage.setItem('myOtherCommitments', JSON.stringify(normalized)); }
+                        try { writeStoredValue('myOtherCommitments', JSON.stringify(normalized)); }
                         catch (error) { console.error('Não foi possível persistir os IDs corrigidos de outros compromissos:', error); }
                     });
                     sortOtherCommitmentsIfNeeded();
@@ -2641,44 +2859,56 @@
         // Mapeamento das cores primárias oficiais de cada tema
         const themeColors = {
             purple: '#8A05BE',
-            blue: '#007AFF',
-            pink: '#E91C5D'
+            blue: '#286DCC',
+            pink: '#C43D72'
         };
 
-        let appTheme = localStorage.getItem('myAppTheme') || 'purple';
+        let appTheme = readStoredValue('myAppTheme') || 'purple';
         document.body.setAttribute('data-theme', appTheme);
+
+        // Consulta somente propriedades visuais; as definições no CSS são a fonte das cores efetivas.
+        const getThemeVisualColor = (property, fallback = '') => getComputedStyle(document.body).getPropertyValue(property).trim() || fallback;
 
         // Função para atualizar dinamicamente a cor da barra de status (tema do navegador/PWA)
         const updateThemeColorMeta = (theme) => {
             const metaThemeColor = document.querySelector('meta[name="theme-color"]');
-            if (metaThemeColor && themeColors[theme]) {
-                metaThemeColor.setAttribute('content', themeColors[theme]);
+            if (metaThemeColor) {
+                metaThemeColor.setAttribute('content', getThemeVisualColor('--primary-fill', themeColors[theme] || themeColors.purple));
             }
         };
 
-        // Aplica a cor correta na barra de status logo no carregamento inicial
-        updateThemeColorMeta(appTheme);
-
-        let savedColorMode = localStorage.getItem('myColorMode') || 'auto';
+        let savedColorMode = readStoredValue('myColorMode') || 'auto';
         if (savedColorMode !== 'auto') {
             document.body.setAttribute('data-color-mode', savedColorMode);
         }
 
+        // Aplica a cor correta na barra de status logo no carregamento inicial
+        // Aguarda a preferência claro/escuro para não aplicar um tom de outra aparência.
+        updateThemeColorMeta(appTheme);
+
+        const updateThemeAppearance = () => {
+            updateThemeColorMeta(appTheme);
+            // Somente o gráfico usa cores já resolvidas no SVG. O redraw existente suspende
+            // gravações mensais, preservando os dados durante uma mudança puramente visual.
+            if (currentView === 'graficos') renderCurrentView();
+        };
+
         const setAppColorMode = (mode) => {
-            localStorage.setItem('myColorMode', mode);
+            writeStoredValue('myColorMode', mode);
             if (mode === 'auto') {
                 document.body.removeAttribute('data-color-mode');
             } else {
                 document.body.setAttribute('data-color-mode', mode);
             }
             updateThemeModeButtonsUI(mode);
+            updateThemeAppearance();
         };
 
         const updateThemeModeButtonsUI = (activeMode) => {
             document.querySelectorAll('.theme-mode-btn').forEach(btn => {
                 const mode = btn.getAttribute('data-mode');
                 if (mode === activeMode) {
-                    btn.style.backgroundColor = 'var(--primary)';
+                    btn.style.backgroundColor = 'var(--primary-fill)';
                     btn.style.color = 'white';
                 } else {
                     btn.style.backgroundColor = 'var(--border-color)';
@@ -2699,12 +2929,12 @@
         };
 
         // Preferência intencional do projeto: zoom começa desativado e pode ser habilitado nas Configurações.
-        let savedZoomPref = localStorage.getItem('myAllowZoom') === 'true';
+        let savedZoomPref = readStoredValue('myAllowZoom') === 'true';
         applyZoomSetting(savedZoomPref);
 
         const toggleZoomSetting = (checkbox) => {
             const allowZoom = checkbox.checked;
-            localStorage.setItem('myAllowZoom', allowZoom);
+            writeStoredValue('myAllowZoom', allowZoom);
             applyZoomSetting(allowZoom);
         };
 
@@ -2723,7 +2953,7 @@
             'myCreditInstallments', 'myOtherCommitments', 'myOtherAutoSort',
             'myMonthlySnapshots', 'myOpenMonthlySnapshot', 'myCycleState',
             'myAppTheme', 'myColorMode', 'myAllowZoom',
-            'myBackupReminderStart', 'myBackupLastRequestedAt', 'myBackupReminderDismissedAt'
+            'myBackupReminderStart', 'myBackupLastRequestedAt', 'myBackupReminderDismissedAt', FINANCIAL_RECOVERY_KEY
         ];
         let storageWarningShownThisSession = false;
 
@@ -2732,7 +2962,7 @@
             // UTF-16 é uma estimativa conservadora, não uma medição exata em disco.
             let codeUnits = 0;
             APP_LOCAL_STORAGE_KEYS.forEach(key => {
-                const value = localStorage.getItem(key);
+                const value = readStoredValue(key);
                 if (value !== null) codeUnits += key.length + value.length;
             });
             return codeUnits * 2;
@@ -2792,7 +3022,7 @@
 
         const getBackupTimestamp = (key) => {
             try {
-                const raw = localStorage.getItem(key);
+                const raw = readStoredValue(key);
                 if (raw === null) return null;
                 const time = Number(raw);
                 return Number.isFinite(time) && time > 0 && time <= Date.now() ? time : null;
@@ -2803,7 +3033,7 @@
 
         const storeBackupTimestamp = (key) => {
             try {
-                localStorage.setItem(key, String(Date.now()));
+                writeStoredValue(key, String(Date.now()));
                 return true;
             } catch (error) {
                 console.warn('Não foi possível registrar a data do lembrete de backup:', error);
@@ -2867,7 +3097,7 @@
 
         const markCompleteBackupRequested = () => {
             storeBackupTimestamp(BACKUP_LAST_REQUEST_KEY);
-            try { localStorage.removeItem(BACKUP_REMINDER_DISMISSED_KEY); }
+            try { removeStoredValue(BACKUP_REMINDER_DISMISSED_KEY); }
             catch (error) { console.warn('Não foi possível limpar o lembrete de backup:', error); }
             updateStorageMonitor();
         };
@@ -2878,9 +3108,9 @@
             if (storageDetails) storageDetails.open = false;
             const toggleInput = document.getElementById('zoom-toggle-input');
             if (toggleInput) {
-                toggleInput.checked = localStorage.getItem('myAllowZoom') === 'true';
+                toggleInput.checked = readStoredValue('myAllowZoom') === 'true';
             }
-            const currentMode = localStorage.getItem('myColorMode') || 'auto';
+            const currentMode = readStoredValue('myColorMode') || 'auto';
             updateThemeModeButtonsUI(currentMode);
             updateThemeColorButtonsUI(appTheme);
             updateStorageMonitor();
@@ -2890,8 +3120,8 @@
         const setAppTheme = (theme) => {
             appTheme = theme;
             document.body.setAttribute('data-theme', theme);
-            localStorage.setItem('myAppTheme', theme);
-            updateThemeColorMeta(theme); // Atualiza a cor da barra de status com o tema selecionado.
+            writeStoredValue('myAppTheme', theme);
+            updateThemeAppearance(); // Atualiza a cor da barra de status com o tema selecionado.
             updateThemeColorButtonsUI(theme);
         };
 
@@ -3011,7 +3241,7 @@
         };
 
         // Há exatamente uma fotografia encerrada por período. Quando há conflito, o último registro
-        // da sequência vence; a importação aplica primeiro os dados locais e depois o backup selecionado.
+        // da sequência vence; em Adicionar, conflitos locais são filtrados antes desta normalização.
         const uniqueMonthlySnapshotsByPeriod = (snapshots) => {
             const byPeriod = new Map();
             (Array.isArray(snapshots) ? snapshots : []).filter(snapshot => snapshot && isValidMonthKey(snapshot.periodKey))
@@ -3023,14 +3253,14 @@
         // O mês aberto fica separado para não consumir uma das 12 fotografias encerradas.
         let openMonthlySnapshot = null;
         try {
-            const savedOpenSnapshot = normalizeMonthlySnapshot(JSON.parse(localStorage.getItem('myOpenMonthlySnapshot') || 'null'));
+            const savedOpenSnapshot = normalizeMonthlySnapshot(JSON.parse((storageReadProblems.has('myOpenMonthlySnapshot') ? null : readStoredValue('myOpenMonthlySnapshot')) || 'null'));
             if (savedOpenSnapshot) openMonthlySnapshot = savedOpenSnapshot;
         } catch (error) {
             openMonthlySnapshot = null;
         }
         let recoveredCurrentSnapshotFromArchive = null;
         try {
-            const savedSnapshots = JSON.parse(localStorage.getItem(MONTHLY_SNAPSHOTS_KEY) || '[]');
+            const savedSnapshots = JSON.parse((storageReadProblems.has(MONTHLY_SNAPSHOTS_KEY) ? null : readStoredValue(MONTHLY_SNAPSHOTS_KEY)) || '[]');
             if (Array.isArray(savedSnapshots)) {
                 const normalizedSnapshots = uniqueMonthlySnapshotsByPeriod(savedSnapshots.map(normalizeMonthlySnapshot).filter(Boolean));
                 const currentKey = getMonthKey();
@@ -3039,8 +3269,7 @@
                 // na coleção de períodos encerrados: ele volta ao ledger aberto, sem perder seus dados.
                 monthlySnapshots = normalizedSnapshots.filter(snapshot => snapshot.periodKey !== currentKey).slice(-12);
                 if (savedCurrentSnapshot) {
-                    // A mesclagem depende de mergeMonthlySnapshots, declarado após esta etapa de carga.
-                    // Guardamos a fotografia para migrá-la com segurança depois da definição da função.
+                    // Guardamos a fotografia para migrá-la após a definição das rotinas de persistência.
                     recoveredCurrentSnapshotFromArchive = savedCurrentSnapshot;
                 }
             }
@@ -3056,7 +3285,7 @@
             const compacted = uniqueMonthlySnapshotsByPeriod(candidateSnapshots)
                 .filter(snapshot => snapshot.periodKey !== currentKey).slice(-12);
             try {
-                localStorage.setItem(MONTHLY_SNAPSHOTS_KEY, JSON.stringify(compacted));
+                writeStoredValue(MONTHLY_SNAPSHOTS_KEY, JSON.stringify(compacted));
                 monthlySnapshots = compacted;
                 monthlySnapshotSaveError = false;
                 return true;
@@ -3076,7 +3305,7 @@
             bannerDismissedFor: null
         };
         try {
-            const savedCycleState = JSON.parse(localStorage.getItem(MONTH_CYCLE_STATE_KEY) || 'null');
+            const savedCycleState = JSON.parse(readStoredValue(MONTH_CYCLE_STATE_KEY) || 'null');
             if (savedCycleState && isValidMonthKey(savedCycleState.lastObservedCycle)) {
                 cycleStateWasStored = true;
                 monthCycleState = {
@@ -3087,12 +3316,13 @@
                 };
             }
         } catch (error) {
+            storageReadProblems.add(MONTH_CYCLE_STATE_KEY);
             cycleStateWasStored = false;
         }
 
         const persistMonthCycleState = () => {
             try {
-                localStorage.setItem(MONTH_CYCLE_STATE_KEY, JSON.stringify(monthCycleState));
+                writeStoredValue(MONTH_CYCLE_STATE_KEY, JSON.stringify(monthCycleState));
                 return true;
             } catch (error) {
                 console.error('Não foi possível salvar o estado do ciclo mensal:', error);
@@ -3130,7 +3360,7 @@
                 });
             });
             if (changed) {
-                try { localStorage.setItem('myEnvelopes', JSON.stringify(envelopes)); }
+                try { writeStoredValue('myEnvelopes', JSON.stringify(envelopes)); }
                 catch (error) { console.error('Não foi possível atualizar as referências mensais dos gastos antigos:', error); }
             }
         };
@@ -3170,8 +3400,8 @@
             return collected;
         };
 
-        const buildMonthlySnapshot = (periodKey, closedAt = new Date().toISOString()) => {
-            const envelopeRows = envelopes.map(env => {
+        const buildMonthlySnapshot = (periodKey, closedAt = new Date().toISOString(), state = { envelopes, fixedExpenses, creditInstallments, otherCommitments }) => {
+            const envelopeRows = state.envelopes.map(env => {
                 const expenses = collectEnvelopeExpensesForPeriod(env, periodKey);
                 // Apenas gastos explicitamente preservados numa redefinição sem histórico
                 // sobrevivem à limpeza dos lançamentos ativos. Exclusões não são ressuscitadas.
@@ -3194,10 +3424,10 @@
                     retainedExpenses
                 };
             });
-            const fixedRows = fixedExpenses.filter(item => isRecurringDueInPeriod(item, periodKey)).map(item => ({ id: Number(item.id) || 0, name: item.name, amount: item.amount, dueDateDay: normalizeFixedDueDay(item.dueDateDay), firstDueMonth: normalizeFirstDueMonth(item.firstDueMonth) }));
-            const creditRows = creditInstallments.filter(item => isInstallmentDueInPeriod(item, periodKey))
+            const fixedRows = state.fixedExpenses.filter(item => isRecurringDueInPeriod(item, periodKey)).map(item => ({ id: Number(item.id) || 0, name: item.name, amount: item.amount, dueDateDay: normalizeFixedDueDay(item.dueDateDay), firstDueMonth: normalizeFirstDueMonth(item.firstDueMonth) }));
+            const creditRows = state.creditInstallments.filter(item => isInstallmentDueInPeriod(item, periodKey))
                 .map(item => ({ ...item, currentInstallment: installmentNumberForPeriod(item, periodKey) }));
-            const otherRows = otherCommitments.filter(item => isInstallmentDueInPeriod(item, periodKey))
+            const otherRows = state.otherCommitments.filter(item => isInstallmentDueInPeriod(item, periodKey))
                 .map(item => ({ ...item, currentInstallment: installmentNumberForPeriod(item, periodKey) }));
             const variable = envelopeRows.reduce((sum, env) => sum + env.spent, 0);
             const fixed = fixedRows.reduce((sum, item) => sum + item.amount, 0);
@@ -3220,25 +3450,33 @@
         // A mesclagem ampla foi descontinuada: ela ressuscitava registros excluídos.
         // A competência aberta usa apenas o estado efetivo e retainedExpenses de redefinições.
 
-        // Migra fotografias antigas do mês corrente para o ledger aberto, após definir a função de mesclagem.
+        // Migra fotografias antigas do mês corrente para o ledger aberto, após definir a persistência.
         // Se houver um ledger de outro mês ainda aberto, preserva-o como histórico antes de substituí-lo.
         if (recoveredCurrentSnapshotFromArchive) {
             const currentKey = getMonthKey();
+            const previous = JSON.parse(JSON.stringify({ monthlySnapshots, openMonthlySnapshot }));
             try {
-                if (openMonthlySnapshot && openMonthlySnapshot.periodKey !== currentKey
-                    && !monthlySnapshots.some(snapshot => snapshot.periodKey === openMonthlySnapshot.periodKey)) {
-                    monthlySnapshots = uniqueMonthlySnapshotsByPeriod([...monthlySnapshots, openMonthlySnapshot])
-                        .filter(snapshot => snapshot.periodKey !== currentKey).slice(-12);
-                }
-                // A fotografia corrente legada só é retomada quando não existe ledger aberto;
-                // reconstruir a partir do estado ativo eliminará eventuais linhas obsoletas.
-                openMonthlySnapshot = openMonthlySnapshot && openMonthlySnapshot.periodKey === currentKey
-                    ? openMonthlySnapshot : recoveredCurrentSnapshotFromArchive;
-                localStorage.setItem('myOpenMonthlySnapshot', JSON.stringify(openMonthlySnapshot));
-                if (!persistMonthlySnapshots(monthlySnapshots)) {
-                    throw new Error('Não foi possível persistir o histórico após a migração.');
-                }
+                withStorageTransaction(() => {
+                    if (openMonthlySnapshot && openMonthlySnapshot.periodKey !== currentKey
+                        && !monthlySnapshots.some(snapshot => snapshot.periodKey === openMonthlySnapshot.periodKey)) {
+                        monthlySnapshots = uniqueMonthlySnapshotsByPeriod([...monthlySnapshots, openMonthlySnapshot])
+                            .filter(snapshot => snapshot.periodKey !== currentKey).slice(-12);
+                    }
+                    // A fotografia corrente legada só é retomada quando não existe ledger aberto;
+                    // reconstruir a partir do estado ativo eliminará eventuais linhas obsoletas.
+                    openMonthlySnapshot = openMonthlySnapshot && openMonthlySnapshot.periodKey === currentKey
+                        ? openMonthlySnapshot : recoveredCurrentSnapshotFromArchive;
+                    writeStoredValue('myOpenMonthlySnapshot', JSON.stringify(openMonthlySnapshot));
+                    if (!persistMonthlySnapshots(monthlySnapshots)) {
+                        throw new Error('Não foi possível persistir o histórico após a migração.');
+                    }
+                });
             } catch (error) {
+                monthlySnapshots = previous.monthlySnapshots;
+                openMonthlySnapshot = previous.openMonthlySnapshot;
+                // A migração precisa terminar antes de qualquer renderização substituir o ledger antigo.
+                // Reabrir permite nova tentativa; uma restauração integral expressa também pode recuperá-lo.
+                storageReadProblems.add(MONTHLY_SNAPSHOTS_KEY);
                 monthlySnapshotSaveError = true;
                 console.error('Não foi possível migrar a fotografia corrente para o ledger aberto:', error);
             }
@@ -3246,17 +3484,28 @@
 
         // O mês aberto é reconstruído dos registros efetivos, não da união de cadastros antigos.
         // Somente gastos marcados em retainedExpenses durante redefinições são preservados.
-        const updateOpenMonthlySnapshot = () => {
+        const updateOpenMonthlySnapshot = (candidates = {}) => {
+            if (suspendMonthlySnapshotUpdates) return true;
+            if ((storageReadProblems.size && !allowUnreadableReplacement) || storageRecoveryPending) { monthlySnapshotSaveError = true; return false; }
             const currentKey = getMonthKey();
             if (monthCycleState.lastObservedCycle !== currentKey) return false;
-            const liveSnapshot = buildMonthlySnapshot(currentKey);
+            const liveSnapshot = buildMonthlySnapshot(currentKey, undefined, { envelopes, fixedExpenses, creditInstallments, otherCommitments, ...candidates });
             const hasData = liveSnapshot.envelopes.length > 0 || liveSnapshot.fixedExpenses.length > 0 || liveSnapshot.creditInstallments.length > 0 || liveSnapshot.otherCommitments.length > 0;
             if (!hasData && !openMonthlySnapshot) return true;
             if (!hasData && openMonthlySnapshot && openMonthlySnapshot.periodKey !== currentKey) return true;
             const nextSnapshot = liveSnapshot;
             try {
-                localStorage.setItem('myOpenMonthlySnapshot', JSON.stringify(nextSnapshot));
+                // Compara com o armazenamento, pois redefinições e exclusões podem ter
+                // alterado o ledger em memória antes da confirmação conjunta dos dados.
+                const storedSnapshot = JSON.parse(readStoredValue('myOpenMonthlySnapshot') || 'null');
+                if (storedSnapshot && JSON.stringify({ ...nextSnapshot, closedAt: storedSnapshot.closedAt }) === JSON.stringify(storedSnapshot)) {
+                    openMonthlySnapshot = storedSnapshot;
+                    monthlySnapshotSaveError = false;
+                    return true;
+                }
+                writeStoredValue('myOpenMonthlySnapshot', JSON.stringify(nextSnapshot));
                 openMonthlySnapshot = nextSnapshot;
+                monthlySnapshotSaveError = false;
                 return true;
             } catch (error) {
                 monthlySnapshotSaveError = true;
@@ -3271,7 +3520,7 @@
             const existingSnapshot = monthlySnapshots.find(snapshot => snapshot.periodKey === periodKey);
             if (existingSnapshot) {
                 if (openMonthlySnapshot && openMonthlySnapshot.periodKey === periodKey) {
-                    try { localStorage.removeItem('myOpenMonthlySnapshot'); } catch (error) { console.error(error); }
+                    try { removeStoredValue('myOpenMonthlySnapshot'); } catch (error) { console.error(error); }
                     openMonthlySnapshot = null;
                 }
                 return true;
@@ -3284,7 +3533,7 @@
             if (!persistMonthlySnapshots([...monthlySnapshots, snapshotToSave])) return false;
             if (openMonthlySnapshot && openMonthlySnapshot.periodKey === periodKey) {
                 try {
-                    localStorage.removeItem('myOpenMonthlySnapshot');
+                    removeStoredValue('myOpenMonthlySnapshot');
                     openMonthlySnapshot = null;
                 } catch (error) {
                     console.error('Fotografia fechada, mas o ledger aberto não pôde ser removido:', error);
@@ -3296,32 +3545,47 @@
         // O app é offline e não executa enquanto fechado. Por isso fechamos os períodos
         // conhecidos na primeira abertura/ação após a virada, sem inventar dados de meses não observados.
         const checkMonthCycleBoundary = () => {
-            const currentKey = getMonthKey();
-            if (!cycleStateWasStored) {
-                monthCycleState = { lastObservedCycle: currentKey, pendingCycles: [], bannerDismissedFor: null };
-                normalizeLegacyExpensePeriods();
-                persistMonthCycleState();
-                cycleStateWasStored = true;
+            if ((storageReadProblems.size && !allowUnreadableReplacement) || storageRecoveryPending) { monthlySnapshotSaveError = true; return false; }
+            const previous = JSON.parse(JSON.stringify({ monthlySnapshots, openMonthlySnapshot, monthCycleState, cycleStateWasStored, envelopes }));
+            try {
+                return withStorageTransaction(() => {
+                    const currentKey = getMonthKey();
+                    if (!cycleStateWasStored) {
+                        monthCycleState = { lastObservedCycle: currentKey, pendingCycles: [], bannerDismissedFor: null };
+                        normalizeLegacyExpensePeriods();
+                        if (!persistMonthCycleState()) throw new Error('Não foi possível salvar o ciclo inicial.');
+                        cycleStateWasStored = true;
+                        return false;
+                    }
+
+                    normalizeLegacyExpensePeriods();
+                    const previousKey = monthCycleState.lastObservedCycle;
+                    const difference = monthKeyDifference(previousKey, currentKey);
+                    if (!Number.isFinite(difference) || difference <= 0) return false;
+
+                    // A fotografia precisa ser salva antes de avançar os marcadores do ciclo.
+                    if (!captureMonthlySnapshot(previousKey)) throw new Error('Não foi possível fechar o registro mensal.');
+
+                    const pending = new Set(monthCycleState.pendingCycles);
+                    for (let offset = 0; offset < difference; offset++) pending.add(shiftMonthKey(previousKey, offset));
+                    monthCycleState = {
+                        lastObservedCycle: currentKey,
+                        pendingCycles: [...pending].filter(isValidMonthKey).sort().slice(-12),
+                        bannerDismissedFor: null
+                    };
+                    if (!persistMonthCycleState()) throw new Error('Não foi possível salvar a mudança de ciclo.');
+                    return true;
+                });
+            } catch (error) {
+                monthlySnapshots = previous.monthlySnapshots;
+                openMonthlySnapshot = previous.openMonthlySnapshot;
+                monthCycleState = previous.monthCycleState;
+                cycleStateWasStored = previous.cycleStateWasStored;
+                envelopes = previous.envelopes;
+                monthlySnapshotSaveError = true;
+                console.error('Fechamento mensal não confirmado; estado anterior mantido:', error);
                 return false;
             }
-
-            normalizeLegacyExpensePeriods();
-            const previousKey = monthCycleState.lastObservedCycle;
-            const difference = monthKeyDifference(previousKey, currentKey);
-            if (!Number.isFinite(difference) || difference <= 0) return false;
-
-            // A fotografia precisa ser salva antes de avançar os marcadores do ciclo.
-            if (!captureMonthlySnapshot(previousKey)) return false;
-
-            const pending = new Set(monthCycleState.pendingCycles);
-            for (let offset = 0; offset < difference; offset++) pending.add(shiftMonthKey(previousKey, offset));
-            monthCycleState = {
-                lastObservedCycle: currentKey,
-                pendingCycles: [...pending].filter(isValidMonthKey).sort().slice(-12),
-                bannerDismissedFor: null
-            };
-            persistMonthCycleState();
-            return true;
         };
 
         // Inicializa a referência uma vez ou captura o período fechado antes do avanço de parcelas.
@@ -3337,8 +3601,7 @@
             row.spent = row.expenses.reduce((sum, item) => sum + Number(item.amount || 0), 0);
             openMonthlySnapshot.totals.variable = openMonthlySnapshot.envelopes.reduce((sum, item) => sum + Number(item.spent || 0), 0);
             openMonthlySnapshot.totals.grandTotal = openMonthlySnapshot.totals.variable + openMonthlySnapshot.totals.fixed + openMonthlySnapshot.totals.credit + openMonthlySnapshot.totals.other;
-            try { localStorage.setItem('myOpenMonthlySnapshot', JSON.stringify(openMonthlySnapshot)); }
-            catch (error) { monthlySnapshotSaveError = true; console.error('Não foi possível atualizar o ledger após a edição do gasto:', error); }
+            // A gravação é feita por updateApp junto com o lançamento, permitindo reversão integral.
         };
 
         const persistHistoricalExpense = (env, expense, periodKey) => {
@@ -3443,8 +3706,8 @@
             if (!notice) return;
             const currentKey = getMonthKey();
             const pendingCount = monthCycleState.pendingCycles.length;
-            const showForSaveError = monthlySnapshotSaveError && monthCycleState.lastObservedCycle !== currentKey;
-            const shouldShow = currentView === 'home' && envelopes.length > 0 && (pendingCount > 0 || showForSaveError) && monthCycleState.bannerDismissedFor !== currentKey;
+            const showForSaveError = monthlySnapshotSaveError;
+            const shouldShow = currentView === 'home' && (showForSaveError || (envelopes.length > 0 && pendingCount > 0 && monthCycleState.bannerDismissedFor !== currentKey));
             notice.hidden = !shouldShow;
             if (!shouldShow) return;
             const text = document.getElementById('month-cycle-notice-text');
@@ -3469,6 +3732,10 @@
         };
 
         const openPendingCycleAction = () => {
+            if (monthlySnapshotSaveError && monthCycleState.lastObservedCycle === getMonthKey()) {
+                updateApp();
+                return;
+            }
             checkMonthCycleBoundary();
             if (monthlySnapshotSaveError && monthCycleState.lastObservedCycle !== getMonthKey()) {
                 alert('Não foi possível salvar a fotografia do mês anterior. Verifique o espaço de armazenamento do navegador e faça um backup antes de continuar.');
@@ -3502,39 +3769,54 @@
         // Competência mensal: o vencimento informa o dia de pagamento, não o momento de avanço.
         // Atualização por diferença de meses, sem limite artificial de 24 iterações (até 1.000 parcelas).
         const processInstallmentsAutoUpdate = () => {
-            const currentKey = getMonthKey();
-            const processCollection = (items, storageKey) => {
-                const updatedItems = items.map(item => ({ ...item }));
-                let changed = false;
-                updatedItems.forEach(item => {
-                    if (!item || !Number.isInteger(item.currentInstallment) || !Number.isInteger(item.totalInstallments)) return;
-                    if (item.currentInstallment > item.totalInstallments || isScheduledForLater(item, currentKey)) return;
-                    if (!Number.isInteger(item.lastYear) || !Number.isInteger(item.lastMonth) || item.lastMonth < 0 || item.lastMonth > 11) {
-                        item.lastYear = Number(currentKey.slice(0, 4));
-                        item.lastMonth = Number(currentKey.slice(5, 7)) - 1;
-                        changed = true;
-                        return;
-                    }
-                    const lastKey = `${item.lastYear}-${String(item.lastMonth + 1).padStart(2, '0')}`;
-                    const monthsPassed = monthKeyDifference(lastKey, currentKey);
-                    if (monthsPassed <= 0 || !Number.isFinite(monthsPassed)) return;
-                    item.currentInstallment = Math.min(item.totalInstallments + 1, item.currentInstallment + monthsPassed);
-                    item.lastYear = Number(currentKey.slice(0, 4));
-                    item.lastMonth = Number(currentKey.slice(5, 7)) - 1;
-                    changed = true;
+            // Mesmo quando chamada diretamente, fecha o período observado antes de avançar parcelas.
+            checkMonthCycleBoundary();
+            if (monthCycleState.lastObservedCycle !== getMonthKey() || (storageReadProblems.size && !allowUnreadableReplacement) || storageRecoveryPending) return;
+            const previous = JSON.parse(JSON.stringify({ creditInstallments, otherCommitments, openMonthlySnapshot }));
+            try {
+                withStorageTransaction(() => {
+                    const currentKey = getMonthKey();
+                    if (monthCycleState.lastObservedCycle !== currentKey || (storageReadProblems.size && !allowUnreadableReplacement) || storageRecoveryPending) return;
+                    const processCollection = (items, storageKey) => {
+                        const updatedItems = items.map(item => ({ ...item }));
+                        let changed = false;
+                        updatedItems.forEach(item => {
+                            if (!item || !Number.isInteger(item.currentInstallment) || !Number.isInteger(item.totalInstallments)) return;
+                            if (item.currentInstallment > item.totalInstallments || isScheduledForLater(item, currentKey)) return;
+                            if (!Number.isInteger(item.lastYear) || !Number.isInteger(item.lastMonth) || item.lastMonth < 0 || item.lastMonth > 11) {
+                                item.lastYear = Number(currentKey.slice(0, 4));
+                                item.lastMonth = Number(currentKey.slice(5, 7)) - 1;
+                                changed = true;
+                                return;
+                            }
+                            const lastKey = `${item.lastYear}-${String(item.lastMonth + 1).padStart(2, '0')}`;
+                            const monthsPassed = monthKeyDifference(lastKey, currentKey);
+                            if (monthsPassed <= 0 || !Number.isFinite(monthsPassed)) return;
+                            item.currentInstallment = Math.min(item.totalInstallments + 1, item.currentInstallment + monthsPassed);
+                            item.lastYear = Number(currentKey.slice(0, 4));
+                            item.lastMonth = Number(currentKey.slice(5, 7)) - 1;
+                            changed = true;
                 });
                 if (changed) {
-                    try { localStorage.setItem(storageKey, JSON.stringify(updatedItems)); }
-                    catch (error) {
-                        console.error(`Não foi possível salvar a atualização automática em ${storageKey}:`, error);
-                        alert('As parcelas foram atualizadas apenas nesta sessão porque o armazenamento local falhou. Faça um backup e verifique o espaço disponível.');
-                    }
+                    writeStoredValue(storageKey, JSON.stringify(updatedItems));
                 }
                 return updatedItems;
             };
             creditInstallments = processCollection(creditInstallments, 'myCreditInstallments');
             // Outros Compromissos compartilham a mesma competência mensal e avanço automático.
             otherCommitments = processCollection(otherCommitments, 'myOtherCommitments');
+            if (!updateOpenMonthlySnapshot()) throw new Error('Não foi possível salvar o avanço mensal.');
+                });
+            } catch (error) {
+                creditInstallments = previous.creditInstallments;
+                otherCommitments = previous.otherCommitments;
+                openMonthlySnapshot = previous.openMonthlySnapshot;
+                monthlySnapshotSaveError = true;
+                console.error('Atualização de parcelas não confirmada:', error);
+                // Na importação, a operação externa também precisa ser cancelada integralmente.
+                if (activeStorageTransaction) throw error;
+                alert('Não foi possível salvar a atualização mensal. Os dados anteriores foram mantidos; verifique o armazenamento e tente novamente.');
+            }
         };
 
         processInstallmentsAutoUpdate();
@@ -3596,7 +3878,8 @@
                 'inter': 'Inter', 'c6': 'C6 Bank', 'c6bank': 'C6 Bank', 'xp': 'XP',
                 'mercadopago': 'Mercado Pago', 'btg': 'BTG Pactual', 'btgpactual': 'BTG Pactual', 'picpay': 'PicPay'
             };
-            if (bankMap[cleaned]) return bankMap[cleaned];
+            // Nomes livres nunca consultam propriedades herdadas, como constructor ou __proto__.
+            if (Object.prototype.hasOwnProperty.call(bankMap, cleaned)) return bankMap[cleaned];
             const trimmed = rawInput.trim();
             if (!trimmed) return 'Outros';
             return trimmed.charAt(0).toUpperCase() + trimmed.slice(1);
@@ -3677,14 +3960,26 @@
         ['env-total', 'expense-amount', 'reset-total', 'fixed-item-amount', 'credit-item-amount', 'other-item-amount'].forEach(id => setupLiveValueLimit(id));
 
         const formatCurrency = (value) => Number(value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        // Compara o valor que é exibido em centavos, eliminando resíduos binários e zero negativo.
+        const moneyDifference = (left, right) => Math.round((left - right) * 100) / 100 || 0;
         
+        // YYYY-MM-DD é um dia local; horários ISO existentes continuam usando seu fuso original.
+        const parseEntryDate = (value) => {
+            const match = typeof value === 'string' && value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+            if (!match) return new Date(value);
+            const date = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+            return date.getFullYear() === Number(match[1]) && date.getMonth() === Number(match[2]) - 1
+                && date.getDate() === Number(match[3]) ? date : new Date(NaN);
+        };
+
         const formatDate = (isoString) => {
-            const d = new Date(isoString);
+            const d = parseEntryDate(isoString);
             if (isNaN(d.getTime())) return '';
             const day = d.getDate().toString().padStart(2, '0');
             const month = (d.getMonth() + 1).toString().padStart(2, '0');
             const year = d.getFullYear();
             const currentYear = new Date().getFullYear();
+            if (typeof isoString === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(isoString)) return year !== currentYear ? `${day}/${month}/${year}` : `${day}/${month}`;
             const timeStr = `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
             if (year !== currentYear) return `${day}/${month}/${year} às ${timeStr}`;
             return `${day}/${month} às ${timeStr}`;
@@ -3692,31 +3987,44 @@
 
         // Redesenha a tela atual sem gravar dados; também é usado para desfazer uma alteração que não pôde ser salva.
         const renderCurrentView = () => {
-            renderCycleNotice();
-            if (currentView === 'home') renderEnvelopes();
-            else if (currentView === 'despesas-fixas') renderFixedExpensesList();
-            else if (currentView === 'parcelamentos') renderCreditInstallmentsList();
-            else if (currentView === 'outros-compromissos') renderOtherCommitmentsList();
-            else if (currentView === 'relatorio') renderFinancialReport();
-            else if (currentView === 'graficos') renderGraphicsView(); // ADICIONADO
-            else if (currentView === 'historico-mensal') renderMonthlyHistoryView();
+            const wasSuspended = suspendMonthlySnapshotUpdates;
+            suspendMonthlySnapshotUpdates = true;
+            try {
+                renderCycleNotice();
+                if (currentView === 'home') renderEnvelopes();
+                else if (currentView === 'despesas-fixas') renderFixedExpensesList();
+                else if (currentView === 'parcelamentos') renderCreditInstallmentsList();
+                else if (currentView === 'outros-compromissos') renderOtherCommitmentsList();
+                else if (currentView === 'relatorio') renderFinancialReport();
+                else if (currentView === 'graficos') renderGraphicsView(); // ADICIONADO
+                else if (currentView === 'historico-mensal') renderMonthlyHistoryView();
+            } finally { suspendMonthlySnapshotUpdates = wasSuspended; }
         };
 
         const updateApp = (options = {}) => {
-            // A interface continua sendo atualizada, mas uma falha de persistência é informada explicitamente.
-            let envelopeSaveSucceeded = true;
+            // Envelopes e ledger só são confirmados juntos. Uma falha desfaz também a alteração
+            // em memória, evitando apresentar como salvo um lançamento que não entrou no histórico.
+            const previousEnvelopes = readStoredValue('myEnvelopes');
+            const previousOpen = readStoredValue('myOpenMonthlySnapshot');
+            let saved = false;
             try {
-                localStorage.setItem('myEnvelopes', JSON.stringify(envelopes));
+                withStorageTransaction(() => {
+                    writeStoredValue('myEnvelopes', JSON.stringify(envelopes));
+                    if (!updateOpenMonthlySnapshot()) throw new Error('Não foi possível salvar o registro mensal.');
+                });
+                saved = true;
             } catch (error) {
-                envelopeSaveSucceeded = false;
-                console.error('Não foi possível salvar os envelopes no armazenamento local:', error);
+                console.error('Alteração não confirmada no armazenamento local:', error);
+                try { envelopes = previousEnvelopes ? JSON.parse(previousEnvelopes) : []; } catch (ignored) { /* Conteúdo ilegível permanece protegido. */ }
+                try { openMonthlySnapshot = previousOpen ? JSON.parse(previousOpen) : null; } catch (ignored) { /* Conteúdo ilegível permanece protegido. */ }
+                monthlySnapshotSaveError = true;
+                if (options.suppressSaveAlert !== true) alert(storageRecoveryPending
+                    ? 'A gravação falhou e a recuperação local ficou pendente. Não feche o aplicativo; faça um backup dos dados visíveis e verifique o armazenamento.'
+                    : 'Não foi possível salvar a alteração e seu registro mensal. Os dados anteriores foram mantidos. Verifique o armazenamento local e tente novamente.');
             }
             renderCurrentView();
-            if (envelopeSaveSucceeded) updateStorageMonitor(options.suppressSaveAlert !== true);
-            if (!envelopeSaveSucceeded && options.suppressSaveAlert !== true) {
-                alert('As alterações aparecem nesta sessão, mas não foi possível salvá-las permanentemente. Faça um backup assim que o armazenamento voltar a funcionar e evite fechar ou recarregar o aplicativo até resolver o problema.');
-            }
-            return envelopeSaveSucceeded;
+            if (saved) updateStorageMonitor(options.suppressSaveAlert !== true);
+            return saved;
         };
 
         // O saldo do cartão de envelope considera apenas os lançamentos do mês corrente.
@@ -3745,12 +4053,12 @@
             const btnEnvelopes = document.getElementById('chart-tab-envelopes');
 
             if (tab === 'general') {
-                btnGeneral.style.background = 'var(--primary)';
+                btnGeneral.style.background = 'var(--primary-fill)';
                 btnGeneral.style.color = 'white';
                 btnEnvelopes.style.background = 'transparent';
                 btnEnvelopes.style.color = 'var(--text-main)';
             } else {
-                btnEnvelopes.style.background = 'var(--primary)';
+                btnEnvelopes.style.background = 'var(--primary-fill)';
                 btnEnvelopes.style.color = 'white';
                 btnGeneral.style.background = 'transparent';
                 btnGeneral.style.color = 'var(--text-main)';
@@ -3783,7 +4091,7 @@
                 }
 
                 const items = [
-                    { label: 'Despesas Variáveis', value: totalSpentCurrent, color: 'var(--primary)' },
+                    { label: 'Despesas Variáveis', value: totalSpentCurrent, color: 'var(--primary-chart)' },
                     { label: 'Despesas Fixas', value: totalFixed, color: '#32D74B' },
                     { label: 'Parcelamentos', value: activeCreditTotal, color: '#FF9F0A' },
                     { label: 'Outros compromissos', value: totalOther, color: '#64D2FF' }
@@ -3799,7 +4107,13 @@
                     return;
                 }
 
-                const palette = ['#8A05BE', '#007AFF', '#E91C5D', '#32D74B', '#FF9F0A', '#FF453A', '#64D2FF', '#5E5CE6'];
+                // As cores dos três temas acompanham a aparência; as demais categorias são preservadas.
+                const palette = [
+                    getThemeVisualColor('--chart-purple', themeColors.purple),
+                    getThemeVisualColor('--chart-blue', themeColors.blue),
+                    getThemeVisualColor('--chart-pink', themeColors.pink),
+                    '#32D74B', '#FF9F0A', '#FF453A', '#64D2FF', '#5E5CE6'
+                ];
                 const items = envelopes.map((env, idx) => ({
                     label: env.name,
                     value: getEnvSpent(env),
@@ -3866,9 +4180,9 @@
                 cumulativePercent += percent;
 
                 let strokeColor = item.color;
-                if (strokeColor === 'var(--primary)') {
+                if (strokeColor === 'var(--primary)' || strokeColor === 'var(--primary-chart)') {
                     const theme = document.body.getAttribute('data-theme') || 'purple';
-                    strokeColor = theme === 'blue' ? '#007AFF' : (theme === 'pink' ? '#E91C5D' : '#8A05BE');
+                    strokeColor = getThemeVisualColor('--primary-chart', themeColors[theme] || themeColors.purple);
                 }
 
                 svgSlices += `
@@ -4268,22 +4582,34 @@
         const openRestoreModal = () => openModal('modal-restore');
 
         const confirmRestoreApp = () => {
-            localStorage.removeItem('myEnvelopes');
-            localStorage.removeItem('myFixedExpenses');
-            localStorage.removeItem('myFixedAutoSort');
-            localStorage.removeItem('myCreditInstallments');
-            // A restauração também apaga os dados e a preferência de ordenação de Outros Compromissos.
-            localStorage.removeItem('myOtherCommitments');
-            localStorage.removeItem('myOtherAutoSort');
-            // A redefinição total também remove as fotografias mensais e o estado de ciclos pendentes.
-            localStorage.removeItem(MONTHLY_SNAPSHOTS_KEY);
-            localStorage.removeItem(MONTH_CYCLE_STATE_KEY);
-            localStorage.removeItem('myOpenMonthlySnapshot');
-            localStorage.removeItem('myAppTheme');
-            // A redefinição também zera somente as datas informativas do lembrete de backup.
-            localStorage.removeItem(BACKUP_REMINDER_START_KEY);
-            localStorage.removeItem(BACKUP_LAST_REQUEST_KEY);
-            localStorage.removeItem(BACKUP_REMINDER_DISMISSED_KEY);
+            // A redefinição é uma exclusão expressamente confirmada; não confunde conteúdo
+            // ilegível com ausência e só limpa a proteção após confirmar a gravação.
+            allowUnreadableReplacement = true;
+            try {
+                withStorageTransaction(() => {
+                    removeStoredValue('myEnvelopes');
+                    removeStoredValue('myFixedExpenses');
+                    removeStoredValue('myFixedAutoSort');
+                    removeStoredValue('myCreditInstallments');
+                    // A restauração também apaga os dados e a preferência de ordenação de Outros Compromissos.
+                    removeStoredValue('myOtherCommitments');
+                    removeStoredValue('myOtherAutoSort');
+                    // A redefinição total também remove as fotografias mensais e o estado de ciclos pendentes.
+                    removeStoredValue(MONTHLY_SNAPSHOTS_KEY);
+                    removeStoredValue(MONTH_CYCLE_STATE_KEY);
+                    removeStoredValue('myOpenMonthlySnapshot');
+                    removeStoredValue('myAppTheme');
+                    // A redefinição também zera somente as datas informativas do lembrete de backup.
+                    removeStoredValue(BACKUP_REMINDER_START_KEY);
+                    removeStoredValue(BACKUP_LAST_REQUEST_KEY);
+                    removeStoredValue(BACKUP_REMINDER_DISMISSED_KEY);
+                });
+                storageReadProblems.clear();
+            } catch (error) {
+                console.error('Não foi possível concluir a redefinição:', error);
+                alert('A redefinição não foi concluída. Os dados financeiros anteriores foram preservados ou permanecem no registro de recuperação. Verifique o armazenamento e tente novamente.');
+                return;
+            } finally { allowUnreadableReplacement = false; }
             monthlySnapshots = [];
             openMonthlySnapshot = null;
             monthlySnapshotSaveError = false;
@@ -4431,33 +4757,25 @@
         // Preserva o estado anterior se uma gravação de compromisso ou preferência falhar.
         // O usuário recebe um aviso e pode tentar novamente sem criar registros apenas em memória.
         const persistFinancialChanges = (changes) => {
-            const previous = new Map();
-            const writtenKeys = [];
+            const previousOpen = openMonthlySnapshot ? JSON.parse(JSON.stringify(openMonthlySnapshot)) : null;
+            const candidates = {};
+            const collectionNames = { myFixedExpenses: 'fixedExpenses', myCreditInstallments: 'creditInstallments', myOtherCommitments: 'otherCommitments' };
             try {
-                changes.forEach(([key]) => previous.set(key, localStorage.getItem(key)));
-                changes.forEach(([key, value]) => {
-                    localStorage.setItem(key, value);
-                    writtenKeys.push(key);
+                changes.forEach(([key, value]) => { if (collectionNames[key]) candidates[collectionNames[key]] = JSON.parse(value); });
+                withStorageTransaction(() => {
+                    changes.forEach(([key, value]) => writeStoredValue(key, value));
+                    if (!updateOpenMonthlySnapshot(candidates)) throw new Error('Não foi possível salvar o registro mensal.');
                 });
                 // Aviso após o fluxo de salvamento, sem interromper a atualização da interface.
                 setTimeout(() => updateStorageMonitor(true), 0);
                 return true;
             } catch (error) {
-                console.error('Não foi possível salvar os compromissos no armazenamento local:', error);
-                let rollbackSucceeded = true;
-                writtenKeys.reverse().forEach(key => {
-                    try {
-                        const oldValue = previous.get(key);
-                        if (oldValue === null) localStorage.removeItem(key);
-                        else localStorage.setItem(key, oldValue);
-                    } catch (rollbackError) {
-                        rollbackSucceeded = false;
-                        console.error('Não foi possível desfazer a gravação parcial:', key, rollbackError);
-                    }
-                });
-                alert(rollbackSucceeded
-                    ? 'Não foi possível salvar a alteração. Os dados anteriores foram mantidos. Verifique o armazenamento local e tente novamente.'
-                    : 'Não foi possível concluir a gravação nem restaurar totalmente a preferência anterior. Não feche o aplicativo; faça um backup e verifique o armazenamento local.');
+                openMonthlySnapshot = previousOpen;
+                monthlySnapshotSaveError = true;
+                console.error('Não foi possível salvar os compromissos e o registro mensal:', error);
+                alert(storageRecoveryPending
+                    ? 'Não foi possível concluir a gravação nem restaurar todos os dados. Não feche o aplicativo; faça um backup e verifique o armazenamento local.'
+                    : 'Não foi possível salvar a alteração. Os dados anteriores foram mantidos. Verifique o armazenamento local e tente novamente.');
                 return false;
             }
         };
@@ -5571,7 +5889,7 @@
                 const total = snapshot.totals.grandTotal || 0;
                 let changeHtml = '';
                 if (previous) {
-                    const difference = total - previous.totals.grandTotal;
+                    const difference = moneyDifference(total, previous.totals.grandTotal);
                     const percent = previous.totals.grandTotal > 0 ? Math.round(Math.abs(difference / previous.totals.grandTotal) * 100) : null;
                     const comparisonText = difference === 0
                         ? `Sem variação vs. ${sanitizeHtml(previous.label)}`
@@ -5622,7 +5940,7 @@
             const olderSnapshotExists = archived.length > 0;
             let bodyHtml = '';
             if (monthlySnapshotSaveError) {
-                bodyHtml += '<div class="monthly-history-empty" role="alert">Não foi possível salvar o histórico do mês anterior. Faça um backup, libere espaço do navegador e abra novamente o aplicativo para tentar de novo.</div>';
+                bodyHtml += '<div class="monthly-history-empty" role="alert">Não foi possível salvar ou recuperar o histórico mensal. Faça um backup dos dados disponíveis, verifique o armazenamento e abra novamente o aplicativo para tentar de novo.</div>';
             }
             bodyHtml += renderCard(currentSnapshot, true, previousCurrent);
             if (archived.length > 0) {
@@ -5693,7 +6011,7 @@
 
             const totalSpentWithFixed = totalSpentCurrent + totalFixed + activeCreditTotal + totalOther;
             const totalBudgetWithFixed = totalBudgetCurrent + totalFixed + activeCreditTotal + totalOther;
-            const variableRemaining = totalBudgetCurrent - totalSpentCurrent;
+            const variableRemaining = moneyDifference(totalBudgetCurrent, totalSpentCurrent);
             const variablePercent = totalBudgetCurrent > 0 ? Math.round((totalSpentCurrent / totalBudgetCurrent) * 100) : 0;
 
             let prevSpentTotal = 0;
@@ -5729,7 +6047,7 @@
 
             let comparisonHtml = `<span style="color:var(--text-muted);">Comparação não disponível (sem dados equivalentes do mês anterior).</span>`;
             if (hasPreviousComparison) {
-                const diff = totalSpentCurrent - prevSpentTotal;
+                const diff = moneyDifference(totalSpentCurrent, prevSpentTotal);
                 const diffPercent = prevSpentTotal > 0 ? Math.abs(Math.round((diff / prevSpentTotal) * 100)) : 0;
                 if (diff === 0) {
                     comparisonHtml = `<span>Gastos idênticos ao mês anterior (${sanitizeHtml(comparedMonthLabel)}).</span>`;
@@ -5755,7 +6073,7 @@
                     maxEnvSpent = spent;
                     topEnvelope = env;
                 }
-                if (spent > env.total) overBudgetCount++;
+                if (moneyDifference(spent, env.total) > 0) overBudgetCount++;
             });
 
             let smartInsight = "Seu orçamento segue equilibrado e sob controle.";
@@ -6035,7 +6353,7 @@
                     grandTotal += env.total;
                     grandSpent += envSpent;
 
-                    const available = env.total - envSpent;
+                    const available = moneyDifference(env.total, envSpent);
                     const percentSpent = env.total > 0 ? Math.round((envSpent / env.total) * 100) : 0;
                     const isOver = available < 0;
 
@@ -6100,7 +6418,7 @@
                 const dashStatusLabel = document.getElementById('dash-status-label');
                 const dashProgressFill = document.getElementById('dash-progress-fill');
 
-                const grandAvailable = grandTotal - grandSpent;
+                const grandAvailable = moneyDifference(grandTotal, grandSpent);
                 const grandPercentSpent = grandTotal > 0 ? (grandSpent / grandTotal) * 100 : 0;
                 const grandBarWidth = Math.min(grandPercentSpent, 100);
 
@@ -6245,7 +6563,7 @@
                         });
                     }
                     if(expense.date) {
-                        const d = new Date(expense.date);
+                        const d = parseEntryDate(expense.date);
                         if (!isNaN(d.getTime())) {
                             const yyyy = d.getFullYear();
                             const mm = String(d.getMonth() + 1).padStart(2, '0');
@@ -6290,7 +6608,7 @@
             if (expenseId) {
                 const existingExp = (envelopes[envIndex].expenses || []).find(e => e.id == expenseId);
                 if (existingExp && existingExp.date) {
-                    const parsedDate = new Date(existingExp.date);
+                    const parsedDate = parseEntryDate(existingExp.date);
                     if (!isNaN(parsedDate.getTime())) baseDate = parsedDate; 
                 }
             }
@@ -6360,8 +6678,8 @@
                 persistHistoricalExpense(envelopes[envIndex], updatedExpense, expensePeriodKey);
             }
             
+            if (!updateApp()) return;
             closeModal('modal-expense');
-            updateApp();
             
             if(document.getElementById('modal-history').classList.contains('active-modal')) {
                 openHistoryModal(envId, 'current');
@@ -6614,6 +6932,7 @@
                 });
             }
             
+            if (!updateApp()) return;
             document.getElementById('edit-env-id').value = '';
             document.getElementById('env-name').value = '';
             document.getElementById('env-total').value = '';
@@ -6621,7 +6940,6 @@
             currentSelectedSvg = null;
             
             closeModal('modal-new-envelope');
-            updateApp();
         };
 
         const openResetModal = (envId) => {
@@ -6812,7 +7130,7 @@
                 }
 
                 // Só uma seleção integral merece atualizar a data informativa de backup completo.
-                isCompleteJsonBackup = selectedIds.length === envelopes.length &&
+                isCompleteJsonBackup = storageReadProblems.size === 0 && !storageRecoveryPending && selectedIds.length === envelopes.length &&
                     (!fixedExpenses.length || exportFixed) &&
                     (!creditInstallments.length || exportCredit) &&
                     (!otherCommitments.length || exportOther) &&
@@ -6855,7 +7173,7 @@
                 mimeType = 'text/plain';
 
                 const dataAtual = new Date();
-                fileContent += `=== CONSOLIDADO ===\n`;
+                fileContent += `=== RELATÓRIO DOS ENVELOPES ===\n`;
                 fileContent += `Gerado em: ${dataAtual.getDate().toString().padStart(2, '0')}/${(dataAtual.getMonth() + 1).toString().padStart(2, '0')}/${dataAtual.getFullYear()} às ${dataAtual.getHours().toString().padStart(2, '0')}:${dataAtual.getMinutes().toString().padStart(2, '0')}\n\n`;
 
                 dataToExport.forEach(env => {
@@ -6864,7 +7182,7 @@
                     fileContent += `Orçamento Limite: ${formatCurrency(env.total)}\n`;
 
                     const envSpent = getEnvSpent(env);
-                    const available = env.total - envSpent;
+                    const available = moneyDifference(env.total, envSpent);
 
                     fileContent += `Total Gasto: ${formatCurrency(envSpent)}\n`;
                     fileContent += available >= 0 
@@ -6975,6 +7293,8 @@
             reader.onload = function(e) {
                 try {
                     const imported = JSON.parse(e.target.result);
+                    if (!imported || typeof imported !== 'object') throw new Error('Formato inválido.');
+                    validateDataCollections(Array.isArray(imported) ? { envelopes: imported } : imported);
                     let rawEnvelopes = [];
                     let rawFixed = [];
                     let rawCredit = [];
@@ -7050,8 +7370,8 @@
                     ensureUniqueNumericIds(validCredit);
 
                     const validOther = rawOther
-                        // Preserva a regra original desta coleção: itens importados exigem valor positivo.
-                        .filter(item => item && typeof item.name === 'string' && item.name.trim() !== '' && typeof item.amount === 'number' && Number.isFinite(item.amount) && item.amount > 0)
+                        // Preserva valores legados não negativos; os formulários continuam exigindo valor positivo.
+                        .filter(item => item && typeof item.name === 'string' && item.name.trim() !== '' && typeof item.amount === 'number' && Number.isFinite(item.amount) && item.amount >= 0)
                         .map(item => {
                             const dueDay = Number(item.dueDateDay);
                             const current = Number(item.currentInstallment);
@@ -7193,7 +7513,9 @@
                     updateImportRestoreView();
                     openModal('modal-import');
                 } catch (err) {
-                    alert('Erro ao carregar o arquivo. Certifique-se de que é um JSON válido gerado pelo aplicativo.');
+                    pendingImportData = { envelopes: [], fixedExpenses: [], creditInstallments: [], otherCommitments: [], monthlySnapshots: [], openMonthlySnapshot: null, fixedAutoSort: null, otherAutoSort: null, completeBackup: false, cycleState: null };
+                    closeModal('modal-import');
+                    alert(`Importação não iniciada. ${err.message || 'Verifique se o arquivo é um JSON válido gerado pelo aplicativo.'}`);
                 }
                 event.target.value = ''; 
             };
@@ -7234,19 +7556,12 @@
                 return;
             }
 
-            // Guarda as chaves e o estado atual antes de importar. Se uma gravação falhar, tentamos reverter a operação inteira.
-            const importStorageKeys = [
-                'myEnvelopes', 'myFixedExpenses', 'myFixedAutoSort', 'myCreditInstallments',
-                'myOtherCommitments', 'myOtherAutoSort', MONTHLY_SNAPSHOTS_KEY, 'myOpenMonthlySnapshot', MONTH_CYCLE_STATE_KEY
-            ];
-            const importStorageBefore = Object.create(null);
-            try {
-                importStorageKeys.forEach(key => { importStorageBefore[key] = localStorage.getItem(key); });
-            } catch (error) {
-                console.error('Não foi possível preparar a cópia interna antes da importação:', error);
-                alert('Não foi possível verificar o armazenamento atual. A importação não foi iniciada.');
+            // Não substitui conteúdo ilegível implicitamente nem inicia uma segunda recuperação.
+            if ((storageReadProblems.size && !restoreComplete) || storageRecoveryPending) {
+                alert('A importação não foi iniciada porque há dados locais que não puderam ser lidos ou recuperados. O conteúdo original foi preservado.');
                 return;
             }
+            // O estado em memória é restaurado se a transação inteira não puder ser confirmada.
             const importStateBefore = {
                 envelopes: JSON.parse(JSON.stringify(envelopes)),
                 fixedExpenses: JSON.parse(JSON.stringify(fixedExpenses)),
@@ -7261,9 +7576,13 @@
                 cycleStateWasStored
             };
 
+            const importTransaction = new Map();
+            activeStorageTransaction = importTransaction;
+            // Substituir conteúdo ilegível exige a restauração integral já confirmada na interface.
+            allowUnreadableReplacement = restoreComplete;
             try {
             if (restoreComplete) {
-                // Substituição atômica em termos lógicos: o catch abaixo restaura armazenamento e memória.
+                // Prepara a substituição integral; só confirma depois de validar o fechamento e o ledger.
                 envelopes = JSON.parse(JSON.stringify(pendingImportData.envelopes));
                 fixedExpenses = JSON.parse(JSON.stringify(pendingImportData.fixedExpenses));
                 creditInstallments = JSON.parse(JSON.stringify(pendingImportData.creditInstallments));
@@ -7290,15 +7609,19 @@
                     [MONTHLY_SNAPSHOTS_KEY, monthlySnapshots],
                     ['myOpenMonthlySnapshot', openMonthlySnapshot],
                     [MONTH_CYCLE_STATE_KEY, monthCycleState]
-                ].forEach(([key, value]) => localStorage.setItem(key, JSON.stringify(value)));
-                localStorage.setItem('myFixedAutoSort', String(isFixedAutoSort));
-                localStorage.setItem('myOtherAutoSort', String(isOtherAutoSort));
+                ].forEach(([key, value]) => writeStoredValue(key, JSON.stringify(value)));
+                writeStoredValue('myFixedAutoSort', String(isFixedAutoSort));
+                writeStoredValue('myOtherAutoSort', String(isOtherAutoSort));
                 // Se o backup foi feito em mês anterior, fecha-o antes de avançar parcelas.
                 checkMonthCycleBoundary();
                 if (monthlySnapshotSaveError) throw new Error('Não foi possível restaurar as fotografias mensais.');
                 processInstallmentsAutoUpdate();
                 normalizeLegacyExpensePeriods();
                 if (!updateApp({ suppressSaveAlert: true }) || !updateOpenMonthlySnapshot()) throw new Error('Não foi possível concluir a restauração.');
+                activeStorageTransaction = null;
+                commitStoredChanges(importTransaction);
+                storageReadProblems.clear();
+                allowUnreadableReplacement = false;
                 closeModal('modal-import');
                 alert('Backup integral restaurado com sucesso.');
                 pendingImportData = { envelopes: [], fixedExpenses: [], creditInstallments: [], otherCommitments: [], monthlySnapshots: [], openMonthlySnapshot: null, fixedAutoSort: null, otherAutoSort: null, completeBackup: false, cycleState: null };
@@ -7320,7 +7643,7 @@
                 // Backups antigos não têm fixedAutoSort; nesse caso, preserva-se a preferência atual.
                 if (typeof pendingImportData.fixedAutoSort === 'boolean') {
                     isFixedAutoSort = pendingImportData.fixedAutoSort;
-                    localStorage.setItem('myFixedAutoSort', String(isFixedAutoSort));
+                    writeStoredValue('myFixedAutoSort', String(isFixedAutoSort));
                 }
 
                 pendingImportData.fixedExpenses.forEach(item => {
@@ -7333,7 +7656,7 @@
                     }
                 });
                 sortFixedExpensesIfNeeded();
-                localStorage.setItem('myFixedExpenses', JSON.stringify(fixedExpenses));
+                writeStoredValue('myFixedExpenses', JSON.stringify(fixedExpenses));
             }
 
             let addedCreditCount = 0;
@@ -7347,7 +7670,7 @@
                         addedCreditCount++;
                     }
                 });
-                localStorage.setItem('myCreditInstallments', JSON.stringify(creditInstallments));
+                writeStoredValue('myCreditInstallments', JSON.stringify(creditInstallments));
             }
 
             let addedOtherCount = 0;
@@ -7355,7 +7678,7 @@
                 // Backups antigos podem não ter otherAutoSort; nesse caso mantemos a preferência local atual.
                 if (typeof pendingImportData.otherAutoSort === 'boolean') {
                     isOtherAutoSort = pendingImportData.otherAutoSort;
-                    localStorage.setItem('myOtherAutoSort', String(isOtherAutoSort));
+                    writeStoredValue('myOtherAutoSort', String(isOtherAutoSort));
                 }
 
                 pendingImportData.otherCommitments.forEach(item => {
@@ -7368,10 +7691,11 @@
                     }
                 });
                 sortOtherCommitmentsIfNeeded();
-                localStorage.setItem('myOtherCommitments', JSON.stringify(otherCommitments));
+                writeStoredValue('myOtherCommitments', JSON.stringify(otherCommitments));
             }
 
             let addedSnapshotsCount = 0;
+            let skippedSnapshotsCount = 0;
             if (importHistory && (pendingImportData.monthlySnapshots.length > 0 || pendingImportData.openMonthlySnapshot)) {
                 const currentKey = getMonthKey();
                 const importedSnapshots = uniqueMonthlySnapshotsByPeriod(pendingImportData.monthlySnapshots);
@@ -7380,21 +7704,25 @@
                 const importedOpenIsCurrent = importedOpen && importedOpen.periodKey === currentKey;
                 const incomingCurrentSnapshot = importedOpenIsCurrent ? importedOpen : importedCurrentFromArchive;
 
-                // Meses encerrados são fotografias independentes: o backup substitui o registro do
-                // mesmo periodKey por inteiro, nunca soma suas linhas nem cria dois cartões para o mês.
+                // Adicionar preserva o mês local em conflitos. A substituição fica restrita
+                // à restauração integral escolhida expressamente pelo usuário.
                 const snapshotsByPeriod = new Map(monthlySnapshots
                     .filter(snapshot => snapshot.periodKey !== currentKey)
                     .map(snapshot => [snapshot.periodKey, snapshot]));
                 importedSnapshots.filter(snapshot => snapshot.periodKey !== currentKey).forEach(snapshot => {
-                    if (!snapshotsByPeriod.has(snapshot.periodKey)) addedSnapshotsCount++;
+                    if (snapshotsByPeriod.has(snapshot.periodKey)) { skippedSnapshotsCount++; return; }
+                    addedSnapshotsCount++;
                     snapshotsByPeriod.set(snapshot.periodKey, snapshot);
                 });
 
-                if (importedOpen && !importedOpenIsCurrent && !snapshotsByPeriod.has(importedOpen.periodKey)) {
+                if (importedOpen && !importedOpenIsCurrent) {
                     // Um ledger aberto de um mês que já passou vira fotografia encerrada, salvo se
                     // houver uma fotografia fechada mais autoritativa desse mesmo período.
-                    snapshotsByPeriod.set(importedOpen.periodKey, importedOpen);
-                    addedSnapshotsCount++;
+                    if (snapshotsByPeriod.has(importedOpen.periodKey)) skippedSnapshotsCount++;
+                    else {
+                        snapshotsByPeriod.set(importedOpen.periodKey, importedOpen);
+                        addedSnapshotsCount++;
+                    }
                 }
 
                 // Compatibilidade com dados antigos que deixaram o mês corrente na lista de fechados.
@@ -7405,9 +7733,27 @@
                     currentBase = openMonthlySnapshot;
                 }
                 if (incomingCurrentSnapshot) {
-                    // A fotografia selecionada substitui o ledger do período no backup;
-                    // o próximo render reconciliará seu conteúdo com os cadastros importados.
-                    openMonthlySnapshot = incomingCurrentSnapshot;
+                    // O mês aberto depende dos cadastros selecionados. Preserva os gastos retidos
+                    // locais e aceita os do backup somente em envelopes ainda ausentes do ledger.
+                    const localRows = currentBase ? currentBase.envelopes : [];
+                    openMonthlySnapshot = { ...incomingCurrentSnapshot, envelopes: [
+                        ...localRows,
+                        ...incomingCurrentSnapshot.envelopes.filter(row => !localRows.some(local => Number(local.id) === Number(row.id)))
+                    ] };
+                    const rebuilt = buildMonthlySnapshot(currentKey);
+                    const expenseSignature = entries => JSON.stringify((entries || []).map(entry => [String(entry.id), entry.amount, entry.date || '', entry.desc || '', entry.paymentMethod || '']).sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b))));
+                    const envelopesMatch = incomingCurrentSnapshot.envelopes.every(row => rebuilt.envelopes.some(live => Number(live.id) === Number(row.id)
+                        && live.name === row.name && live.total === row.total && Math.round(live.spent * 100) === Math.round(row.spent * 100)
+                        && expenseSignature(live.expenses) === expenseSignature(row.expenses)));
+                    const commitmentsMatch = ['fixedExpenses', 'creditInstallments', 'otherCommitments'].every(key => incomingCurrentSnapshot[key].every(row => rebuilt[key].some(live => Number(live.id) === Number(row.id)
+                        && live.name === row.name && live.amount === row.amount && live.dueDateDay === row.dueDateDay
+                        && (key === 'fixedExpenses' || (live.currentInstallment === row.currentInstallment && live.totalInstallments === row.totalInstallments))
+                        && (key !== 'creditInstallments' || live.cardName === row.cardName))));
+                    if (!envelopesMatch || !commitmentsMatch) {
+                        const error = new Error('O histórico do mês atual depende de cadastros ou lançamentos que não foram selecionados ou conflitam com os dados locais. Selecione os itens correspondentes ou use a restauração de um backup completo. Nenhum dado foi importado.');
+                        error.importSelectionError = true;
+                        throw error;
+                    }
                 } else if (currentBase) {
                     openMonthlySnapshot = currentBase;
                 }
@@ -7416,7 +7762,7 @@
                     throw new Error('Não foi possível gravar as fotografias mensais.');
                 }
                 if (openMonthlySnapshot && openMonthlySnapshot.periodKey === currentKey && (incomingCurrentSnapshot || currentBase)) {
-                    try { localStorage.setItem('myOpenMonthlySnapshot', JSON.stringify(openMonthlySnapshot)); }
+                    try { writeStoredValue('myOpenMonthlySnapshot', JSON.stringify(openMonthlySnapshot)); }
                     catch (error) {
                         monthlySnapshotSaveError = true;
                         console.error('Não foi possível importar o mês em andamento:', error);
@@ -7432,12 +7778,16 @@
             if (!updateApp({ suppressSaveAlert: true })) {
                 throw new Error('Não foi possível salvar os envelopes importados.');
             }
+            activeStorageTransaction = null;
+            commitStoredChanges(importTransaction);
             closeModal('modal-import');
-            alert(`Importação concluída! (${addedEnvelopesCount} envelope(s), ${addedFixedCount} despesa(s) fixa(s), ${addedCreditCount} parcelamento(s), ${addedOtherCount} outro(s) compromisso(s) e ${addedSnapshotsCount} fotografia(s) mensal(is) adicionados).`);
+            alert(`Importação concluída! (${addedEnvelopesCount} envelope(s), ${addedFixedCount} despesa(s) fixa(s), ${addedCreditCount} parcelamento(s), ${addedOtherCount} outro(s) compromisso(s) e ${addedSnapshotsCount} fotografia(s) mensal(is) adicionados).${skippedSnapshotsCount ? ` ${skippedSnapshotsCount} período(s) já existente(s) foram mantidos, sem substituição.` : ''}`);
             // Consulta o volume somente após a importação concluída; não interfere no rollback.
             setTimeout(() => updateStorageMonitor(true), 0);
             pendingImportData = { envelopes: [], fixedExpenses: [], creditInstallments: [], otherCommitments: [], monthlySnapshots: [], openMonthlySnapshot: null, fixedAutoSort: null, otherAutoSort: null, completeBackup: false, cycleState: null };
             } catch (error) {
+                activeStorageTransaction = null;
+                allowUnreadableReplacement = false;
                 console.error('Importação cancelada; restaurando os dados anteriores:', error);
                 envelopes = importStateBefore.envelopes;
                 fixedExpenses = importStateBefore.fixedExpenses;
@@ -7451,20 +7801,12 @@
                 monthCycleState = importStateBefore.monthCycleState;
                 cycleStateWasStored = importStateBefore.cycleStateWasStored;
 
-                let storageRollbackSucceeded = true;
-                // Remove primeiro as chaves tocadas para liberar espaço antes de restaurar os valores anteriores.
-                importStorageKeys.forEach(key => {
-                    try { localStorage.removeItem(key); }
-                    catch (rollbackError) { storageRollbackSucceeded = false; console.error('Falha ao remover chave durante rollback:', key, rollbackError); }
-                });
-                importStorageKeys.forEach(key => {
-                    const previousValue = importStorageBefore[key];
-                    if (previousValue === null || previousValue === undefined) return;
-                    try { localStorage.setItem(key, previousValue); }
-                    catch (rollbackError) { storageRollbackSucceeded = false; console.error('Falha ao restaurar chave durante rollback:', key, rollbackError); }
-                });
+                // As escritas foram confirmadas juntas; a reversão preserva chaves intactas.
+                const storageRollbackSucceeded = !storageRecoveryPending;
                 renderCurrentView();
-                if (storageRollbackSucceeded) {
+                if (error.importSelectionError) {
+                    alert(error.message);
+                } else if (storageRollbackSucceeded) {
                     alert('A importação não foi concluída. Os dados anteriores foram restaurados; nenhum item desta importação foi mantido. Verifique o armazenamento antes de tentar novamente.');
                 } else {
                     alert('A importação falhou e a restauração automática do armazenamento ficou incompleta. Não feche o aplicativo; exporte os dados que ainda aparecem e verifique o armazenamento local.');
@@ -7500,6 +7842,22 @@
             }
             customConfirmCallback = null;
         };
+
+        // Mantém barra e gráficos coerentes quando o sistema muda a aparência no modo automático.
+        // addListener mantém compatibilidade com versões anteriores do Safari.
+        if (typeof window.matchMedia === 'function') {
+            const systemColorScheme = window.matchMedia('(prefers-color-scheme: dark)');
+            const updateAutomaticAppearance = () => {
+                if (document.body.getAttribute('data-color-mode') === null) updateThemeAppearance();
+            };
+            if (typeof systemColorScheme.addEventListener === 'function') systemColorScheme.addEventListener('change', updateAutomaticAppearance);
+            else if (typeof systemColorScheme.addListener === 'function') systemColorScheme.addListener(updateAutomaticAppearance);
+        }
+
+        // Uma leitura malsucedida nunca equivale a uma instalação vazia.
+        if (storageReadProblems.size || storageRecoveryPending) {
+            alert('Não foi possível ler ou recuperar todos os dados locais. O conteúdo original foi preservado e as gravações financeiras foram bloqueadas nesta sessão. Reabra o aplicativo após verificar o armazenamento. Os dados visíveis podem estar incompletos.');
+        }
 
         // Renderização inicial e registro do Service Worker
         renderEnvelopes();
