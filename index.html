@@ -22,6 +22,8 @@
         /* Refinamento dos temas: --primary define textos, ícones, contornos e indicadores;
            --primary-fill usa o tom aprovado para superfícies com texto branco;
            --primary-chart distingue as áreas dos gráficos sem alterar seus cálculos. */
+        /* Ajuste fino de vivacidade: aproxima a saturação das cores originais,
+           preservando os papéis visuais e o contraste dos pares de texto e fundo. */
         :root, body[data-theme="purple"] {
             --primary: #8A05BE;
             --primary-fill: #8A05BE;
@@ -31,25 +33,25 @@
         }
 
         body[data-theme="blue"] {
-            --primary: #225CAF;
-            --primary-fill: #286DCC;
-            --primary-chart: #286DCC;
-            --primary-dark: #2059AA;
-            --primary-light-bg: rgba(40, 109, 204, 0.12);
+            --primary: #0059C7;
+            --primary-fill: #006CE6;
+            --primary-chart: #006CE6;
+            --primary-dark: #0058C2;
+            --primary-light-bg: rgba(0, 108, 230, 0.12);
         }
 
         body[data-theme="pink"] {
-            --primary: #AD2F61;
-            --primary-fill: #C43D72;
-            --primary-chart: #C43D72;
-            --primary-dark: #A62F5F;
-            --primary-light-bg: rgba(196, 61, 114, 0.12);
+            --primary: #B7114F;
+            --primary-fill: #DC1B5B;
+            --primary-chart: #DC1B5B;
+            --primary-dark: #BE154F;
+            --primary-light-bg: rgba(220, 27, 91, 0.12);
         }
 
         :root {
             --chart-purple: #8A05BE;
-            --chart-blue: #286DCC;
-            --chart-pink: #C43D72;
+            --chart-blue: #006CE6;
+            --chart-pink: #DC1B5B;
             --bg: #F0F1F5;
             --card-bg: #FFFFFF;
             --text-main: #333333;
@@ -67,28 +69,28 @@
         /* Suporte a Dark Mode (Automático via Sistema ou Forçado por Preferência) */
         @media (prefers-color-scheme: dark) {
             body:not([data-color-mode="light"]) {
-                --primary: #CD9AF2;
-                --primary-fill: #9B3BD3;
-                --primary-chart: #CD9AF2;
-                --chart-purple: #CD9AF2;
-                --chart-blue: #77A9F0;
-                --chart-pink: #F395B6;
-                --primary-dark: #7E29B1;
-                --primary-light-bg: rgba(205, 154, 242, 0.14);
+                --primary: #C175FF;
+                --primary-fill: #9825E8;
+                --primary-chart: #C175FF;
+                --chart-purple: #C175FF;
+                --chart-blue: #4C99FF;
+                --chart-pink: #FF6299;
+                --primary-dark: #7C19C3;
+                --primary-light-bg: rgba(193, 117, 255, 0.14);
             }
             body[data-theme="blue"]:not([data-color-mode="light"]) {
-                --primary: #77A9F0;
-                --primary-fill: #2E6BC4;
-                --primary-chart: #77A9F0;
-                --primary-dark: #2457A4;
-                --primary-light-bg: rgba(119, 169, 240, 0.14);
+                --primary: #4C99FF;
+                --primary-fill: #086DE5;
+                --primary-chart: #4C99FF;
+                --primary-dark: #055BC4;
+                --primary-light-bg: rgba(76, 153, 255, 0.14);
             }
             body[data-theme="pink"]:not([data-color-mode="light"]) {
-                --primary: #F395B6;
-                --primary-fill: #B83E6C;
-                --primary-chart: #F395B6;
-                --primary-dark: #9D2F59;
-                --primary-light-bg: rgba(243, 149, 182, 0.14);
+                --primary: #FF6299;
+                --primary-fill: #D61E61;
+                --primary-chart: #FF6299;
+                --primary-dark: #B71550;
+                --primary-light-bg: rgba(255, 98, 153, 0.14);
             }
 
             body:not([data-color-mode="light"]) {
@@ -117,14 +119,14 @@
 
         /* Modo Escuro Forçado Manualmente */
         body[data-color-mode="dark"] {
-            --primary: #CD9AF2;
-            --primary-fill: #9B3BD3;
-            --primary-chart: #CD9AF2;
-            --chart-purple: #CD9AF2;
-            --chart-blue: #77A9F0;
-            --chart-pink: #F395B6;
-            --primary-dark: #7E29B1;
-            --primary-light-bg: rgba(205, 154, 242, 0.14);
+            --primary: #C175FF;
+            --primary-fill: #9825E8;
+            --primary-chart: #C175FF;
+            --chart-purple: #C175FF;
+            --chart-blue: #4C99FF;
+            --chart-pink: #FF6299;
+            --primary-dark: #7C19C3;
+            --primary-light-bg: rgba(193, 117, 255, 0.14);
             --bg: #000000;
             --card-bg: #1C1C1E;
             --text-main: #F2F2F7;
@@ -139,18 +141,18 @@
             --card-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
         }
         body[data-theme="blue"][data-color-mode="dark"] {
-            --primary: #77A9F0;
-            --primary-fill: #2E6BC4;
-            --primary-chart: #77A9F0;
-            --primary-dark: #2457A4;
-            --primary-light-bg: rgba(119, 169, 240, 0.14);
+            --primary: #4C99FF;
+            --primary-fill: #086DE5;
+            --primary-chart: #4C99FF;
+            --primary-dark: #055BC4;
+            --primary-light-bg: rgba(76, 153, 255, 0.14);
         }
         body[data-theme="pink"][data-color-mode="dark"] {
-            --primary: #F395B6;
-            --primary-fill: #B83E6C;
-            --primary-chart: #F395B6;
-            --primary-dark: #9D2F59;
-            --primary-light-bg: rgba(243, 149, 182, 0.14);
+            --primary: #FF6299;
+            --primary-fill: #D61E61;
+            --primary-chart: #FF6299;
+            --primary-dark: #B71550;
+            --primary-light-bg: rgba(255, 98, 153, 0.14);
         }
         body[data-color-mode="dark"] .settings-color-swatch {
             background-color: var(--theme-swatch-dark);
@@ -1993,7 +1995,7 @@
                     <div style="width:20px; height:20px; display:flex; align-items:center; justify-content:center; color:var(--danger);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg></div>
                     <h2 style="margin:0;">Redefinir aplicativo</h2>
                 </div>
-                <p class="modal-subtitle" style="color: var(--danger); font-weight: 600;">Atenção: Esta ação apagará envelopes, gastos, despesas fixas, parcelamentos, outros compromissos e históricos, além de redefinir o tema e as ordenações. O modo claro/escuro e a preferência de zoom serão mantidos.</p>
+                <p class="modal-subtitle" style="color: var(--danger); font-weight: 600;">Atenção: Esta ação apagará envelopes, gastos, despesas fixas, parcelamentos, outros compromissos e históricos, além de redefinir o tema e as ordenações.</p>
                 <div class="modal-buttons">
                     <button class="btn btn-cancel" onclick="closeModal('modal-restore')">Cancelar</button>
                     <button class="btn btn-danger" onclick="confirmRestoreApp()">Restaurar</button>
@@ -2013,13 +2015,13 @@
                     <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">Tema de Cores</label>
                     <div class="settings-color-options" role="group" aria-label="Tema de cores">
                         <button type="button" class="settings-color-option" data-theme-option="purple" onclick="setAppTheme('purple')" aria-pressed="false" title="Roxo padrão">
-                            <span class="settings-color-swatch" style="--theme-swatch-light:#8A05BE; --theme-swatch-dark:#9B3BD3;" aria-hidden="true"></span>Roxo
+                            <span class="settings-color-swatch" style="--theme-swatch-light:#8A05BE; --theme-swatch-dark:#9825E8;" aria-hidden="true"></span>Roxo
                         </button>
                         <button type="button" class="settings-color-option" data-theme-option="blue" onclick="setAppTheme('blue')" aria-pressed="false" title="Azul elegante">
-                            <span class="settings-color-swatch" style="--theme-swatch-light:#286DCC; --theme-swatch-dark:#2E6BC4;" aria-hidden="true"></span>Azul
+                            <span class="settings-color-swatch" style="--theme-swatch-light:#006CE6; --theme-swatch-dark:#086DE5;" aria-hidden="true"></span>Azul
                         </button>
                         <button type="button" class="settings-color-option" data-theme-option="pink" onclick="setAppTheme('pink')" aria-pressed="false" title="Rosa vibrante">
-                            <span class="settings-color-swatch" style="--theme-swatch-light:#C43D72; --theme-swatch-dark:#B83E6C;" aria-hidden="true"></span>Rosa
+                            <span class="settings-color-swatch" style="--theme-swatch-light:#DC1B5B; --theme-swatch-dark:#D61E61;" aria-hidden="true"></span>Rosa
                         </button>
                     </div>
                 </div>
@@ -2859,8 +2861,8 @@
         // Mapeamento das cores primárias oficiais de cada tema
         const themeColors = {
             purple: '#8A05BE',
-            blue: '#286DCC',
-            pink: '#C43D72'
+            blue: '#006CE6',
+            pink: '#DC1B5B'
         };
 
         let appTheme = readStoredValue('myAppTheme') || 'purple';

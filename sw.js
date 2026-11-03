@@ -1,5 +1,5 @@
-// v23: atualiza os temas roxo, azul e rosa nos modos claro e escuro.
-const CACHE_NAME = 'envelopes-cache-v23';
+// v24: recupera a vivacidade dos temas, preservando os contrastes verificados.
+const CACHE_NAME = 'envelopes-cache-v24';
 
 const ASSETS_TO_CACHE = [
   './',
