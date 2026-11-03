@@ -1081,6 +1081,31 @@
         .report-summary-count { color: var(--text-muted); font-size: 0.78rem; font-weight: 400; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .report-summary-total { color: var(--text-main); font-size: 0.95rem; font-weight: 700; white-space: nowrap; flex-shrink: 0; }
 
+        /* Agendados e concluídos: divisor centralizado e mais espaço ao recolher. */
+        .financial-status-section {
+            margin-top: 14px;
+            padding-top: 10px;
+        }
+
+        .financial-status-section > summary {
+            position: relative;
+        }
+
+        .financial-status-section:not([open]) > summary {
+            min-height: 44px;
+        }
+
+        .financial-status-section > summary::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: 8%;
+            width: 84%;
+            height: 1px;
+            background-color: var(--dashed-line);
+            pointer-events: none;
+        }
+
         .report-details summary::-webkit-details-marker { display: none; }
         
         .report-chevron {
@@ -1743,7 +1768,8 @@
         <!-- 4. Nova Tela de Gráficos / Análise Visual -->
         <div id="view-graficos" class="full-view-container">
             <div class="full-view-content">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <!-- Permite acomodar o título e a opção de histórico em telas pequenas. -->
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 12px;">
                     <div style="display:flex; align-items:center; gap:8px;">
                         <div style="width:20px; height:20px; display:flex; align-items:center; justify-content:center; color:var(--primary);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path><path d="M22 12A10 10 0 0 0 12 2v10z"></path></svg></div>
                         <h2 style="margin:0; font-size: 1.25rem;">Análise Visual</h2>
@@ -2142,7 +2168,7 @@
                     <p>Funciona 100% offline, sem servidores externos ou cadastro. Seus dados ficam armazenados localmente no dispositivo, com opções de exportação e importação de backups.</p>
 
                     <div style="border-top: 1px solid var(--border-color); padding-top: 10px; margin-top: 4px; font-size: 0.85rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 4px;">
-                        <span><strong>Versão:</strong> 4.8.3</span>
+                        <span><strong>Versão:</strong> 5.0.1</span>
                         <span><strong>Desenvolvedor:</strong> Ricardo Soares</span>
                         <span>© 2026 | Todos os direitos reservados.</span>
                     </div>
@@ -2322,7 +2348,7 @@
                             <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
                             <line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line>
                         </svg>
-                        Virar o Mês
+                        Virar o mês
                     </h2>
                     <label class="modal-checkbox-label">
                         <input type="checkbox" id="reset-keep-history" checked style="width: 20px; height: 20px; accent-color: var(--primary-fill); cursor: pointer;"> Manter histórico
@@ -2339,7 +2365,7 @@
                 </div>
                 <div class="modal-buttons">
                     <button class="btn btn-cancel" onclick="closeModal('modal-reset')">Cancelar</button>
-                    <button class="btn btn-confirm" onclick="confirmReset()">Iniciar Mês</button>
+                    <button class="btn btn-confirm" onclick="confirmReset()">Recomeçar o mês</button>
                 </div>
             </div>
         </div>
@@ -4705,6 +4731,24 @@
             const totalEl = document.getElementById('fixed-total-value');
             list.innerHTML = '';
 
+            // Agrupa somente a apresentação; o cálculo mensal existente permanece igual.
+            const scheduledItems = fixedExpenses.filter(item =>
+                isScheduledForLater(item, getMonthKey())
+            );
+
+            let scheduledSection = null;
+
+            if (scheduledItems.length > 0) {
+                scheduledSection = document.createElement('details');
+                scheduledSection.className = 'report-details financial-status-section';
+
+                const summary = document.createElement('summary');
+                summary.style.cssText = 'display:flex; justify-content:space-between; align-items:center; gap:8px; padding:4px 8px; list-style:none; cursor:pointer; color:var(--text-main); font-size:0.88rem; font-weight:600;';
+                summary.innerHTML = `<span>Despesas agendadas (${scheduledItems.length})</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="report-chevron" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
+                scheduledSection.appendChild(summary);
+
+            }
+
             let total = 0;
             if (fixedExpenses.length === 0) {
                 list.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding:24px;">Nenhuma despesa fixa cadastrada.</p>';
@@ -4745,7 +4789,7 @@
                     if (isScheduledForLater(item, getMonthKey())) {
                         const scheduled = document.createElement('span');
                         scheduled.className = 'history-date';
-                        scheduled.textContent = `Agendada para ${displayFirstDueMonth(item.firstDueMonth)} · fora do total atual`;
+                        scheduled.textContent = `Agendada para ${displayFirstDueMonth(item.firstDueMonth)}`;
                         infoDiv.appendChild(scheduled);
                     }
 
@@ -4774,11 +4818,33 @@
                     actionsDiv.appendChild(delBtn);
                     div.appendChild(infoDiv);
                     div.appendChild(actionsDiv);
-                    list.appendChild(div);
+                    // Reaproveita a mesma linha e os mesmos botões nos dois grupos.
+                    if (isScheduledForLater(item, getMonthKey())) {
+                        scheduledSection.appendChild(div);
+                    } else {
+                        list.appendChild(div);
+                    }
                 });
-            }
-            totalEl.innerText = formatCurrency(total);
-        };
+
+                }
+                if (scheduledSection) {
+                // Evita duas divisórias antes dos agendamentos.
+                const lastActiveRow = list.lastElementChild;
+                if (lastActiveRow && lastActiveRow.classList.contains('history-item')) {
+                    lastActiveRow.style.borderBottom = 'none';
+                }
+
+                list.appendChild(scheduledSection);
+
+                // Aviso ao final da lista, visível também com os agendamentos recolhidos.
+                const note = document.createElement('p');
+                note.textContent = 'Agendadas fora do total.';
+                note.style.cssText = 'margin:12px 8px 0; font-size:0.82rem; line-height:1.4; color:var(--text-muted);';
+                list.appendChild(note);
+                }
+
+                totalEl.innerText = formatCurrency(total);
+                };
 
         // Preserva o estado anterior se uma gravação de compromisso ou preferência falhar.
         // O usuário recebe um aviso e pode tentar novamente sem criar registros apenas em memória.
@@ -5177,8 +5243,7 @@
 
                 const details = document.createElement('details');
 
-                details.className = 'report-details';
-                details.style.cssText = 'margin-top:14px; border-top:1px solid var(--dashed-line); padding-top:10px;';
+                details.className = 'report-details financial-status-section';
                 const summary = document.createElement('summary');
                 summary.style.cssText = 'display:flex; justify-content:space-between; align-items:center; gap:8px; padding:4px 8px; list-style:none; cursor:pointer; color:var(--text-main); font-size:0.88rem; font-weight:600;';
                 summary.innerHTML = `<span>Parcelamentos agendados (${scheduledItems.length})</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="report-chevron" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
@@ -5246,8 +5311,7 @@
                 }
 
                 const details = document.createElement('details');
-                details.className = 'report-details';
-                details.style.cssText = 'margin-top:14px; border-top:1px solid var(--dashed-line); padding-top:10px;';
+                details.className = 'report-details financial-status-section';
                 const summary = document.createElement('summary');
                 summary.style.cssText = 'display:flex; justify-content:space-between; align-items:center; gap:8px; padding:4px 8px; list-style:none; cursor:pointer; color:var(--text-muted); font-size:0.88rem; font-weight:600;';
                 summary.innerHTML = `<span>Parcelamentos concluídos (${completedItems.length})</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="report-chevron" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
@@ -5624,8 +5688,7 @@
 
                 const details = document.createElement('details');
 
-                details.className = 'report-details';
-                details.style.cssText = 'margin-top:14px; border-top:1px solid var(--dashed-line); padding-top:10px;';
+                details.className = 'report-details financial-status-section';
                 const summary = document.createElement('summary');
                 summary.style.cssText = 'display:flex; justify-content:space-between; align-items:center; gap:8px; padding:4px 8px; list-style:none; cursor:pointer; color:var(--text-main); font-size:0.88rem; font-weight:600;';
                 summary.innerHTML = `<span>Compromissos agendados (${scheduledItems.length})</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="report-chevron" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
@@ -5675,8 +5738,7 @@
                 }
 
                 const details = document.createElement('details');
-                details.className = 'report-details';
-                details.style.cssText = 'margin-top:14px; border-top:1px solid var(--dashed-line); padding-top:10px;';
+                details.className = 'report-details financial-status-section';
                 const summary = document.createElement('summary');
                 summary.style.cssText = 'display:flex; justify-content:space-between; align-items:center; gap:8px; padding:4px 8px; list-style:none; cursor:pointer; color:var(--text-muted); font-size:0.88rem; font-weight:600;';
                 summary.innerHTML = `<span>Compromissos concluídos (${completedItems.length})</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="report-chevron" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
@@ -6426,7 +6488,7 @@
 
                         <div class="action-buttons">
                             <button class="btn-action" onclick="openExpenseModal(${env.id})">➖ Registrar Gasto</button>
-                            <button class="btn-reset-icon" onclick="openResetModal(${env.id})" title="Iniciar Novo Mês">
+                            <button class="btn-reset-icon" onclick="openResetModal(${env.id})" title="Recomeçar o mês">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                                     <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
                                     <line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line>

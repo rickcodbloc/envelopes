@@ -1,5 +1,5 @@
-// v26: ajusta cabeçalho e progresso no modo escuro/edita menções de fotografias em mensagens de usuário.
-const CACHE_NAME = 'envelopes-cache-v26';
+// v27: Refinos nas divisorias de 3 opções do menu e refino.
+const CACHE_NAME = 'envelopes-cache-v27';
 
 const ASSETS_TO_CACHE = [
   './',
