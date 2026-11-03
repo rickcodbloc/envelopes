@@ -3133,7 +3133,8 @@
             if (toggleInput) {
                 toggleInput.checked = readStoredValue('myAllowZoom') === 'true';
             }
-            const currentMode = readStoredValue('myColorMode') || 'auto';
+            // Indica o modo aplicado nesta janela, mesmo se outra alterar a preferência salva.
+            const currentMode = document.body.getAttribute('data-color-mode') || 'auto';
             updateThemeModeButtonsUI(currentMode);
             updateThemeColorButtonsUI(appTheme);
             updateStorageMonitor();
