@@ -1,5 +1,5 @@
-// v24: recupera a vivacidade dos temas, preservando os contrastes verificados.
-const CACHE_NAME = 'envelopes-cache-v24';
+// v26: ajusta cabeçalho e progresso no modo escuro/edita menções de fotografias em mensagens de usuário.
+const CACHE_NAME = 'envelopes-cache-v26';
 
 const ASSETS_TO_CACHE = [
   './',

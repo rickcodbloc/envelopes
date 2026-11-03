@@ -71,6 +71,9 @@
             body:not([data-color-mode="light"]) {
                 --primary: #C175FF;
                 --primary-fill: #9825E8;
+                /* Cabeçalho roxo noturno suavizado; progresso mantido. */
+                --primary-header: #9B3BD3;
+                --primary-progress: #AD66E8;
                 --primary-chart: #C175FF;
                 --chart-purple: #C175FF;
                 --chart-blue: #4C99FF;
@@ -81,6 +84,9 @@
             body[data-theme="blue"]:not([data-color-mode="light"]) {
                 --primary: #4C99FF;
                 --primary-fill: #086DE5;
+                /* Ajuste localizado do cabeçalho e do progresso noturnos. */
+                --primary-header: #1B6CD5;
+                --primary-progress: #4688E5;
                 --primary-chart: #4C99FF;
                 --primary-dark: #055BC4;
                 --primary-light-bg: rgba(76, 153, 255, 0.14);
@@ -88,6 +94,9 @@
             body[data-theme="pink"]:not([data-color-mode="light"]) {
                 --primary: #FF6299;
                 --primary-fill: #D61E61;
+                /* Ajuste localizado do cabeçalho e do progresso noturnos. */
+                --primary-header: #C72E67;
+                --primary-progress: #E85D91;
                 --primary-chart: #FF6299;
                 --primary-dark: #B71550;
                 --primary-light-bg: rgba(255, 98, 153, 0.14);
@@ -121,6 +130,9 @@
         body[data-color-mode="dark"] {
             --primary: #C175FF;
             --primary-fill: #9825E8;
+            /* Cabeçalho roxo noturno suavizado; progresso mantido. */
+            --primary-header: #9B3BD3;
+            --primary-progress: #AD66E8;
             --primary-chart: #C175FF;
             --chart-purple: #C175FF;
             --chart-blue: #4C99FF;
@@ -143,6 +155,9 @@
         body[data-theme="blue"][data-color-mode="dark"] {
             --primary: #4C99FF;
             --primary-fill: #086DE5;
+            /* Ajuste localizado do cabeçalho e do progresso noturnos. */
+            --primary-header: #1B6CD5;
+            --primary-progress: #4688E5;
             --primary-chart: #4C99FF;
             --primary-dark: #055BC4;
             --primary-light-bg: rgba(76, 153, 255, 0.14);
@@ -150,6 +165,9 @@
         body[data-theme="pink"][data-color-mode="dark"] {
             --primary: #FF6299;
             --primary-fill: #D61E61;
+            /* Ajuste localizado do cabeçalho e do progresso noturnos. */
+            --primary-header: #C72E67;
+            --primary-progress: #E85D91;
             --primary-chart: #FF6299;
             --primary-dark: #B71550;
             --primary-light-bg: rgba(255, 98, 153, 0.14);
@@ -223,7 +241,7 @@
         }
 
         header {
-        background-color: var(--primary-fill);
+        background-color: var(--primary-header, var(--primary-fill));
         color: white;
         padding-top: max(14px, calc(8px + env(safe-area-inset-top)));
         padding-bottom: 10px;
@@ -2873,9 +2891,12 @@
 
         // Função para atualizar dinamicamente a cor da barra de status (tema do navegador/PWA)
         const updateThemeColorMeta = (theme) => {
-            const metaThemeColor = document.querySelector('meta[name="theme-color"]');
-            if (metaThemeColor) {
-                metaThemeColor.setAttribute('content', getThemeVisualColor('--primary-fill', themeColors[theme] || themeColors.purple));
+        const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+
+        if (metaThemeColor) {
+            // A barra do navegador acompanha o cabeçalho; no claro mantém a cor atual.
+            const fillColor = getThemeVisualColor('--primary-fill', themeColors[theme] || themeColors.purple);
+            metaThemeColor.setAttribute('content', getThemeVisualColor('--primary-header', fillColor));
             }
         };
 
@@ -3740,7 +3761,7 @@
             }
             checkMonthCycleBoundary();
             if (monthlySnapshotSaveError && monthCycleState.lastObservedCycle !== getMonthKey()) {
-                alert('Não foi possível salvar a fotografia do mês anterior. Verifique o espaço de armazenamento do navegador e faça um backup antes de continuar.');
+                alert('Não foi possível fechar o mês anterior. Faça um backup e verifique o armazenamento.');
                 renderCycleNotice();
                 return;
             }
@@ -4480,7 +4501,7 @@
             // Revalida o ciclo no momento da confirmação, pois o modal pode ter ficado aberto durante a virada.
             checkMonthCycleBoundary();
             if (monthlySnapshotSaveError && monthCycleState.lastObservedCycle !== getMonthKey()) {
-                alert('Não foi possível salvar a fotografia mensal anterior. Nenhum envelope foi redefinido. Faça um backup e tente novamente.');
+                alert('Não foi possível fechar o mês anterior. Nenhum envelope foi redefinido. Faça um backup e tente novamente.');
                 return;
             }
             const checkboxes = document.querySelectorAll('.multi-reset-cb:checked');
@@ -6435,7 +6456,8 @@
                     dashAvailableEl.innerText = formatCurrency(grandAvailable);
                     dashAvailableEl.className = 'dash-main-value';
                     dashStatusLabel.innerText = 'Disponível';
-                    dashProgressFill.style.backgroundColor = 'var(--primary)';
+                    // Tom próprio no escuro; no claro mantém a cor atual.
+                    dashProgressFill.style.backgroundColor = 'var(--primary-progress, var(--primary))';
                 } else {
                     dashAvailableEl.innerText = formatCurrency(Math.abs(grandAvailable));
                     dashAvailableEl.className = 'dash-main-value danger';
@@ -6961,7 +6983,7 @@
             // Revalida a virada antes de arquivar; uma fotografia mensal pendente tem prioridade sobre a redefinição.
             checkMonthCycleBoundary();
             if (monthlySnapshotSaveError && monthCycleState.lastObservedCycle !== getMonthKey()) {
-                alert('Não foi possível salvar a fotografia mensal anterior. O envelope não foi redefinido. Faça um backup e tente novamente.');
+                alert('Não foi possível fechar o mês anterior. O envelope não foi redefinido. Faça um backup e tente novamente.');
                 return;
             }
             const id = parseInt(document.getElementById('reset-id').value);
@@ -6991,7 +7013,7 @@
         };
 
         const deleteEnvelope = (id) => {
-            showCustomConfirm('Excluir Envelope', 'Tem certeza que deseja excluir este envelope? O histórico individual será apagado, mas as fotografias mensais já salvas permanecerão.', () => {
+            showCustomConfirm('Excluir Envelope', 'Excluir este envelope e seu histórico individual? Os meses encerrados serão mantidos.', () => {
                 envelopes = envelopes.filter(env => env.id !== id);
                 updateApp();
             });
@@ -7783,7 +7805,7 @@
             activeStorageTransaction = null;
             commitStoredChanges(importTransaction);
             closeModal('modal-import');
-            alert(`Importação concluída! (${addedEnvelopesCount} envelope(s), ${addedFixedCount} despesa(s) fixa(s), ${addedCreditCount} parcelamento(s), ${addedOtherCount} outro(s) compromisso(s) e ${addedSnapshotsCount} fotografia(s) mensal(is) adicionados).${skippedSnapshotsCount ? ` ${skippedSnapshotsCount} período(s) já existente(s) foram mantidos, sem substituição.` : ''}`);
+            alert(`Importação concluída! (${addedEnvelopesCount} envelope(s), ${addedFixedCount} despesa(s) fixa(s), ${addedCreditCount} parcelamento(s), ${addedOtherCount} outro(s) compromisso(s) e ${addedSnapshotsCount} registro(s) mensal(is) adicionados).${skippedSnapshotsCount ? ` ${skippedSnapshotsCount} período(s) já existente(s) foram mantidos, sem substituição.` : ''}`);
             // Consulta o volume somente após a importação concluída; não interfere no rollback.
             setTimeout(() => updateStorageMonitor(true), 0);
             pendingImportData = { envelopes: [], fixedExpenses: [], creditInstallments: [], otherCommitments: [], monthlySnapshots: [], openMonthlySnapshot: null, fixedAutoSort: null, otherAutoSort: null, completeBackup: false, cycleState: null };
