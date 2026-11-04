@@ -1,5 +1,5 @@
-// v28: Importação seletiva por ID e novo texto do botão de virada do mês.
-const CACHE_NAME = 'envelopes-cache-v28';
+// v29: Paleta dos gráficos padronizada para os modos claro e escuro.
+const CACHE_NAME = 'envelopes-cache-v29';
 
 const ASSETS_TO_CACHE = [
   './',
