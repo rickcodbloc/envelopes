@@ -57,9 +57,16 @@
             --chart-pink: #DC1B5B;
             --chart-green: #32D74B;
             --chart-orange: #FF9F0A;
+            --chart-red: #FF453A;
             --chart-cyan: #64D2FF;
+            --chart-indigo: #5E5CE6;
             --chart-teal: #00A6A6;
             --chart-gold: #B58B00;
+
+            /* Categorias do gráfico geral, com aparência noturna própria. */
+            --chart-general-fixed: var(--chart-green);
+            --chart-general-installments: var(--chart-orange);
+            --chart-general-other: var(--chart-cyan);
             --chart-extra-lightness: 45%;
             --bg: #F0F1F5;
             --card-bg: #FFFFFF;
@@ -84,15 +91,17 @@
                 --primary-header: #9B3BD3;
                 --primary-progress: #AD66E8;
                 --primary-chart: #C175FF;
-                /* A mesma paleta, adaptada ao fundo escuro. */
+                /* Variações noturnas dos envelopes e dos dois tons adicionais. */
                 --chart-purple: #C175FF;
                 --chart-blue: #4C99FF;
                 --chart-pink: #FF6299;
-                --chart-green: #63E67A;
-                --chart-orange: #FFB84D;
-                --chart-cyan: #8ADFFF;
                 --chart-teal: #55D6CF;
                 --chart-gold: #E9C44A;
+
+                /* Ajustes noturnos exclusivos do gráfico geral. */
+                --chart-general-fixed: #63E67A;
+                --chart-general-installments: #FFB84D;
+                --chart-general-other: #8ADFFF;
                 --chart-extra-lightness: 68%;
                 --primary-dark: #7C19C3;
                 --primary-light-bg: rgba(193, 117, 255, 0.14);
@@ -150,16 +159,18 @@
             --primary-header: #9B3BD3;
             --primary-progress: #AD66E8;
             --primary-chart: #C175FF;
-            /* A mesma paleta, adaptada ao fundo escuro. */
+            /* Variações noturnas dos envelopes e dos dois tons adicionais. */
             --chart-purple: #C175FF;
             --chart-blue: #4C99FF;
             --chart-pink: #FF6299;
-            --chart-green: #63E67A;
-            --chart-orange: #FFB84D;
-            --chart-cyan: #8ADFFF;
             --chart-teal: #55D6CF;
             --chart-gold: #E9C44A;
-            --chart-extra-lightness: 68%;
+
+/* Ajustes noturnos exclusivos do gráfico geral. */
+--chart-general-fixed: #63E67A;
+--chart-general-installments: #FFB84D;
+--chart-general-other: #8ADFFF;
+--chart-extra-lightness: 68%;
             --primary-dark: #7C19C3;
             --primary-light-bg: rgba(193, 117, 255, 0.14);
             --bg: #000000;
@@ -4194,9 +4205,9 @@
 
                 const items = [
                 { label: 'Despesas Variáveis', value: totalSpentCurrent, color: 'var(--primary-chart)' },
-                { label: 'Despesas Fixas', value: totalFixed, color: getThemeVisualColor('--chart-green', '#32D74B') },
-                { label: 'Parcelamentos', value: activeCreditTotal, color: getThemeVisualColor('--chart-orange', '#FF9F0A') },
-                { label: 'Outros compromissos', value: totalOther, color: getThemeVisualColor('--chart-cyan', '#64D2FF') }
+                { label: 'Despesas Fixas', value: totalFixed, color: getThemeVisualColor('--chart-general-fixed', '#32D74B') },
+                { label: 'Parcelamentos', value: activeCreditTotal, color: getThemeVisualColor('--chart-general-installments', '#FF9F0A') },
+                { label: 'Outros compromissos', value: totalOther, color: getThemeVisualColor('--chart-general-other', '#64D2FF') }
                 ].filter(i => i.value > 0);
 
                 container.innerHTML = generateDonutSvg(items, grandTotal);
@@ -4209,16 +4220,16 @@
                     return;
                 }
 
-                // Paleta dos envelopes: preserva as oito cores originais e acrescenta dois tons.
+                // Paleta dos envelopes, centralizada no CSS e resolvida conforme a aparência.
                 const palette = [
                     getThemeVisualColor('--chart-purple', themeColors.purple),
                     getThemeVisualColor('--chart-blue', themeColors.blue),
                     getThemeVisualColor('--chart-pink', themeColors.pink),
-                    '#32D74B',
-                    '#FF9F0A',
-                    '#FF453A',
-                    '#64D2FF',
-                    '#5E5CE6',
+                    getThemeVisualColor('--chart-green', '#32D74B'),
+                    getThemeVisualColor('--chart-orange', '#FF9F0A'),
+                    getThemeVisualColor('--chart-red', '#FF453A'),
+                    getThemeVisualColor('--chart-cyan', '#64D2FF'),
+                    getThemeVisualColor('--chart-indigo', '#5E5CE6'),
                     getThemeVisualColor('--chart-teal', '#00A6A6'),
                     getThemeVisualColor('--chart-gold', '#B58B00')
                 ];
