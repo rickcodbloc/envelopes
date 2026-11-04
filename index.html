@@ -2385,7 +2385,7 @@
                 </div>
                 <div class="modal-buttons">
                     <button class="btn btn-cancel" onclick="closeModal('modal-reset')">Cancelar</button>
-                    <button class="btn btn-confirm" onclick="confirmReset()">Recomeçar o mês</button>
+                    <button class="btn btn-confirm" onclick="confirmReset()">Iniciar mês</button>
                 </div>
             </div>
         </div>
@@ -2420,7 +2420,7 @@
                     <div style="width:20px; height:20px; display:flex; align-items:center; justify-content:center; color:var(--primary);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg></div>
                     <h2 style="margin:0;">Importar Dados</h2>
                 </div>
-                <p class="modal-subtitle">Selecione os itens do arquivo para adicionar. (Seus dados atuais serão mantidos).</p>
+                <p class="modal-subtitle">Selecione o que deseja recuperar. Registros ausentes serão trazidos, inclusive os apagados. Suas edições atuais serão mantidas.</p>
                 <div id="import-list" class="checkbox-list"></div>
                 <!-- Somente backups completos da versão 9 oferecem restauração integral explícita. -->
                 <label id="import-restore-option" class="modal-checkbox-label" style="margin-top:12px; display:none; align-items:flex-start;">
@@ -2429,7 +2429,7 @@
                 </label>
                 <div class="modal-buttons">
                     <button class="btn btn-cancel" onclick="closeModal('modal-import')">Cancelar</button>
-                    <button class="btn btn-confirm" onclick="confirmImport()">Adicionar</button>
+                    <button class="btn btn-confirm" onclick="confirmImport()">Importar</button>
                 </div>
             </div>
         </div>
@@ -2647,7 +2647,6 @@
         };
 
         // Gera IDs inteiros positivos e únicos dentro da coleção, compatíveis com os fluxos que usam parseInt().
-        // IDs válidos são preservados; somente IDs ausentes, fracionários ou duplicados são substituídos.
         const createUniqueNumericId = (items = []) => {
             const usedIds = new Set((Array.isArray(items) ? items : [])
                 .map(item => Number(item && item.id))
@@ -2657,7 +2656,21 @@
             return candidate;
         };
 
-        const ensureUniqueNumericIds = (items, onChanged = null) => {
+        // Um arquivo antigo sem ID estável precisa produzir a mesma chave em cada leitura.
+        // Usa uma faixa de inteiros seguros acima dos timestamps usuais; colisões na lista são resolvidas abaixo.
+        const legacyImportId = (fields) => {
+            const text = JSON.stringify(fields);
+            let first = 2166136261;
+            let second = 5381;
+            for (let i = 0; i < text.length; i++) {
+                first = Math.imul(first ^ text.charCodeAt(i), 16777619);
+                second = Math.imul(second, 33) ^ text.charCodeAt(i);
+            }
+            return 2 ** 52 + (first >>> 12) * 2 ** 32 + (second >>> 0);
+        };
+
+        // IDs válidos são preservados; somente IDs ausentes, fracionários ou duplicados são substituídos.
+        const ensureUniqueNumericIds = (items, onChanged = null, forImport = false) => {
             const validIdsReserved = new Set((Array.isArray(items) ? items : [])
                 .map(item => Number(item && item.id))
                 .filter(id => Number.isSafeInteger(id) && id > 0));
@@ -2667,7 +2680,9 @@
                 const originalId = item && item.id;
                 let id = Number(originalId);
                 if (!Number.isSafeInteger(id) || id <= 0 || usedIds.has(id)) {
-                    id = Date.now();
+                    // Um ID fracionário legado ainda reconhece o cadastro após uma edição.
+                    const legacyKey = Number.isFinite(id) && id > 0 && !Number.isInteger(id) ? id : item;
+                    id = forImport ? legacyImportId(legacyKey) : Date.now();
                     while (validIdsReserved.has(id) || usedIds.has(id)) id++;
                     item.id = id;
                     changed = true;
@@ -2681,16 +2696,6 @@
             // Persiste somente quando a normalização realmente mudou um ID; evita escritas extras em cada abertura.
             if (changed && typeof onChanged === 'function') onChanged(normalizedItems);
             return normalizedItems;
-        };
-
-        // Preserva o ID exportado quando ainda está livre; só remapeia colisões reais com dados locais.
-        // Isso mantém alinhados os registros ativos e suas referências dentro do snapshot mensal aberto.
-        const assignAvailableImportedId = (item, items) => {
-            const importedId = Number(item && item.id);
-            const idIsAvailable = Number.isSafeInteger(importedId) && importedId > 0
-                && !(Array.isArray(items) ? items : []).some(existing => Number(existing && existing.id) === importedId);
-            item.id = idIsAvailable ? importedId : createUniqueNumericId(items);
-            return item;
         };
 
         // Limites efetivos durante a digitação; maxlength sozinho não funciona em input number.
@@ -3313,7 +3318,7 @@
         };
 
         // Há exatamente uma fotografia encerrada por período. Quando há conflito, o último registro
-        // da sequência vence; em Adicionar, conflitos locais são filtrados antes desta normalização.
+        // da sequência vence; na importação seletiva, conflitos locais são filtrados antes desta normalização.
         const uniqueMonthlySnapshotsByPeriod = (snapshots) => {
             const byPeriod = new Map();
             (Array.isArray(snapshots) ? snapshots : []).filter(snapshot => snapshot && isValidMonthKey(snapshot.periodKey))
@@ -3484,7 +3489,11 @@
                 retainedExpenses.forEach(expense => {
                     if (!expenses.some(existing => String(existing.id) === String(expense.id))) expenses.push({ ...expense });
                 });
-                const historyForPeriod = (Array.isArray(env.history) ? env.history : []).find(item => getHistoryPeriodKey(item) === periodKey && finiteMoney(item.total));
+                // Um arquivo individual recuperado neste mês conserva sua meta histórica sem
+                // assumir o orçamento do mês aberto no lugar do envelope local.
+                const historyForPeriod = (Array.isArray(env.history) ? env.history : []).find(item =>
+                    getHistoryPeriodKey(item) === periodKey && finiteMoney(item.total) &&
+                    !(item.useLiveBudget === true && periodKey === getMonthKey()));
                 const total = historyForPeriod ? historyForPeriod.total : (finiteMoney(env.total) ? env.total : 0);
                 return {
                     id: Number(env.id) || 0,
@@ -6651,7 +6660,7 @@
 
         const openExpenseModal = (envId, expenseItemId = null) => {
             // O bloqueio vale somente para novos lançamentos; edição não deve ser impedida.
-            if (!expenseItemId && !ensureCycleAllowsNewExpense()) return;
+            if (expenseItemId == null && !ensureCycleAllowsNewExpense()) return;
             const env = envelopes.find(e => e.id === envId);
             if(!env) return;
 
@@ -6659,7 +6668,7 @@
             document.getElementById('expense-env-id').value = envId;
             document.getElementById('expense-envelope-name').innerText = `Envelope: ${env.name}`;
             
-            if(expenseItemId) {
+            if(expenseItemId != null) {
                 document.getElementById('expense-modal-title').innerText = 'Editar Gasto';
                 const expense = (env.expenses || []).find(e => e.id === expenseItemId);
                 if(expense) {
@@ -6713,13 +6722,13 @@
             const envIndex = envelopes.findIndex(env => env.id === envId);
             if (envIndex === -1) return; 
 
-            let baseDate = new Date(); 
-            if (expenseId) {
-                const existingExp = (envelopes[envIndex].expenses || []).find(e => e.id == expenseId);
-                if (existingExp && existingExp.date) {
-                    const parsedDate = parseEntryDate(existingExp.date);
-                    if (!isNaN(parsedDate.getTime())) baseDate = parsedDate; 
-                }
+            // Conserva a identidade original também para gastos que vieram de backups com IDs em texto.
+            const expIndex = expenseId ? (envelopes[envIndex].expenses || []).findIndex(e => String(e.id) === expenseId) : -1;
+            const existingExp = expIndex === -1 ? null : envelopes[envIndex].expenses[expIndex];
+            let baseDate = new Date();
+            if (existingExp && existingExp.date) {
+                const parsedDate = parseEntryDate(existingExp.date);
+                if (!isNaN(parsedDate.getTime())) baseDate = parsedDate;
             }
 
             let expDateIso = baseDate.toISOString();
@@ -6761,7 +6770,7 @@
             envelopes[envIndex].expenses = envelopes[envIndex].expenses || [];
             const expensePeriodKey = getMonthKey(selectedDate);
             const updatedExpense = {
-                id: expenseId ? Number(expenseId) : Date.now(),
+                id: existingExp ? existingExp.id : Date.now(),
                 amount,
                 paymentMethod,
                 desc,
@@ -6770,7 +6779,6 @@
             };
 
             if (expenseId) {
-                const expIndex = envelopes[envIndex].expenses.findIndex(e => e.id == expenseId);
                 if (expIndex !== -1) {
                     if (expensePeriodKey === getMonthKey()) {
                         envelopes[envIndex].expenses[expIndex] = updatedExpense;
@@ -7394,6 +7402,34 @@
 
         const triggerImport = () => document.getElementById('import-file-input').click();
 
+        // Só o legado sem ID usa os campos originais e a ocorrência. Duas compras iguais na
+        // mesma lista continuam distintas, inclusive ao reler o arquivo depois de reiniciar.
+        const identifyLegacyExpenses = (entries, fallbackPeriod, used = new Set()) => {
+            if (!entries.some(entry => entry.id == null || entry.id === '')) return;
+            entries.forEach(entry => {
+                if (entry.id != null && entry.id !== '') used.add(String(entry.id));
+            });
+            entries.forEach(entry => {
+                if (entry.id != null && entry.id !== '') return;
+                let id = legacyImportId([getEntryPeriodKey(entry, fallbackPeriod), entry.date || '',
+                    entry.amount, entry.desc || '', entry.paymentMethod || '']);
+                while (used.has(String(id))) id++;
+                entry.id = id;
+                used.add(String(id));
+            });
+        };
+
+        // Fotos antigas podem copiar o mesmo gasto no extrato e na lista de gastos retidos.
+        // Identifica as duas representações pela mesma regra antes da normalização comum.
+        const normalizeImportedSnapshot = (snapshot) => {
+            if (!snapshot) return null;
+            (snapshot.envelopes || []).forEach(row => {
+                identifyLegacyExpenses(row.expenses || [], snapshot.periodKey);
+                identifyLegacyExpenses(row.retainedExpenses || [], snapshot.periodKey);
+            });
+            return normalizeMonthlySnapshot(snapshot);
+        };
+
         const importData = (event) => {
             const file = event.target.files[0];
             if (!file) return;
@@ -7423,7 +7459,7 @@
                         rawCredit = Array.isArray(imported.creditInstallments) ? imported.creditInstallments : [];
                         rawOther = Array.isArray(imported.otherCommitments) ? imported.otherCommitments : [];
                         rawSnapshots = Array.isArray(imported.monthlySnapshots) ? imported.monthlySnapshots : [];
-                        rawOpenSnapshot = normalizeMonthlySnapshot(imported.openMonthlySnapshot);
+                        rawOpenSnapshot = normalizeImportedSnapshot(imported.openMonthlySnapshot);
                         rawFixedAutoSort = typeof imported.fixedAutoSort === 'boolean' ? imported.fixedAutoSort : null;
                         rawOtherAutoSort = typeof imported.otherAutoSort === 'boolean' ? imported.otherAutoSort : null;
                         completeBackup = imported.version >= 9 && imported.completeBackup === true;
@@ -7449,7 +7485,7 @@
                             history: Array.isArray(env.history) ? env.history.filter(h => h && typeof h === 'object' && Array.isArray(h.expenses)) : []
                         }));
                     // Arquivos importados também passam pela regra única de IDs inteiros e sem duplicatas.
-                    ensureUniqueNumericIds(validEnvelopes);
+                    ensureUniqueNumericIds(validEnvelopes, null, true);
 
                     const validFixed = rawFixed
                         .filter(item => item && typeof item.name === 'string' && typeof item.amount === 'number' && Number.isFinite(item.amount))
@@ -7460,7 +7496,7 @@
                             dueDateDay: normalizeFixedDueDay(item.dueDateDay),
                             firstDueMonth: normalizeFirstDueMonth(item.firstDueMonth)
                         }));
-                    ensureUniqueNumericIds(validFixed);
+                    ensureUniqueNumericIds(validFixed, null, true);
 
                     const validCredit = rawCredit
                         .filter(item => item && typeof item.name === 'string' && typeof item.amount === 'number' && Number.isFinite(item.amount))
@@ -7476,7 +7512,7 @@
                             lastYear: Number.isInteger(item.lastYear) ? item.lastYear : undefined,
                             lastMonth: Number.isInteger(item.lastMonth) && item.lastMonth >= 0 && item.lastMonth <= 11 ? item.lastMonth : undefined
                         }));
-                    ensureUniqueNumericIds(validCredit);
+                    ensureUniqueNumericIds(validCredit, null, true);
 
                     const validOther = rawOther
                         // Preserva valores legados não negativos; os formulários continuam exigindo valor positivo.
@@ -7497,10 +7533,9 @@
                                 lastMonth: Number.isInteger(item.lastMonth) && item.lastMonth >= 0 && item.lastMonth <= 11 ? item.lastMonth : undefined
                             };
                         });
-                    ensureUniqueNumericIds(validOther);
+                    ensureUniqueNumericIds(validOther, null, true);
 
-                    const validSnapshots = uniqueMonthlySnapshotsByPeriod(rawSnapshots.map(normalizeMonthlySnapshot).filter(Boolean))
-                        .slice(-13);
+                    const validSnapshots = uniqueMonthlySnapshotsByPeriod(rawSnapshots.map(normalizeImportedSnapshot).filter(Boolean));
                     const validOpenSnapshot = rawOpenSnapshot && rawOpenSnapshot.periodKey ? rawOpenSnapshot : null;
 
                     if (validEnvelopes.length === 0 && validFixed.length === 0 && validCredit.length === 0 && validOther.length === 0 && validSnapshots.length === 0 && !validOpenSnapshot) {
@@ -7631,19 +7666,133 @@
             reader.readAsText(file);
         };
 
-        // Adicionar continua sendo o comportamento original. Restauração integral exige opção
-        // expressa e desativa a seleção parcial para impedir perdas acidentais.
+        // A seleção recupera registros ausentes. A restauração integral exige escolha expressa
+        // e desativa a seleção parcial para impedir substituições acidentais.
         const updateImportRestoreView = () => {
             const restoring = document.getElementById('import-restore-cb').checked;
             const subtitle = document.querySelector('#modal-import .modal-subtitle');
             if (subtitle) subtitle.textContent = restoring
                 ? 'Atenção: todos os dados atuais serão substituídos pelo backup completo selecionado.'
-                : 'Selecione os itens do arquivo para adicionar. (Seus dados atuais serão mantidos).';
+                : 'Selecione o que deseja recuperar. Registros ausentes serão trazidos, inclusive os apagados. Suas edições atuais serão mantidas.';
             document.querySelectorAll('#import-list input[type="checkbox"]').forEach(cb => {
                 cb.disabled = restoring;
                 if (restoring) cb.checked = true;
             });
-            document.querySelector('#modal-import .btn-confirm').textContent = restoring ? 'Restaurar' : 'Adicionar';
+            document.querySelector('#modal-import .btn-confirm').textContent = restoring ? 'Restaurar' : 'Importar';
+        };
+
+        // A identidade do gasto vale em todo o envelope, mesmo depois de mudar de mês ou
+        // de ser arquivado. A posição e os valores da cópia local têm precedência.
+        const mergeImportedEnvelope = (target, source, sourcePeriod, incomingRetained, isNew) => {
+            const currentKey = getMonthKey();
+            const localRow = openMonthlySnapshot && openMonthlySnapshot.periodKey === currentKey
+                ? openMonthlySnapshot.envelopes.find(row => Number(row.id) === target.id) : null;
+            const retained = localRow ? localRow.retainedExpenses : [];
+            const prepareExpenses = (env, fallback) => {
+                // Reserva os IDs de todos os grupos antes de numerar gastos legados idênticos.
+                const lists = [...env.history.map(group => [group.expenses,
+                    getHistoryPeriodKey(group) || getEntryPeriodKey(group.expenses[0], fallback)]), [env.expenses, fallback]];
+                const ids = new Set();
+                lists.forEach(([entries]) => entries.forEach(entry => {
+                    if (entry.id != null && entry.id !== '') ids.add(String(entry.id));
+                }));
+                lists.forEach(([entries, period]) => identifyLegacyExpenses(entries, period, ids));
+                return ids;
+            };
+            const known = prepareExpenses(target, currentKey);
+            retained.forEach(entry => known.add(String(entry.id)));
+            prepareExpenses(source, sourcePeriod);
+
+            const historyByMonth = new Map();
+            const historyById = new Map(target.history.map(group => [String(group.id), group]));
+            target.history.forEach(group => {
+                const key = getHistoryPeriodKey(group);
+                if (!historyByMonth.has(key)) historyByMonth.set(key, group);
+            });
+            // Alguns arquivos antigos guardam mais de um fechamento individual no mesmo mês.
+            // Nesse caso, preserva os grupos e seus orçamentos em vez de uni-los só pela competência.
+            const archiveMonth = group => getHistoryPeriodKey(group) || getEntryPeriodKey(group.expenses[0], sourcePeriod);
+            const groupsPerMonth = new Map();
+            source.history.forEach((group, index) => {
+                const period = archiveMonth(group);
+                groupsPerMonth.set(period, (groupsPerMonth.get(period) || 0) + 1);
+                if (!Number.isFinite(Number(group.id)) || !Number(group.id)) {
+                    group.id = legacyImportId(['histórico', source.id, period, index]);
+                }
+            });
+            const getArchive = (period, original) => {
+                let id = Number(original?.id);
+                const sameId = historyById.get(String(id));
+                if (sameId && getHistoryPeriodKey(sameId) === period) return sameId;
+                if ((!original || groupsPerMonth.get(period) === 1) && historyByMonth.has(period)) {
+                    return historyByMonth.get(period);
+                }
+                // O seletor precisa de IDs distintos mesmo quando um arquivo reutiliza o ID em outro mês.
+                if (sameId) {
+                    id = legacyImportId(['histórico', source.id, period, id]);
+                    while (historyById.has(String(id))) {
+                        const previous = historyById.get(String(id));
+                        if (getHistoryPeriodKey(previous) === period) return previous;
+                        id++;
+                    }
+                }
+                if (!Number.isFinite(id) || !id) id = createUniqueNumericId(target.history);
+                const savedMonth = monthlySnapshots.find(snapshot => snapshot.periodKey === period);
+                const savedRow = savedMonth && savedMonth.envelopes.find(row => Number(row.id) === target.id);
+                const total = original && finiteMoney(original.total) ? original.total : savedRow ? savedRow.total : source.total;
+                const group = { id, periodKey: period, label: original?.label || formatMonthLabelKey(period), total, expenses: [] };
+                if (period === currentKey && (!isNew || original?.useLiveBudget === true)) group.useLiveBudget = true;
+                target.history.push(group);
+                if (!historyByMonth.has(period)) historyByMonth.set(period, group);
+                historyById.set(String(id), group);
+                return group;
+            };
+            let recovered = 0;
+            const recover = (entries, fallbackPeriod, archived = false, original = null) => {
+                let sourceGroup;
+                entries.forEach(entry => {
+                    const id = String(entry.id);
+                    if (known.has(id)) return;
+                    const period = getEntryPeriodKey(entry, fallbackPeriod) || currentKey;
+                    let destination = target.expenses;
+                    if (archived && period === (fallbackPeriod || currentKey)) {
+                        if (!sourceGroup) sourceGroup = getArchive(period, original);
+                        destination = sourceGroup.expenses;
+                    } else if (archived || period !== currentKey) {
+                        destination = getArchive(period).expenses;
+                    }
+                    destination.push({ ...entry, periodKey: period });
+                    known.add(id);
+                    recovered++;
+                });
+            };
+            // O arquivo individual fornece o mês e o orçamento antes dos lançamentos ativos.
+            source.history.forEach(group => {
+                const period = archiveMonth(group);
+                if (!group.expenses.length) getArchive(period || currentKey, group);
+                recover(group.expenses, period, true, group);
+            });
+            recover(source.expenses, sourcePeriod);
+
+            // Uma redefinição sem histórico pode deixar gastos apenas no consolidado aberto.
+            // Esses gastos continuam fora do saldo do cartão do envelope.
+            const missingRetained = incomingRetained.filter(entry => getEntryPeriodKey(entry, currentKey) === currentKey && !known.has(String(entry.id)));
+            if (missingRetained.length) {
+                if (localRow) missingRetained.forEach(entry => localRow.retainedExpenses.push(entry));
+                else {
+                    if (!openMonthlySnapshot) openMonthlySnapshot = { periodKey: currentKey, envelopes: [] };
+                    openMonthlySnapshot.envelopes.push({ id: target.id, retainedExpenses: missingRetained });
+                }
+            }
+            return recovered + missingRetained.length;
+        };
+
+        // Fixas, parcelas e compromissos mantêm a versão local por ID, mesmo após renomeação.
+        const addMissingImportedItems = (target, source) => {
+            const ids = new Set(target.map(item => item.id));
+            const missing = source.filter(item => !ids.has(item.id));
+            missing.forEach(item => target.push({ ...item }));
+            return missing.length;
         };
 
         const confirmImport = () => {
@@ -7737,147 +7886,62 @@
                 updateStorageMonitor(true);
                 return;
             }
+            // Se o mês virou enquanto a seleção estava aberta, fecha primeiro o período local.
+            const currentKey = getMonthKey();
+            checkMonthCycleBoundary();
+            if (monthCycleState.lastObservedCycle !== currentKey) throw new Error('Não foi possível confirmar o ciclo atual.');
+            const importedOpen = pendingImportData.openMonthlySnapshot;
+            const importedCurrent = importHistory && (importedOpen && importedOpen.periodKey === currentKey
+                ? importedOpen : pendingImportData.monthlySnapshots.find(snapshot => snapshot.periodKey === currentKey));
+            const sourcePeriod = pendingImportData.cycleState?.lastObservedCycle || importedOpen?.periodKey || null;
+            let addedSnapshotsCount = 0;
+            if (importHistory) {
+                // O consolidado local fechado tem prioridade. Um ledger antigo do backup pode
+                // completar o histórico; o mês em andamento será reconstruído dos dados resultantes.
+                const existing = new Set(monthlySnapshots.map(snapshot => snapshot.periodKey));
+                const byPeriod = new Map(monthlySnapshots.map(snapshot => [snapshot.periodKey, snapshot]));
+                const incoming = [...pendingImportData.monthlySnapshots];
+                if (importedOpen) incoming.push(importedOpen);
+                incoming.forEach(snapshot => {
+                    if (snapshot.periodKey < currentKey && !byPeriod.has(snapshot.periodKey)) {
+                        byPeriod.set(snapshot.periodKey, snapshot);
+                    }
+                });
+                if (!persistMonthlySnapshots([...byPeriod.values()])) throw new Error('Não foi possível gravar os meses encerrados.');
+                addedSnapshotsCount = monthlySnapshots.filter(snapshot => !existing.has(snapshot.periodKey)).length;
+            }
+
             let addedEnvelopesCount = 0;
+            let recoveredExpensesCount = 0;
             selectedIndices.forEach(index => {
-                const envToImport = JSON.parse(JSON.stringify(pendingImportData.envelopes[index]));
-                // O ID é a identidade do envelope: reimportar o mesmo backup não deve duplicar orçamento e gastos.
-                const exists = envelopes.some(e => e.id === envToImport.id);
-                if (exists) return;
-                envelopes.push(envToImport);
-                addedEnvelopesCount++;
+                const source = JSON.parse(JSON.stringify(pendingImportData.envelopes[index]));
+                let target = envelopes.find(env => env.id === source.id);
+                const isNew = !target;
+                if (isNew) {
+                    target = { ...source, expenses: [], history: [] };
+                    envelopes.push(target);
+                    addedEnvelopesCount++;
+                }
+                const row = importedCurrent && importedCurrent.envelopes.find(item => Number(item.id) === source.id);
+                recoveredExpensesCount += mergeImportedEnvelope(target, source, sourcePeriod, row?.retainedExpenses || [], isNew);
             });
 
             let addedFixedCount = 0;
-            if (importFixed && pendingImportData.fixedExpenses.length > 0) {
-                // Backups antigos não têm fixedAutoSort; nesse caso, preserva-se a preferência atual.
-                if (typeof pendingImportData.fixedAutoSort === 'boolean') {
-                    isFixedAutoSort = pendingImportData.fixedAutoSort;
-                    writeStoredValue('myFixedAutoSort', String(isFixedAutoSort));
-                }
-
-                pendingImportData.fixedExpenses.forEach(item => {
-                    let fixedToImport = JSON.parse(JSON.stringify(item));
-                    const exists = fixedExpenses.some(f => f.name.toLowerCase() === fixedToImport.name.toLowerCase());
-                    if (!exists) {
-                        assignAvailableImportedId(fixedToImport, fixedExpenses);
-                        fixedExpenses.push(fixedToImport);
-                        addedFixedCount++;
-                    }
-                });
+            if (importFixed) {
+                addedFixedCount = addMissingImportedItems(fixedExpenses, pendingImportData.fixedExpenses);
                 sortFixedExpensesIfNeeded();
                 writeStoredValue('myFixedExpenses', JSON.stringify(fixedExpenses));
             }
-
             let addedCreditCount = 0;
-            if (importCredit && pendingImportData.creditInstallments.length > 0) {
-                pendingImportData.creditInstallments.forEach(item => {
-                    let creditToImport = JSON.parse(JSON.stringify(item));
-                    const exists = creditInstallments.some(c => c.name.toLowerCase() === creditToImport.name.toLowerCase() && c.cardName === creditToImport.cardName);
-                    if (!exists) {
-                        assignAvailableImportedId(creditToImport, creditInstallments);
-                        creditInstallments.push(creditToImport);
-                        addedCreditCount++;
-                    }
-                });
+            if (importCredit) {
+                addedCreditCount = addMissingImportedItems(creditInstallments, pendingImportData.creditInstallments);
                 writeStoredValue('myCreditInstallments', JSON.stringify(creditInstallments));
             }
-
             let addedOtherCount = 0;
-            if (importOther && pendingImportData.otherCommitments.length > 0) {
-                // Backups antigos podem não ter otherAutoSort; nesse caso mantemos a preferência local atual.
-                if (typeof pendingImportData.otherAutoSort === 'boolean') {
-                    isOtherAutoSort = pendingImportData.otherAutoSort;
-                    writeStoredValue('myOtherAutoSort', String(isOtherAutoSort));
-                }
-
-                pendingImportData.otherCommitments.forEach(item => {
-                    const otherToImport = JSON.parse(JSON.stringify(item));
-                    const exists = otherCommitments.some(existing => existing.name.toLowerCase() === otherToImport.name.toLowerCase());
-                    if (!exists) {
-                        assignAvailableImportedId(otherToImport, otherCommitments);
-                        otherCommitments.push(otherToImport);
-                        addedOtherCount++;
-                    }
-                });
+            if (importOther) {
+                addedOtherCount = addMissingImportedItems(otherCommitments, pendingImportData.otherCommitments);
                 sortOtherCommitmentsIfNeeded();
                 writeStoredValue('myOtherCommitments', JSON.stringify(otherCommitments));
-            }
-
-            let addedSnapshotsCount = 0;
-            let skippedSnapshotsCount = 0;
-            if (importHistory && (pendingImportData.monthlySnapshots.length > 0 || pendingImportData.openMonthlySnapshot)) {
-                const currentKey = getMonthKey();
-                const importedSnapshots = uniqueMonthlySnapshotsByPeriod(pendingImportData.monthlySnapshots);
-                const importedCurrentFromArchive = importedSnapshots.find(snapshot => snapshot.periodKey === currentKey) || null;
-                const importedOpen = pendingImportData.openMonthlySnapshot;
-                const importedOpenIsCurrent = importedOpen && importedOpen.periodKey === currentKey;
-                const incomingCurrentSnapshot = importedOpenIsCurrent ? importedOpen : importedCurrentFromArchive;
-
-                // Adicionar preserva o mês local em conflitos. A substituição fica restrita
-                // à restauração integral escolhida expressamente pelo usuário.
-                const snapshotsByPeriod = new Map(monthlySnapshots
-                    .filter(snapshot => snapshot.periodKey !== currentKey)
-                    .map(snapshot => [snapshot.periodKey, snapshot]));
-                importedSnapshots.filter(snapshot => snapshot.periodKey !== currentKey).forEach(snapshot => {
-                    if (snapshotsByPeriod.has(snapshot.periodKey)) { skippedSnapshotsCount++; return; }
-                    addedSnapshotsCount++;
-                    snapshotsByPeriod.set(snapshot.periodKey, snapshot);
-                });
-
-                if (importedOpen && !importedOpenIsCurrent) {
-                    // Um ledger aberto de um mês que já passou vira fotografia encerrada, salvo se
-                    // houver uma fotografia fechada mais autoritativa desse mesmo período.
-                    if (snapshotsByPeriod.has(importedOpen.periodKey)) skippedSnapshotsCount++;
-                    else {
-                        snapshotsByPeriod.set(importedOpen.periodKey, importedOpen);
-                        addedSnapshotsCount++;
-                    }
-                }
-
-                // Compatibilidade com dados antigos que deixaram o mês corrente na lista de fechados.
-                const localCurrentFromArchive = monthlySnapshots.find(snapshot => snapshot.periodKey === currentKey) || null;
-                const localOpenIsCurrent = openMonthlySnapshot && openMonthlySnapshot.periodKey === currentKey;
-                let currentBase = localCurrentFromArchive;
-                if (localOpenIsCurrent) {
-                    currentBase = openMonthlySnapshot;
-                }
-                if (incomingCurrentSnapshot) {
-                    // O mês aberto depende dos cadastros selecionados. Preserva os gastos retidos
-                    // locais e aceita os do backup somente em envelopes ainda ausentes do ledger.
-                    const localRows = currentBase ? currentBase.envelopes : [];
-                    openMonthlySnapshot = { ...incomingCurrentSnapshot, envelopes: [
-                        ...localRows,
-                        ...incomingCurrentSnapshot.envelopes.filter(row => !localRows.some(local => Number(local.id) === Number(row.id)))
-                    ] };
-                    const rebuilt = buildMonthlySnapshot(currentKey);
-                    const expenseSignature = entries => JSON.stringify((entries || []).map(entry => [String(entry.id), entry.amount, entry.date || '', entry.desc || '', entry.paymentMethod || '']).sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b))));
-                    const envelopesMatch = incomingCurrentSnapshot.envelopes.every(row => rebuilt.envelopes.some(live => Number(live.id) === Number(row.id)
-                        && live.name === row.name && live.total === row.total && Math.round(live.spent * 100) === Math.round(row.spent * 100)
-                        && expenseSignature(live.expenses) === expenseSignature(row.expenses)));
-                    const commitmentsMatch = ['fixedExpenses', 'creditInstallments', 'otherCommitments'].every(key => incomingCurrentSnapshot[key].every(row => rebuilt[key].some(live => Number(live.id) === Number(row.id)
-                        && live.name === row.name && live.amount === row.amount && live.dueDateDay === row.dueDateDay
-                        && (key === 'fixedExpenses' || (live.currentInstallment === row.currentInstallment && live.totalInstallments === row.totalInstallments))
-                        && (key !== 'creditInstallments' || live.cardName === row.cardName))));
-                    if (!envelopesMatch || !commitmentsMatch) {
-                        const error = new Error('O histórico do mês atual depende de cadastros ou lançamentos que não foram selecionados ou conflitam com os dados locais. Selecione os itens correspondentes ou use a restauração de um backup completo. Nenhum dado foi importado.');
-                        error.importSelectionError = true;
-                        throw error;
-                    }
-                } else if (currentBase) {
-                    openMonthlySnapshot = currentBase;
-                }
-
-                if (!persistMonthlySnapshots([...snapshotsByPeriod.values()])) {
-                    throw new Error('Não foi possível gravar as fotografias mensais.');
-                }
-                if (openMonthlySnapshot && openMonthlySnapshot.periodKey === currentKey && (incomingCurrentSnapshot || currentBase)) {
-                    try { writeStoredValue('myOpenMonthlySnapshot', JSON.stringify(openMonthlySnapshot)); }
-                    catch (error) {
-                        monthlySnapshotSaveError = true;
-                        console.error('Não foi possível importar o mês em andamento:', error);
-                        throw new Error('Não foi possível gravar a fotografia do mês em andamento.');
-                    }
-                }
             }
 
             // Novos registros importados também recebem referência de mês antes da próxima renderização.
@@ -7890,7 +7954,7 @@
             activeStorageTransaction = null;
             commitStoredChanges(importTransaction);
             closeModal('modal-import');
-            alert(`Importação concluída! (${addedEnvelopesCount} envelope(s), ${addedFixedCount} despesa(s) fixa(s), ${addedCreditCount} parcelamento(s), ${addedOtherCount} outro(s) compromisso(s) e ${addedSnapshotsCount} registro(s) mensal(is) adicionados).${skippedSnapshotsCount ? ` ${skippedSnapshotsCount} período(s) já existente(s) foram mantidos, sem substituição.` : ''}`);
+            alert(`Importação concluída! Recuperados: ${addedEnvelopesCount} envelope(s), ${recoveredExpensesCount} gasto(s), ${addedFixedCount} despesa(s) fixa(s), ${addedCreditCount} parcelamento(s), ${addedOtherCount} outro(s) compromisso(s) e ${addedSnapshotsCount} mês(es) encerrado(s).`);
             // Consulta o volume somente após a importação concluída; não interfere no rollback.
             setTimeout(() => updateStorageMonitor(true), 0);
             pendingImportData = { envelopes: [], fixedExpenses: [], creditInstallments: [], otherCommitments: [], monthlySnapshots: [], openMonthlySnapshot: null, fixedAutoSort: null, otherAutoSort: null, completeBackup: false, cycleState: null };
@@ -7913,9 +7977,7 @@
                 // As escritas foram confirmadas juntas; a reversão preserva chaves intactas.
                 const storageRollbackSucceeded = !storageRecoveryPending;
                 renderCurrentView();
-                if (error.importSelectionError) {
-                    alert(error.message);
-                } else if (storageRollbackSucceeded) {
+                if (storageRollbackSucceeded) {
                     alert('A importação não foi concluída. Os dados anteriores foram restaurados; nenhum item desta importação foi mantido. Verifique o armazenamento antes de tentar novamente.');
                 } else {
                     alert('A importação falhou e a restauração automática do armazenamento ficou incompleta. Não feche o aplicativo; exporte os dados que ainda aparecem e verifique o armazenamento local.');

@@ -1,5 +1,5 @@
-// v27: Refinos nas divisorias de 3 opções do menu e refino.
-const CACHE_NAME = 'envelopes-cache-v27';
+// v28: Importação seletiva por ID e novo texto do botão de virada do mês.
+const CACHE_NAME = 'envelopes-cache-v28';
 
 const ASSETS_TO_CACHE = [
   './',
