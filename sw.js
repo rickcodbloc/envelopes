@@ -1,5 +1,5 @@
-// v31: 8 Ajustes/refinos/implementos
-const CACHE_NAME = 'envelopes-cache-v31';
+// v32: correções de integridade e refinamentos de interface
+const CACHE_NAME = 'envelopes-cache-v32';
 
 const ASSETS_TO_CACHE = [
   './',
