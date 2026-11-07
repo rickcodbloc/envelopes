@@ -757,6 +757,30 @@
 
         .btn-reset-icon:active { background-color: var(--border-color); transform: scale(0.93); color: var(--primary); }
 
+        /* Separa as ações de arquivo tanto na tela inicial vazia quanto na lista de envelopes. */
+        .backup-actions {
+            grid-column: 1 / -1;
+            position: relative;
+            margin-top: 12px;
+            margin-bottom: 24px;
+            padding-top: 15px;
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .backup-actions::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: min(84%, 320px);
+            height: 1px;
+            background: var(--dashed-line);
+        }
+
         .btn-backup {
             background-color: var(--card-bg);
             border: 1px solid var(--border-color);
@@ -1066,6 +1090,12 @@
             margin-top: 12px;
         }
 
+        /* Data e hora dividem a linha no formulário de gastos, com mais espaço para a data. */
+        #date-container {
+            grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+            gap: 8px;
+        }
+
         .checkbox-list {
             flex: 1;
             overflow-y: auto;
@@ -1138,6 +1168,9 @@
             pointer-events: none;
         }
 
+        /* Contorno reforçado nas caixas expansíveis do Consolidado. O total tem estilo próprio. */
+        #financial-report-body > .report-details { border: 2px solid var(--border-color); }
+
         .report-details summary::-webkit-details-marker { display: none; }
         
         .report-chevron {
@@ -1149,6 +1182,32 @@
         .report-details[open] .report-chevron {
             transform: rotate(180deg);
             color: var(--primary);
+        }
+
+        /* Seletor de envelope no próprio formulário, com a mesma seta dos demais painéis. */
+        #expense-envelope-picker { margin-bottom: 12px; }
+        #expense-envelope-summary {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            min-height: 44px;
+            list-style: none;
+            color: var(--primary);
+            font-weight: bold;
+            cursor: pointer;
+        }
+        #expense-envelope-options { min-height: 0; max-height: 24vh; }
+        .expense-envelope-option {
+            width: 100%;
+            background: transparent;
+            border: 0;
+            border-bottom: 1px solid var(--border-color);
+            text-align: left;
+        }
+        .expense-envelope-option[aria-pressed="true"] {
+            background: var(--primary-light-bg);
+            border-radius: 6px;
         }
 
         /* Relatório Financeiro: elimina a borda inferior da última despesa
@@ -1588,12 +1647,13 @@
             }
         }
 
+        /* A guia acompanha o fechamento mais breve do anel nas duas abas. */
         .chart-guide-ring {
-            animation: chartGuideFadeOut 0.9s ease-out forwards;
+            animation: chartGuideFadeOut 0.8s ease-out forwards;
         }
 
         .chart-reveal-mask {
-            animation: chartRevealRing 0.72s cubic-bezier(0.16, 1, 0.3, 1) both;
+            animation: chartRevealRing 0.64s cubic-bezier(0.18, 0.94, 0.32, 1) both;
         }
 
         @media (prefers-reduced-motion: reduce) {
@@ -2323,8 +2383,14 @@
             <div class="modal-content">
                 <h2 id="expense-modal-title">Registrar Gasto</h2>
                 <p id="expense-envelope-name" style="margin-bottom:16px; color:var(--primary); font-weight:bold;"></p>
+                <details id="expense-envelope-picker" class="report-details" hidden>
+                    <summary id="expense-envelope-summary">
+                        <span id="expense-envelope-selection"></span>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="report-chevron" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </summary>
+                    <div id="expense-envelope-options" class="checkbox-list" role="group" aria-label="Envelope de destino"></div>
+                </details>
                 <input type="hidden" id="expense-env-id">
-                <input type="hidden" id="expense-item-id">
                 
                 <div class="form-group">
                     <label>Valor Gasto (R$)</label>
@@ -2343,10 +2409,16 @@
                 </div>
 
                 <div class="form-group">
-                    <span class="toggle-date" id="toggle-date-btn" onclick="toggleDateField()">+ Alterar data do gasto (Atual: Hoje)</span>
+                    <span class="toggle-date" id="toggle-date-btn" onclick="toggleDateField()">+ Alterar data/hora do gasto</span>
                     <div id="date-container">
-                        <label>Data do Gasto</label>
-                        <input type="text" id="expense-date" inputmode="numeric" placeholder="DD/MM/AAAA" maxlength="10">
+                        <div>
+                            <label for="expense-date">Data do gasto</label>
+                            <input type="text" id="expense-date" inputmode="numeric" placeholder="DD/MM/AAAA" maxlength="10">
+                        </div>
+                        <div>
+                            <label for="expense-time">Hora</label>
+                            <input type="text" id="expense-time" inputmode="numeric" placeholder="Ex: 14:30" maxlength="5">
+                        </div>
                     </div>
                 </div>
 
@@ -2430,6 +2502,13 @@
                 </div>
                 <p class="modal-subtitle">Selecione o que deseja incluir na exportação:</p>
                 <div id="export-list" class="checkbox-list"></div>
+
+                <!-- O TXT filtra o relatório dos envelopes. O Histórico mensal pertence ao backup JSON. -->
+                <!-- Agrupa a opção de conteúdo com os envelopes selecionados, antes do formato. -->
+                <label id="export-txt-history-option" class="modal-checkbox-label" style="display:none; margin-top:12px;">
+                    <input type="checkbox" id="export-txt-history-cb" checked style="width:20px; height:20px; accent-color:var(--primary-fill);">
+                    Incluir histórico dos envelopes
+                </label>
                 
                 <div class="form-group" style="margin-top: 8px;">
                     <label>Formato de Exportação</label>
@@ -2588,6 +2667,9 @@
         let tempIsFixedAutoSort = isFixedAutoSort;
         let currentSelectedSvg = null;
         let currentHistoryEnvId = null;
+        // Rascunho do formulário. Escolher um destino só altera o estado do modal.
+        let expenseBeingEdited = null;
+        let expenseDestinationId = null;
         // Inclui Outros Compromissos no estado temporário para manter o fluxo de backup/importação completo.
         let pendingImportData = { envelopes: [], fixedExpenses: [], creditInstallments: [], otherCommitments: [], monthlySnapshots: [], openMonthlySnapshot: null, fixedAutoSort: null, otherAutoSort: null, completeBackup: false, cycleState: null };
         let currentView = 'home'; // 'home', 'despesas-fixas', 'parcelamentos', 'relatorio'
@@ -2794,6 +2876,11 @@
                         require(!ids.has(String(item.id)), `${label}: identificadores de gastos duplicados.`);
                         ids.add(String(item.id));
                     }
+                    // A identidade original é opcional para manter a leitura de backups anteriores à transferência.
+                    if (item.transferOrigin != null) {
+                        const { envelopeId, expenseId } = item.transferOrigin;
+                        require(Number.isSafeInteger(envelopeId) && envelopeId > 0 && typeof expenseId === 'string' && expenseId !== '', `${label}: origem do gasto inválida.`);
+                    }
                 });
             };
             ['envelopes', 'fixedExpenses', 'creditInstallments', 'otherCommitments', 'monthlySnapshots'].forEach(key => {
@@ -2841,121 +2928,120 @@
             myCreditInstallments: 'creditInstallments', myOtherCommitments: 'otherCommitments',
             myMonthlySnapshots: 'monthlySnapshots', myOpenMonthlySnapshot: 'openMonthlySnapshot', myCycleState: 'cycleState'
         };
+        const validatedStoredCollections = new Map();
         Object.entries(storedCollectionFields).forEach(([key, field]) => {
             const raw = readStoredValue(key);
             if (raw === null) return;
-            try { validateDataCollections({ [field]: JSON.parse(raw) }); }
-            catch (error) { storageReadProblems.add(key); console.error('Conteúdo local preservado para recuperação:', key, error); }
+            try {
+                const value = JSON.parse(raw);
+                validateDataCollections({ [field]: value });
+                validatedStoredCollections.set(key, value);
+            } catch (error) { storageReadProblems.add(key); console.error('Conteúdo local preservado para recuperação:', key, error); }
         });
+
+        // Reutiliza o JSON já validado no início e libera a referência depois do carregamento.
+        const takeValidatedStoredCollection = (key) => {
+            const value = validatedStoredCollections.get(key);
+            validatedStoredCollections.delete(key);
+            return value;
+        };
 
         // CARREGAMENTO SEGURO
         try {
-            const rawEnv = storageReadProblems.has('myEnvelopes') ? null : readStoredValue('myEnvelopes');
-            if (rawEnv) {
-                const parsed = JSON.parse(rawEnv);
-                if (Array.isArray(parsed)) {
-                    envelopes = parsed
-                        .filter(env => env && typeof env === 'object' && typeof env.name === 'string' && typeof env.total === 'number' && Number.isFinite(env.total))
-                        .map(env => ({
-                            id: Number(env.id),
-                            name: env.name.trim(),
-                            total: env.total,
-                            icon: env.icon ? (env.icon.startsWith('<svg') ? sanitizeSvg(env.icon) : sanitizeHtml(env.icon)) : '📦',
-                            expenses: Array.isArray(env.expenses) ? env.expenses.filter(ex => ex && typeof ex === 'object' && typeof ex.amount === 'number' && Number.isFinite(ex.amount)) : [],
-                            history: Array.isArray(env.history) ? env.history.filter(h => h && typeof h === 'object' && Array.isArray(h.expenses)) : []
-                        }));
-                    // Corrige IDs legados fracionários/duplicados sem alterar IDs válidos.
-                    envelopes = ensureUniqueNumericIds(envelopes, normalized => {
-                        try { writeStoredValue('myEnvelopes', JSON.stringify(normalized)); }
-                        catch (error) { console.error('Não foi possível persistir os IDs corrigidos dos envelopes:', error); }
-                    });
-                }
+            const parsed = takeValidatedStoredCollection('myEnvelopes');
+            if (Array.isArray(parsed)) {
+                envelopes = parsed
+                    .filter(env => env && typeof env === 'object' && typeof env.name === 'string' && typeof env.total === 'number' && Number.isFinite(env.total))
+                    .map(env => ({
+                        id: Number(env.id),
+                        name: env.name.trim(),
+                        total: env.total,
+                        icon: env.icon ? (env.icon.startsWith('<svg') ? sanitizeSvg(env.icon) : sanitizeHtml(env.icon)) : '📦',
+                        expenses: Array.isArray(env.expenses) ? env.expenses.filter(ex => ex && typeof ex === 'object' && typeof ex.amount === 'number' && Number.isFinite(ex.amount)) : [],
+                        history: Array.isArray(env.history) ? env.history.filter(h => h && typeof h === 'object' && Array.isArray(h.expenses)) : []
+                    }));
+                // Corrige IDs legados fracionários/duplicados sem alterar IDs válidos.
+                envelopes = ensureUniqueNumericIds(envelopes, normalized => {
+                    try { writeStoredValue('myEnvelopes', JSON.stringify(normalized)); }
+                    catch (error) { console.error('Não foi possível persistir os IDs corrigidos dos envelopes:', error); }
+                });
             }
         } catch (e) {
             envelopes = [];
         }
 
         try {
-            const rawFixed = storageReadProblems.has('myFixedExpenses') ? null : readStoredValue('myFixedExpenses');
-            if (rawFixed) {
-                const parsed = JSON.parse(rawFixed);
-                if (Array.isArray(parsed)) {
-                    fixedExpenses = parsed
-                        .filter(item => item && typeof item === 'object' && typeof item.name === 'string' && typeof item.amount === 'number' && Number.isFinite(item.amount))
-                        .map(item => ({
-                            id: Number(item.id),
-                            name: item.name.trim(),
-                            amount: item.amount,
-                            dueDateDay: normalizeFixedDueDay(item.dueDateDay),
-                            firstDueMonth: normalizeFirstDueMonth(item.firstDueMonth)
-                        }));
-                    // Mantém IDs de despesas fixas válidos e corrige somente os inconsistentes.
-                    fixedExpenses = ensureUniqueNumericIds(fixedExpenses, normalized => {
-                        try { writeStoredValue('myFixedExpenses', JSON.stringify(normalized)); }
-                        catch (error) { console.error('Não foi possível persistir os IDs corrigidos das despesas fixas:', error); }
-                    });
-                    sortFixedExpensesIfNeeded();
-                }
+            const parsed = takeValidatedStoredCollection('myFixedExpenses');
+            if (Array.isArray(parsed)) {
+                fixedExpenses = parsed
+                    .filter(item => item && typeof item === 'object' && typeof item.name === 'string' && typeof item.amount === 'number' && Number.isFinite(item.amount))
+                    .map(item => ({
+                        id: Number(item.id),
+                        name: item.name.trim(),
+                        amount: item.amount,
+                        dueDateDay: normalizeFixedDueDay(item.dueDateDay),
+                        firstDueMonth: normalizeFirstDueMonth(item.firstDueMonth)
+                    }));
+                // Mantém IDs de despesas fixas válidos e corrige somente os inconsistentes.
+                fixedExpenses = ensureUniqueNumericIds(fixedExpenses, normalized => {
+                    try { writeStoredValue('myFixedExpenses', JSON.stringify(normalized)); }
+                    catch (error) { console.error('Não foi possível persistir os IDs corrigidos das despesas fixas:', error); }
+                });
+                sortFixedExpensesIfNeeded();
             }
         } catch (e) {
             fixedExpenses = [];
         }
 
         try {
-            const rawCredit = storageReadProblems.has('myCreditInstallments') ? null : readStoredValue('myCreditInstallments');
-            if (rawCredit) {
-                const parsed = JSON.parse(rawCredit);
-                if (Array.isArray(parsed)) {
-                    creditInstallments = parsed
-                        .filter(item => item && typeof item === 'object' && typeof item.name === 'string' && typeof item.amount === 'number' && Number.isFinite(item.amount))
-                        .map(item => ({
-                            id: Number(item.id),
-                            name: item.name.trim(),
-                            amount: item.amount,
-                            dueDateDay: Number.isInteger(Number(item.dueDateDay)) && Number(item.dueDateDay) >= 1 && Number(item.dueDateDay) <= 31 ? Number(item.dueDateDay) : 10,
-                            firstDueMonth: normalizeFirstDueMonth(item.firstDueMonth),
-                            currentInstallment: Number.isInteger(Number(item.currentInstallment)) && Number(item.currentInstallment) >= 1 ? Number(item.currentInstallment) : 1,
-                            totalInstallments: Number.isInteger(Number(item.totalInstallments)) && Number(item.totalInstallments) >= 1 ? Number(item.totalInstallments) : 1,
-                            cardName: item.cardName ? item.cardName.trim() : 'Outros',
-                            lastYear: typeof item.lastYear === 'number' ? item.lastYear : undefined,
-                            lastMonth: typeof item.lastMonth === 'number' ? item.lastMonth : undefined
-                        }));
-                    // IDs inteiros e únicos evitam divergência entre lookup, edição e exclusão.
-                    creditInstallments = ensureUniqueNumericIds(creditInstallments, normalized => {
-                        try { writeStoredValue('myCreditInstallments', JSON.stringify(normalized)); }
-                        catch (error) { console.error('Não foi possível persistir os IDs corrigidos dos parcelamentos:', error); }
-                    });
-                }
+            const parsed = takeValidatedStoredCollection('myCreditInstallments');
+            if (Array.isArray(parsed)) {
+                creditInstallments = parsed
+                    .filter(item => item && typeof item === 'object' && typeof item.name === 'string' && typeof item.amount === 'number' && Number.isFinite(item.amount))
+                    .map(item => ({
+                        id: Number(item.id),
+                        name: item.name.trim(),
+                        amount: item.amount,
+                        dueDateDay: Number.isInteger(Number(item.dueDateDay)) && Number(item.dueDateDay) >= 1 && Number(item.dueDateDay) <= 31 ? Number(item.dueDateDay) : 10,
+                        firstDueMonth: normalizeFirstDueMonth(item.firstDueMonth),
+                        currentInstallment: Number.isInteger(Number(item.currentInstallment)) && Number(item.currentInstallment) >= 1 ? Number(item.currentInstallment) : 1,
+                        totalInstallments: Number.isInteger(Number(item.totalInstallments)) && Number(item.totalInstallments) >= 1 ? Number(item.totalInstallments) : 1,
+                        cardName: item.cardName ? item.cardName.trim() : 'Outros',
+                        lastYear: typeof item.lastYear === 'number' ? item.lastYear : undefined,
+                        lastMonth: typeof item.lastMonth === 'number' ? item.lastMonth : undefined
+                    }));
+                // IDs inteiros e únicos evitam divergência entre lookup, edição e exclusão.
+                creditInstallments = ensureUniqueNumericIds(creditInstallments, normalized => {
+                    try { writeStoredValue('myCreditInstallments', JSON.stringify(normalized)); }
+                    catch (error) { console.error('Não foi possível persistir os IDs corrigidos dos parcelamentos:', error); }
+                });
             }
         } catch (e) {
             creditInstallments = [];
         }
 
         try {
-            const rawOther = storageReadProblems.has('myOtherCommitments') ? null : readStoredValue('myOtherCommitments');
-            if (rawOther) {
-                const parsed = JSON.parse(rawOther);
-                if (Array.isArray(parsed)) {
-                    otherCommitments = parsed
-                        .filter(item => item && typeof item === 'object' && typeof item.name === 'string' && typeof item.amount === 'number' && Number.isFinite(item.amount))
-                        .map(item => ({
-                            id: Number(item.id),
-                            name: item.name.trim(),
-                            amount: item.amount,
-                            dueDateDay: Number.isInteger(Number(item.dueDateDay)) && Number(item.dueDateDay) >= 1 && Number(item.dueDateDay) <= 31 ? Number(item.dueDateDay) : 10,
-                            firstDueMonth: normalizeFirstDueMonth(item.firstDueMonth),
-                            currentInstallment: Number.isInteger(Number(item.currentInstallment)) && Number(item.currentInstallment) >= 1 ? Number(item.currentInstallment) : 1,
-                            totalInstallments: Number.isInteger(Number(item.totalInstallments)) && Number(item.totalInstallments) >= 1 ? Number(item.totalInstallments) : 1,
-                            lastYear: typeof item.lastYear === 'number' ? item.lastYear : undefined,
-                            lastMonth: typeof item.lastMonth === 'number' ? item.lastMonth : undefined
-                        }));
-                    // IDs inteiros e únicos evitam divergência entre lookup, edição e exclusão.
-                    otherCommitments = ensureUniqueNumericIds(otherCommitments, normalized => {
-                        try { writeStoredValue('myOtherCommitments', JSON.stringify(normalized)); }
-                        catch (error) { console.error('Não foi possível persistir os IDs corrigidos de outros compromissos:', error); }
-                    });
-                    sortOtherCommitmentsIfNeeded();
-                }
+            const parsed = takeValidatedStoredCollection('myOtherCommitments');
+            if (Array.isArray(parsed)) {
+                otherCommitments = parsed
+                    .filter(item => item && typeof item === 'object' && typeof item.name === 'string' && typeof item.amount === 'number' && Number.isFinite(item.amount))
+                    .map(item => ({
+                        id: Number(item.id),
+                        name: item.name.trim(),
+                        amount: item.amount,
+                        dueDateDay: Number.isInteger(Number(item.dueDateDay)) && Number(item.dueDateDay) >= 1 && Number(item.dueDateDay) <= 31 ? Number(item.dueDateDay) : 10,
+                        firstDueMonth: normalizeFirstDueMonth(item.firstDueMonth),
+                        currentInstallment: Number.isInteger(Number(item.currentInstallment)) && Number(item.currentInstallment) >= 1 ? Number(item.currentInstallment) : 1,
+                        totalInstallments: Number.isInteger(Number(item.totalInstallments)) && Number(item.totalInstallments) >= 1 ? Number(item.totalInstallments) : 1,
+                        lastYear: typeof item.lastYear === 'number' ? item.lastYear : undefined,
+                        lastMonth: typeof item.lastMonth === 'number' ? item.lastMonth : undefined
+                    }));
+                // IDs inteiros e únicos evitam divergência entre lookup, edição e exclusão.
+                otherCommitments = ensureUniqueNumericIds(otherCommitments, normalized => {
+                    try { writeStoredValue('myOtherCommitments', JSON.stringify(normalized)); }
+                    catch (error) { console.error('Não foi possível persistir os IDs corrigidos de outros compromissos:', error); }
+                });
+                sortOtherCommitmentsIfNeeded();
             }
         } catch (e) {
             otherCommitments = [];
@@ -3300,7 +3386,8 @@
                     paymentMethod: typeof entry.paymentMethod === 'string' ? entry.paymentMethod : '',
                     desc: typeof entry.desc === 'string' ? entry.desc : '',
                     date: typeof entry.date === 'string' ? entry.date : '',
-                    periodKey: isValidMonthKey(entry.periodKey) ? entry.periodKey : getEntryPeriodKey(entry, periodKey)
+                    periodKey: isValidMonthKey(entry.periodKey) ? entry.periodKey : getEntryPeriodKey(entry, periodKey),
+                    ...(entry.transferOrigin ? { transferOrigin: entry.transferOrigin } : {})
                 }));
             const normalizedEnvelopes = (Array.isArray(snapshot.envelopes) ? snapshot.envelopes : []).filter(item => item && typeof item.name === 'string')
                 .map(item => {
@@ -3362,14 +3449,14 @@
         // O mês aberto fica separado para não consumir uma das 12 fotografias encerradas.
         let openMonthlySnapshot = null;
         try {
-            const savedOpenSnapshot = normalizeMonthlySnapshot(JSON.parse((storageReadProblems.has('myOpenMonthlySnapshot') ? null : readStoredValue('myOpenMonthlySnapshot')) || 'null'));
+            const savedOpenSnapshot = normalizeMonthlySnapshot(takeValidatedStoredCollection('myOpenMonthlySnapshot'));
             if (savedOpenSnapshot) openMonthlySnapshot = savedOpenSnapshot;
         } catch (error) {
             openMonthlySnapshot = null;
         }
         let recoveredCurrentSnapshotFromArchive = null;
         try {
-            const savedSnapshots = JSON.parse((storageReadProblems.has(MONTHLY_SNAPSHOTS_KEY) ? null : readStoredValue(MONTHLY_SNAPSHOTS_KEY)) || '[]');
+            const savedSnapshots = takeValidatedStoredCollection(MONTHLY_SNAPSHOTS_KEY);
             if (Array.isArray(savedSnapshots)) {
                 const normalizedSnapshots = uniqueMonthlySnapshotsByPeriod(savedSnapshots.map(normalizeMonthlySnapshot).filter(Boolean));
                 const currentKey = getMonthKey();
@@ -3414,7 +3501,7 @@
             bannerDismissedFor: null
         };
         try {
-            const savedCycleState = JSON.parse(readStoredValue(MONTH_CYCLE_STATE_KEY) || 'null');
+            const savedCycleState = takeValidatedStoredCollection(MONTH_CYCLE_STATE_KEY);
             if (savedCycleState && isValidMonthKey(savedCycleState.lastObservedCycle)) {
                 cycleStateWasStored = true;
                 monthCycleState = {
@@ -3496,7 +3583,8 @@
                     paymentMethod: typeof expense.paymentMethod === 'string' ? expense.paymentMethod : '',
                     desc: typeof expense.desc === 'string' ? expense.desc : '',
                     date: typeof expense.date === 'string' ? expense.date : '',
-                    periodKey
+                    periodKey,
+                    ...(expense.transferOrigin ? { transferOrigin: expense.transferOrigin } : {})
                 });
             };
             (Array.isArray(env.expenses) ? env.expenses : []).forEach(expense => addIfMatching(expense, monthCycleState.lastObservedCycle || periodKey));
@@ -3638,11 +3726,11 @@
                 }
                 return true;
             }
-            const builtSnapshot = buildMonthlySnapshot(periodKey);
             // Na virada, a fotografia aberta é a fonte do período encerrado. A lista atual
             // pode já estar em outro mês; mesclá-la aqui ressuscitaria dados excluídos.
+            // Só monta uma fotografia quando o registro aberto daquele mês não existe.
             const snapshotToSave = openMonthlySnapshot && openMonthlySnapshot.periodKey === periodKey
-                ? openMonthlySnapshot : builtSnapshot;
+                ? openMonthlySnapshot : buildMonthlySnapshot(periodKey);
             if (!persistMonthlySnapshots([...monthlySnapshots, snapshotToSave])) return false;
             if (openMonthlySnapshot && openMonthlySnapshot.periodKey === periodKey) {
                 try {
@@ -3700,9 +3788,6 @@
                 return false;
             }
         };
-
-        // Inicializa a referência uma vez ou captura o período fechado antes do avanço de parcelas.
-        checkMonthCycleBoundary();
 
         // Edição retroativa/exclusão explícita altera o lançamento; redefinições de envelope, em contraste, preservam a fotografia.
         const removeExpenseFromOpenLedger = (envId, expenseId) => {
@@ -3884,12 +3969,13 @@
         const processInstallmentsAutoUpdate = () => {
             // Mesmo quando chamada diretamente, fecha o período observado antes de avançar parcelas.
             checkMonthCycleBoundary();
-            if (monthCycleState.lastObservedCycle !== getMonthKey() || (storageReadProblems.size && !allowUnreadableReplacement) || storageRecoveryPending) return;
-            const previous = JSON.parse(JSON.stringify({ creditInstallments, otherCommitments, openMonthlySnapshot }));
+            if (!cycleStateWasStored || monthCycleState.lastObservedCycle !== getMonthKey() || (storageReadProblems.size && !allowUnreadableReplacement) || storageRecoveryPending) return false;
+            // As rotinas abaixo substituem as coleções. Suas referências anteriores bastam para reverter a gravação.
+            const previous = { creditInstallments, otherCommitments, openMonthlySnapshot };
             try {
-                withStorageTransaction(() => {
+                return withStorageTransaction(() => {
                     const currentKey = getMonthKey();
-                    if (monthCycleState.lastObservedCycle !== currentKey || (storageReadProblems.size && !allowUnreadableReplacement) || storageRecoveryPending) return;
+                    if (monthCycleState.lastObservedCycle !== currentKey || (storageReadProblems.size && !allowUnreadableReplacement) || storageRecoveryPending) return false;
                     const processCollection = (items, storageKey) => {
                         const updatedItems = items.map(item => ({ ...item }));
                         let changed = false;
@@ -3909,16 +3995,17 @@
                             item.lastYear = Number(currentKey.slice(0, 4));
                             item.lastMonth = Number(currentKey.slice(5, 7)) - 1;
                             changed = true;
-                });
-                if (changed) {
-                    writeStoredValue(storageKey, JSON.stringify(updatedItems));
-                }
-                return updatedItems;
-            };
-            creditInstallments = processCollection(creditInstallments, 'myCreditInstallments');
-            // Outros Compromissos compartilham a mesma competência mensal e avanço automático.
-            otherCommitments = processCollection(otherCommitments, 'myOtherCommitments');
-            if (!updateOpenMonthlySnapshot()) throw new Error('Não foi possível salvar o avanço mensal.');
+                        });
+                        if (changed) {
+                            writeStoredValue(storageKey, JSON.stringify(updatedItems));
+                        }
+                        return updatedItems;
+                    };
+                    creditInstallments = processCollection(creditInstallments, 'myCreditInstallments');
+                    // Outros Compromissos compartilham a mesma competência mensal e avanço automático.
+                    otherCommitments = processCollection(otherCommitments, 'myOtherCommitments');
+                    if (!updateOpenMonthlySnapshot()) throw new Error('Não foi possível salvar o avanço mensal.');
+                    return true;
                 });
             } catch (error) {
                 creditInstallments = previous.creditInstallments;
@@ -3929,18 +4016,21 @@
                 // Na importação, a operação externa também precisa ser cancelada integralmente.
                 if (activeStorageTransaction) throw error;
                 alert('Não foi possível salvar a atualização mensal. Os dados anteriores foram mantidos; verifique o armazenamento e tente novamente.');
+                return false;
             }
         };
 
+        // Inicializa a referência uma vez ou captura o período fechado antes do avanço de parcelas.
         processInstallmentsAutoUpdate();
 
         // Ouvir quando usuarios ir em parcelamento para que seja atualizado em tempo real 
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'visible') {
                 // A fotografia do mês anterior deve ocorrer antes de avançar parcelas vencidas.
-                checkMonthCycleBoundary();
-                processInstallmentsAutoUpdate();
-                updateApp();
+                // O processamento já verifica o ciclo e grava o registro aberto. Aqui só redesenha a tela.
+                const updated = processInstallmentsAutoUpdate();
+                renderCurrentView();
+                if (updated) updateStorageMonitor(true);
             }
         });
 
@@ -5187,6 +5277,7 @@
         };
 
         const renderCreditInstallmentsList = () => {
+            // O rótulo compacto de vencimento vale para ativos, agendados e concluídos.
             updateOpenMonthlySnapshot();
             const list = document.getElementById('credit-installments-list');
             const totalEl = document.getElementById('credit-total-value');
@@ -5267,7 +5358,7 @@
                     const dueSpan = document.createElement('span');
                     dueSpan.className = 'history-date';
                     dueSpan.style.cssText = 'display: block; margin-top: 3px;';
-                    dueSpan.textContent = `Vencimento dia ${effectiveDueDay(item.dueDateDay, getMonthKey())}`;
+                    dueSpan.textContent = `Venc. ${effectiveDueDay(item.dueDateDay, getMonthKey())}`;
 
                     infoDiv.appendChild(descSpan);
                     infoDiv.appendChild(detailsDiv);
@@ -5347,7 +5438,7 @@
                     const due = document.createElement('span');
                     due.className = 'history-date';
                     due.style.cssText = 'display:block; margin-top:3px;';
-                    due.textContent = `Início ${displayFirstDueMonth(item.firstDueMonth)} · Vencimento dia ${effectiveDueDay(item.dueDateDay, item.firstDueMonth)}`;
+                    due.textContent = `Início ${displayFirstDueMonth(item.firstDueMonth)} · Venc. ${effectiveDueDay(item.dueDateDay, item.firstDueMonth)}`;
                     info.append(name, amountLine, due);
 
                     const actions = document.createElement('div');
@@ -5418,7 +5509,7 @@
                     const due = document.createElement('span');
                     due.className = 'history-date';
                     due.style.cssText = 'display:block; margin-top:3px;';
-                    due.textContent = `${item.cardName || 'Geral'} · Vencimento dia ${item.dueDateDay}`;
+                    due.textContent = `${item.cardName || 'Geral'} · Venc. ${item.dueDateDay}`;
                     info.append(name, amountLine, due);
 
                     // Mantém os controles originais de edição e exclusão.
@@ -5674,6 +5765,7 @@
         };
 
         const renderOtherCommitmentsList = () => {
+            // Usa a mesma abreviação das demais listas, inclusive nas seções recolhidas.
             updateOpenMonthlySnapshot();
             sortOtherCommitmentsIfNeeded();
             const list = document.getElementById('other-commitments-list');
@@ -5732,7 +5824,7 @@
                     const dueSpan = document.createElement('span');
                     dueSpan.className = 'history-date';
                     dueSpan.style.cssText = 'display:block; margin-top:3px;';
-                    dueSpan.textContent = `Vencimento dia ${effectiveDueDay(item.dueDateDay, getMonthKey())}`;
+                    dueSpan.textContent = `Venc. ${effectiveDueDay(item.dueDateDay, getMonthKey())}`;
 
                     infoDiv.appendChild(descSpan);
                     infoDiv.appendChild(detailsDiv);
@@ -5791,7 +5883,7 @@
                     const due = document.createElement('span');
                     due.className = 'history-date';
                     due.style.cssText = 'display:block; margin-top:3px;';
-                    due.textContent = `Início ${displayFirstDueMonth(item.firstDueMonth)} · Vencimento dia ${effectiveDueDay(item.dueDateDay, item.firstDueMonth)}`;
+                    due.textContent = `Início ${displayFirstDueMonth(item.firstDueMonth)} · Venc. ${effectiveDueDay(item.dueDateDay, item.firstDueMonth)}`;
                     info.append(name, amountLine, due);
                     row.append(info, createOtherCommitmentActions(item));
                     details.appendChild(row);
@@ -5845,7 +5937,7 @@
                     const due = document.createElement('span');
                     due.className = 'history-date';
                     due.style.cssText = 'display:block; margin-top:3px;';
-                    due.textContent = `Vencimento dia ${item.dueDateDay}`;
+                    due.textContent = `Venc. ${item.dueDateDay}`;
                     info.append(name, amountLine, due);
 
                     row.append(info, createOtherCommitmentActions(item));
@@ -6030,13 +6122,15 @@
         const renderMonthlyHistoryView = () => {
             const container = document.getElementById('monthly-history-body');
             if (!container) return;
-            checkMonthCycleBoundary();
             // Atualiza e consulta o ledger do mês aberto para incluir gastos preservados por redefinições.
-            updateOpenMonthlySnapshot();
+            // O redesenho após abertura, retomada ou gravação reutiliza o registro já calculado.
+            if (!suspendMonthlySnapshotUpdates) {
+                checkMonthCycleBoundary();
+                updateOpenMonthlySnapshot();
+            }
             const currentKey = getMonthKey();
-            const liveCurrentSnapshot = buildMonthlySnapshot(currentKey);
             const currentSnapshot = openMonthlySnapshot && openMonthlySnapshot.periodKey === currentKey
-                ? openMonthlySnapshot : liveCurrentSnapshot;
+                ? openMonthlySnapshot : buildMonthlySnapshot(currentKey);
             const archived = monthlySnapshots.slice().filter(item => item.periodKey !== currentKey)
                 .sort((a, b) => b.periodKey.localeCompare(a.periodKey));
             const byPeriod = new Map(archived.map(item => [item.periodKey, item]));
@@ -6281,6 +6375,7 @@
             }
 
             let creditBreakdownHtml = '';
+            // As categorias parceladas do Consolidado usam o mesmo rótulo compacto das listas.
             let activeInstallmentsList = creditInstallments.filter(i => isInstallmentDueInPeriod(i, getMonthKey()));
             if (activeInstallmentsList.length > 0) {
                 const groupedActive = Object.create(null);
@@ -6306,7 +6401,7 @@
                             <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.85rem; padding:6px 0; border-bottom:${index === group.items.length - 1 ? 'none' : '1px solid var(--border-color)'}; gap:8px;">
                                 <div style="display:flex; flex-direction:column; min-width:0; flex:1;">
                                     <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-weight:500;">${sanitizeHtml(item.name)}</span>
-                                    <span style="font-size:0.75rem; color:var(--text-muted);">Parcela ${item.currentInstallment}/${item.totalInstallments} (Venc. dia ${effectiveDueDay(item.dueDateDay, getMonthKey())})</span>
+                                    <span style="font-size:0.75rem; color:var(--text-muted);">Parcela ${item.currentInstallment}/${item.totalInstallments} (Venc. ${effectiveDueDay(item.dueDateDay, getMonthKey())})</span>
                                 </div>
                                 <span style="white-space:nowrap; flex-shrink:0;"><strong>${formatCurrency(item.amount)}</strong></span>
                             </div>
@@ -6325,7 +6420,7 @@
                         <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.85rem; padding:6px 0; border-bottom:1px solid var(--border-color); gap:8px;">
                             <div style="display:flex; flex-direction:column; min-width:0; flex:1;">
                                 <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-weight:500;">${sanitizeHtml(item.name)}</span>
-                                <span style="font-size:0.75rem; color:var(--text-muted);">Parcela ${item.currentInstallment}/${item.totalInstallments} (Venc. dia ${effectiveDueDay(item.dueDateDay, getMonthKey())})</span>
+                                <span style="font-size:0.75rem; color:var(--text-muted);">Parcela ${item.currentInstallment}/${item.totalInstallments} (Venc. ${effectiveDueDay(item.dueDateDay, getMonthKey())})</span>
                             </div>
                             <span style="white-space:nowrap; flex-shrink:0;"><strong>${formatCurrency(item.amount)}</strong></span>
                         </div>
@@ -6369,7 +6464,7 @@
                     ${sanitizeHtml(smartInsight)}
                 </div>
 
-                <details class="report-details" style="background:var(--card-bg); border:1px solid var(--border-color); border-radius:10px; padding:10px 14px;">
+                <details class="report-details" style="background:var(--card-bg); border-radius:10px; padding:10px 14px;">
                     <summary class="report-summary-compact" style="font-weight:600; font-size:0.9rem; cursor:pointer; color:var(--text-main); outline:none;">
                         <div class="report-summary-row">
                             <span>Despesas Variáveis</span>
@@ -6385,7 +6480,7 @@
                     </div>
                 </details>     
 
-                <details class="report-details" style="background:var(--card-bg); border:1px solid var(--border-color); border-radius:10px; padding:10px 14px;">
+                <details class="report-details" style="background:var(--card-bg); border-radius:10px; padding:10px 14px;">
                     <summary class="report-summary-compact" style="font-weight:600; font-size:0.9rem; cursor:pointer; color:var(--text-main); outline:none;">
                         <div class="report-summary-row">
                             <span>Despesas Fixas</span>
@@ -6401,7 +6496,7 @@
                     </div>
                 </details>
 
-                <details class="report-details" style="background:var(--card-bg); border:1px solid var(--border-color); border-radius:10px; padding:10px 14px;">
+                <details class="report-details" style="background:var(--card-bg); border-radius:10px; padding:10px 14px;">
                     <summary class="report-summary-compact" style="font-weight:600; font-size:0.9rem; cursor:pointer; color:var(--text-main); outline:none;">
                         <div class="report-summary-row">
                             <span>Parcelamentos</span>
@@ -6417,7 +6512,7 @@
                     </div>
                 </details>
 
-                <details class="report-details" style="background:var(--card-bg); border:1px solid var(--border-color); border-radius:10px; padding:10px 14px;">
+                <details class="report-details" style="background:var(--card-bg); border-radius:10px; padding:10px 14px;">
                 <summary class="report-summary-compact" style="font-weight:600; font-size:0.9rem; cursor:pointer; color:var(--text-main); outline:none;">
                     <div class="report-summary-row">
                         <span>Outros compromissos</span>
@@ -6433,7 +6528,7 @@
                 </div>
                 </details>
 
-                <details class="report-details" style="background:var(--card-bg); border:1px solid var(--border-color); border-radius:10px; padding:10px 14px;">
+                <details class="report-details" style="background:var(--card-bg); border-radius:10px; padding:10px 14px;">
                     <summary style="font-weight:600; font-size:0.9rem; cursor:pointer; color:var(--text-main); outline:none; display:flex; justify-content:space-between; align-items:center;">
                         <span>Formas de Pagamento</span>
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="report-chevron"><polyline points="6 9 12 15 18 9"></polyline></svg>
@@ -6443,7 +6538,7 @@
                     </div>
                 </details>
 
-                <details class="report-details" style="background:var(--card-bg); border:1px solid var(--border-color); border-radius:10px; padding:10px 14px;">
+                <details class="report-details" style="background:var(--card-bg); border-radius:10px; padding:10px 14px;">
                     <summary style="font-weight:600; font-size:0.9rem; cursor:pointer; color:var(--text-main); outline:none; display:flex; justify-content:space-between; align-items:center;">
                         <span>Comparação mensal · variáveis</span>
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="report-chevron"><polyline points="6 9 12 15 18 9"></polyline></svg>
@@ -6605,7 +6700,7 @@
             }
 
             const backupDiv = document.createElement('div');
-            backupDiv.style.cssText = 'grid-column: 1 / -1; margin-top: 20px; margin-bottom: 24px; display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;';
+            backupDiv.className = 'backup-actions';
             backupDiv.innerHTML = `
                 <button onclick="openExportModal()" class="btn-backup" title="Salvar arquivo no aparelho">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -6647,7 +6742,7 @@
             const container = document.getElementById('date-container');
             const btn = document.getElementById('toggle-date-btn');
             if (forceShow || container.style.display === 'none' || container.style.display === '') {
-                container.style.display = 'block';
+                container.style.display = 'grid';
                 btn.style.display = 'none';
             } else {
                 container.style.display = 'none';
@@ -6689,11 +6784,34 @@
             e.target.value = value;
         });
 
+        // A hora aceita HH:MM. Um ou dois dígitos informam apenas as horas, completadas com :00.
+        const normalizeExpenseTimeInput = (value) => {
+            if (!value) return '';
+            const digits = value.replace(':', '');
+            if (!/^(?:\d{1,2}|\d{4})$/.test(digits)) return null;
+            const hours = digits.slice(0, 2);
+            const minutes = digits.slice(2) || '00';
+            if (Number(hours) > 23 || Number(minutes) > 59) return null;
+            return `${hours.padStart(2, '0')}:${minutes}`;
+        };
+
+        const expenseTimeField = document.getElementById('expense-time');
+        expenseTimeField.addEventListener('input', () => {
+            const value = expenseTimeField.value.trim().replace(/^(\d):(\d{2})$/, '0$1:$2');
+            const digits = value.replace(/\D/g, '').slice(0, 4);
+            const formatted = digits.length > 2 ? `${digits.slice(0, 2)}:${digits.slice(2)}` : digits;
+            if (expenseTimeField.value !== formatted) expenseTimeField.value = formatted;
+        });
+        expenseTimeField.addEventListener('blur', () => {
+            const time = normalizeExpenseTimeInput(expenseTimeField.value);
+            if (time !== null) expenseTimeField.value = time;
+        });
+
         const resetExpenseModal = () => {
             document.getElementById('expense-amount').value = '';
             document.getElementById('expense-desc').value = '';
-            document.getElementById('expense-item-id').value = '';
             document.getElementById('expense-date').value = '';
+            expenseTimeField.value = '';
             document.getElementById('expense-payment-method').value = '';
             document.querySelectorAll('.payment-option').forEach(el => el.classList.remove('selected'));
             document.getElementById('date-container').style.display = 'none';
@@ -6702,42 +6820,79 @@
             document.getElementById('toggle-desc-btn').style.display = 'inline-block';
         };
 
-        const openExpenseModal = (envId, expenseItemId = null) => {
+        const formatExpenseDateInput = (value) => {
+            if (!value) return '';
+            const date = parseEntryDate(value);
+            if (Number.isNaN(date.getTime())) return '';
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            return `${day}/${month}/${date.getFullYear()}`;
+        };
+
+        const formatExpenseTimeInput = (value) => {
+            if (!value || /^\d{4}-\d{2}-\d{2}$/.test(value)) return '';
+            const date = parseEntryDate(value);
+            if (Number.isNaN(date.getTime())) return '';
+            return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+        };
+
+        const selectExpenseEnvelope = (envId) => {
+            const picker = document.getElementById('expense-envelope-picker');
+            const destination = envelopes.find(env => env.id === envId);
+            if (picker.hidden || !destination) return;
+
+            expenseDestinationId = envId;
+            document.getElementById('expense-envelope-selection').textContent = `Envelope: ${destination.name}`;
+            Array.from(document.getElementById('expense-envelope-options').children).forEach(button => {
+                button.setAttribute('aria-pressed', Number(button.value) === envId);
+            });
+            picker.open = false;
+            document.getElementById('expense-envelope-summary').focus();
+        };
+
+        const openExpenseModal = (envId, expense = null) => {
             // O bloqueio vale somente para novos lançamentos; edição não deve ser impedida.
-            if (expenseItemId == null && !ensureCycleAllowsNewExpense()) return;
+            if (!expense && !ensureCycleAllowsNewExpense()) return;
             const env = envelopes.find(e => e.id === envId);
-            if(!env) return;
+            if (!env || (expense && !getEnvCurrentExpenses(env).includes(expense))) return;
 
             resetExpenseModal();
+            expenseBeingEdited = expense;
+            expenseDestinationId = envId;
             document.getElementById('expense-env-id').value = envId;
-            document.getElementById('expense-envelope-name').innerText = `Envelope: ${env.name}`;
-            
-            if(expenseItemId != null) {
+            const envelopeName = document.getElementById('expense-envelope-name');
+            const picker = document.getElementById('expense-envelope-picker');
+            const canTransfer = !!expense && envelopes.length > 1;
+            envelopeName.textContent = `Envelope: ${env.name}`;
+            envelopeName.hidden = canTransfer;
+            picker.hidden = !canTransfer;
+            picker.open = false;
+            document.getElementById('expense-envelope-selection').textContent = envelopeName.textContent;
+            document.getElementById('expense-envelope-options').innerHTML = canTransfer ? envelopes.map(item => `
+                <button type="button" class="checkbox-item expense-envelope-option" value="${item.id}" aria-pressed="${item.id === envId}" onclick="selectExpenseEnvelope(Number(this.value))">
+                    <span class="envelope-icon-wrap" aria-hidden="true">${renderIconHtml(item.icon)}</span>
+                    <span class="checkbox-item-title">${sanitizeHtml(item.name)}</span>
+                </button>
+            `).join('') : '';
+
+            if (expense) {
                 document.getElementById('expense-modal-title').innerText = 'Editar Gasto';
-                const expense = (env.expenses || []).find(e => e.id === expenseItemId);
-                if(expense) {
-                    document.getElementById('expense-item-id').value = expenseItemId;
-                    document.getElementById('expense-amount').value = expense.amount.toFixed(2).replace('.', ',');
-                    if(expense.paymentMethod) {
-                        document.getElementById('expense-payment-method').value = expense.paymentMethod;
-                        document.querySelectorAll('.payment-option').forEach(el => {
-                            if(el.innerText === expense.paymentMethod) el.classList.add('selected');
-                        });
-                    }
-                    if(expense.date) {
-                        const d = parseEntryDate(expense.date);
-                        if (!isNaN(d.getTime())) {
-                            const yyyy = d.getFullYear();
-                            const mm = String(d.getMonth() + 1).padStart(2, '0');
-                            const dd = String(d.getDate()).padStart(2, '0');
-                            document.getElementById('expense-date').value = `${dd}/${mm}/${yyyy}`;
-                            toggleDateField(true); 
-                        }
-                    }
-                    if(expense.desc) {
-                        document.getElementById('expense-desc').value = expense.desc;
-                        toggleDescField(true);
-                    }
+                document.getElementById('expense-amount').value = expense.amount.toFixed(2).replace('.', ',');
+                if (expense.paymentMethod) {
+                    document.getElementById('expense-payment-method').value = expense.paymentMethod;
+                    document.querySelectorAll('.payment-option').forEach(el => {
+                        if (el.innerText === expense.paymentMethod) el.classList.add('selected');
+                    });
+                }
+                const dateInput = formatExpenseDateInput(expense.date);
+                if (dateInput) {
+                    document.getElementById('expense-date').value = dateInput;
+                    expenseTimeField.value = formatExpenseTimeInput(expense.date);
+                    toggleDateField(true);
+                }
+                if (expense.desc) {
+                    document.getElementById('expense-desc').value = expense.desc;
+                    toggleDescField(true);
                 }
             } else {
                 document.getElementById('expense-modal-title').innerText = 'Registrar Gasto';
@@ -6748,37 +6903,64 @@
         };
 
         const saveExpense = () => {
-            const envId = parseInt(document.getElementById('expense-env-id').value);
-            const expenseId = document.getElementById('expense-item-id').value;
+            if (!document.getElementById('modal-expense').classList.contains('active-modal')) return;
+            const envId = Number(document.getElementById('expense-env-id').value);
             // Revalida no salvamento para cobrir modal aberto antes da virada do mês.
-            if (!expenseId && !ensureCycleAllowsNewExpense()) return;
-            const amountStr = document.getElementById('expense-amount').value.trim();
-            const amount = parseBrNumber(amountStr);
-            const paymentMethod = document.getElementById('expense-payment-method').value;
-            const desc = document.getElementById('expense-desc').value.trim();
-            const dateVal = document.getElementById('expense-date').value;
-
-            if (isNaN(amount) || amount <= 0) {
-                alert('Insira um valor de gasto válido.');
+            if (!expenseBeingEdited && !ensureCycleAllowsNewExpense()) return;
+            if (expenseBeingEdited && monthCycleState.lastObservedCycle !== getMonthKey()) checkMonthCycleBoundary();
+            const currentKey = getMonthKey();
+            const source = envelopes.find(env => env.id === envId);
+            const destination = envelopes.find(env => env.id === expenseDestinationId);
+            if (!source || !destination) {
+                alert('Um dos envelopes já não está disponível. Abra o formulário novamente.');
                 return;
             }
 
-            const envIndex = envelopes.findIndex(env => env.id === envId);
-            if (envIndex === -1) return; 
+            // A referência do formulário distingue também gastos legados que vieram sem ID.
+            const expIndex = expenseBeingEdited ? source.expenses.indexOf(expenseBeingEdited) : -1;
+            const existingExp = expIndex === -1 ? null : source.expenses[expIndex];
+            if (expenseBeingEdited && (!existingExp || monthCycleState.lastObservedCycle !== currentKey || getEntryPeriodKey(existingExp, currentKey) !== currentKey)) {
+                alert('Este gasto já não está disponível para edição no mês atual. Abra o histórico novamente.');
+                return;
+            }
 
-            // Conserva a identidade original também para gastos que vieram de backups com IDs em texto.
-            const expIndex = expenseId ? (envelopes[envIndex].expenses || []).findIndex(e => String(e.id) === expenseId) : -1;
-            const existingExp = expIndex === -1 ? null : envelopes[envIndex].expenses[expIndex];
+            const amountStr = document.getElementById('expense-amount').value.trim();
+            const amountUnchanged = existingExp && amountStr === existingExp.amount.toFixed(2).replace('.', ',');
+            const amount = amountUnchanged ? existingExp.amount : parseBrNumber(amountStr);
+            const paymentMethod = document.getElementById('expense-payment-method').value;
+            const desc = document.getElementById('expense-desc').value;
+            const dateVal = document.getElementById('expense-date').value;
+            const timeVal = normalizeExpenseTimeInput(expenseTimeField.value);
+
+            if (isNaN(amount) || (!amountUnchanged && amount <= 0)) {
+                alert('Insira um valor de gasto válido.');
+                return;
+            }
+            if (timeVal === null) {
+                alert('Hora inválida. Use HH:MM entre 00:00 e 23:59 ou digite apenas a hora.');
+                return;
+            }
+
             let baseDate = new Date();
             if (existingExp && existingExp.date) {
                 const parsedDate = parseEntryDate(existingExp.date);
                 if (!isNaN(parsedDate.getTime())) baseDate = parsedDate;
             }
 
-            let expDateIso = baseDate.toISOString();
+            // Ao editar outro campo, preserva o timestamp original e datas legadas sem horário.
+            const storedDate = existingExp?.date;
+            const storedDay = formatExpenseDateInput(storedDate);
+            const dateUnchanged = existingExp && (!dateVal || dateVal === storedDay);
+            const timeChanged = timeVal !== '' && timeVal !== formatExpenseTimeInput(storedDate);
+            const [hours, minutes] = timeVal ? timeVal.split(':').map(Number) : [baseDate.getHours(), baseDate.getMinutes()];
             let selectedDate = new Date(baseDate);
 
-            if (dateVal) {
+            if (timeChanged && existingExp && !dateVal && !storedDay) {
+                alert('Informe a data do gasto para definir a hora.');
+                return;
+            }
+
+            if (!dateUnchanged && dateVal) {
                 const parts = dateVal.split('/');
                 if (parts.length === 3 && parts[0].length === 2 && parts[1].length === 2 && parts[2].length === 4) {
                     const day = parseInt(parts[0], 10);
@@ -6790,10 +6972,8 @@
                         return;
                     }
 
-                    selectedDate = new Date(year, month, day, baseDate.getHours(), baseDate.getMinutes(), baseDate.getSeconds());
-                    if (!isNaN(selectedDate.getTime()) && selectedDate.getFullYear() === year && selectedDate.getMonth() === month && selectedDate.getDate() === day) {
-                        expDateIso = selectedDate.toISOString();
-                    } else {
+                    selectedDate = new Date(year, month, day, hours, minutes, timeChanged ? 0 : baseDate.getSeconds());
+                    if (isNaN(selectedDate.getTime()) || selectedDate.getFullYear() !== year || selectedDate.getMonth() !== month || selectedDate.getDate() !== day) {
                         alert('Data inválida (este dia não existe no mês informado).');
                         return;
                     }
@@ -6801,45 +6981,82 @@
                     alert('Formato de data incompleto ou incorreto. Use DD/MM/AAAA');
                     return;
                 }
+            } else if (timeChanged) {
+                selectedDate.setHours(hours, minutes, 0, 0);
+            }
+
+            const timestampUnchanged = dateUnchanged && !timeChanged;
+            if (!timestampUnchanged && timeVal && (selectedDate.getHours() !== hours || selectedDate.getMinutes() !== minutes)) {
+                alert('A hora informada não existe nessa data no fuso horário do aparelho.');
+                return;
             }
 
             const today = new Date();
             today.setHours(23, 59, 59, 999);
 
-            if (selectedDate > today) {
+            if (!timestampUnchanged && selectedDate > today) {
                 alert('Não é permitido registrar gastos com data futura nos envelopes. O sistema de envelopes controla o mês atual. Para despesas futuras, utilize o módulo de Despesas Fixas ou Parcelamentos.');
                 return;
             }
 
-            envelopes[envIndex].expenses = envelopes[envIndex].expenses || [];
-            const expensePeriodKey = getMonthKey(selectedDate);
+            // Grava no mesmo campo do backup. Alterar só o dia legado mantém a data sem hora.
+            let expenseDate = storedDate;
+            if (!timestampUnchanged) {
+                const dateOnly = !timeChanged && /^\d{4}-\d{2}-\d{2}$/.test(storedDate || '');
+                expenseDate = dateOnly
+                    ? `${getMonthKey(selectedDate)}-${String(selectedDate.getDate()).padStart(2, '0')}`
+                    : selectedDate.toISOString();
+            }
+
+            const previousExpense = existingExp && JSON.stringify(existingExp);
+            // Conserva a identidade original também para gastos que vieram de backups com IDs em texto.
+            // Numera o legado no envelope inteiro para distinguir ocorrências idênticas ao reler o backup.
+            if (existingExp && (existingExp.id == null || existingExp.id === '')) {
+                identifyEnvelopeExpenseIds(getEnvelopeExpenseLists(source, currentKey));
+            }
+
+            const expensePeriodKey = dateUnchanged ? currentKey : getMonthKey(selectedDate);
             const updatedExpense = {
+                ...existingExp,
                 id: existingExp ? existingExp.id : Date.now(),
                 amount,
-                paymentMethod,
-                desc,
-                date: expDateIso,
+                paymentMethod: existingExp && paymentMethod === (existingExp.paymentMethod || '') ? existingExp.paymentMethod : paymentMethod,
+                desc: existingExp && desc === (existingExp.desc || '') ? existingExp.desc : desc.trim(),
+                date: expenseDate,
                 periodKey: expensePeriodKey
             };
 
-            if (expenseId) {
-                if (expIndex !== -1) {
-                    if (expensePeriodKey === getMonthKey()) {
-                        envelopes[envIndex].expenses[expIndex] = updatedExpense;
-                    } else {
-                        removeExpenseFromOpenLedger(envId, expenseId);
-                        envelopes[envIndex].expenses.splice(expIndex, 1);
-                        persistHistoricalExpense(envelopes[envIndex], updatedExpense, expensePeriodKey);
-                    }
+            const moving = existingExp && source !== destination;
+            if (moving) {
+                const retained = openMonthlySnapshot?.envelopes.find(row => Number(row.id) === destination.id)?.retainedExpenses || [];
+                const destinationExpenses = getEnvelopeExpenseLists(destination, currentKey).flatMap(([entries]) => entries).concat(retained);
+                updatedExpense.transferOrigin = getExpenseOrigin(source.id, existingExp);
+                if (destinationExpenses.some(entry => String(entry.id) === String(updatedExpense.id))) {
+                    updatedExpense.id = createUniqueNumericId(destinationExpenses);
                 }
-            } else if (expensePeriodKey === getMonthKey()) {
-                envelopes[envIndex].expenses.push(updatedExpense);
-            } else {
-                // Lançamentos retroativos ficam no histórico do mês informado, sem afetar o saldo atual.
-                persistHistoricalExpense(envelopes[envIndex], updatedExpense, expensePeriodKey);
             }
-            
-            if (!updateApp()) return;
+
+            if (existingExp && !moving && expensePeriodKey === currentKey) {
+                source.expenses[expIndex] = updatedExpense;
+            } else {
+                if (existingExp) {
+                    removeExpenseFromOpenLedger(source.id, existingExp.id);
+                    source.expenses.splice(expIndex, 1);
+                }
+                if (expensePeriodKey === currentKey) {
+                    destination.expenses.push(updatedExpense);
+                } else {
+                    // Lançamentos retroativos ficam no histórico do mês informado, sem afetar o saldo atual.
+                    persistHistoricalExpense(destination, updatedExpense, expensePeriodKey);
+                }
+            }
+
+            // Confirma as duas pontas e o registro aberto juntas. Após reversão, permite tentar de novo no mesmo modal.
+            if (!updateApp()) {
+                const restored = envelopes.find(env => env.id === envId)?.expenses[expIndex];
+                if (restored && JSON.stringify(restored) === previousExpense) expenseBeingEdited = restored;
+                return;
+            }
             closeModal('modal-expense');
             
             if(document.getElementById('modal-history').classList.contains('active-modal')) {
@@ -6864,12 +7081,11 @@
 
             if (Array.isArray(env.history) && env.history.length > 0) {
                 periodContainer.style.display = 'block';
-                periodSelect.innerHTML = '<option value="current">Mês Atual (Em andamento)</option>';
-                env.history.forEach(h => {
-                    if (h && h.id && h.label) {
-                        periodSelect.innerHTML += `<option value="${h.id}">${sanitizeHtml(h.label)}</option>`;
-                    }
-                });
+                // A ordem cronológica vale apenas no seletor. Preserva os IDs e os grupos do arquivo.
+                const archivedPeriods = env.history.filter(h => h && h.id && h.label)
+                    .sort((a, b) => (getHistoryPeriodKey(b) || '').localeCompare(getHistoryPeriodKey(a) || ''));
+                periodSelect.innerHTML = '<option value="current">Mês Atual (Em andamento)</option>' + archivedPeriods
+                    .map(h => `<option value="${sanitizeHtml(String(h.id))}">${sanitizeHtml(h.label)}</option>`).join('');
                 periodSelect.value = periodId;
             } else {
                 periodContainer.style.display = 'none';
@@ -6943,7 +7159,7 @@
                         editBtn.className = 'btn-hist-action btn-hist-edit';
                         editBtn.title = 'Editar Gasto';
                         editBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>';
-                        editBtn.onclick = () => openExpenseModal(env.id, exp.id);
+                        editBtn.onclick = () => openExpenseModal(env.id, exp);
 
                         const sep = document.createElement('div');
                         sep.style.cssText = 'width: 1px; height: 16px; background-color: var(--action-divider); margin: 0 2px;';
@@ -7166,6 +7382,7 @@
             if (otherContainer) otherContainer.style.display = (format === 'txt') ? 'none' : 'flex';
             const historyContainer = document.getElementById('export-history-container');
             if (historyContainer) historyContainer.style.display = (format === 'txt') ? 'none' : 'flex';
+            document.getElementById('export-txt-history-option').style.display = format === 'txt' && envelopes.length ? 'flex' : 'none';
         };
 
         const openExportModal = () => {
@@ -7243,6 +7460,7 @@
                 `;
             });
             document.getElementById('export-list').innerHTML = htmlList;
+            document.getElementById('export-txt-history-cb').checked = true;
             // Sem envelopes, o relatório TXT não consegue representar os dados de outras categorias; prioriza-se o backup JSON.
             if (envelopes.length === 0) document.getElementById('export-format').value = 'json';
             updateExportFormatView();
@@ -7330,6 +7548,7 @@
                 }
 
                 const dataToExport = envelopes.filter(env => selectedIds.includes(env.id));
+                const includeHistory = document.getElementById('export-txt-history-cb').checked;
                 fileName = `envelopes_relatorio_${todayStr}.txt`;
                 mimeType = 'text/plain';
 
@@ -7367,9 +7586,10 @@
                     }
 
                     // Mantém visíveis no relatório os gastos antigos que ainda não foram arquivados no histórico individual.
-                    const otherPeriodExpenses = (Array.isArray(env.expenses) ? env.expenses : []).filter(exp =>
+                    // A opção de histórico controla também esse bloco, para o TXT do mês conter só gastos ativos.
+                    const otherPeriodExpenses = includeHistory ? (Array.isArray(env.expenses) ? env.expenses : []).filter(exp =>
                         getEntryPeriodKey(exp, monthCycleState.lastObservedCycle || getMonthKey()) !== getMonthKey()
-                    );
+                    ) : [];
                     if (otherPeriodExpenses.length > 0) {
                         fileContent += `[LANÇAMENTOS DE OUTROS PERÍODOS MANTIDOS NO ENVELOPE]\n`;
                         [...otherPeriodExpenses].sort((a,b) => new Date(b.date) - new Date(a.date)).forEach(exp => {
@@ -7383,7 +7603,7 @@
                         fileContent += `\n`;
                     }
 
-                    if (Array.isArray(env.history) && env.history.length > 0) {
+                    if (includeHistory && Array.isArray(env.history) && env.history.length > 0) {
                         fileContent += `[HISTÓRICO DE MESES ANTERIORES]\n`;
                         env.history.forEach(hist => {
                             if (!hist) return;
@@ -7461,6 +7681,48 @@
                 entry.id = id;
                 used.add(String(id));
             });
+        };
+
+        const getEnvelopeExpenseLists = (env, fallbackPeriod) => [
+            ...env.history.map(group => [group.expenses,
+                getHistoryPeriodKey(group) || getEntryPeriodKey(group.expenses[0], fallbackPeriod)]),
+            [env.expenses, fallbackPeriod]
+        ];
+
+        const identifyEnvelopeExpenseIds = (lists) => {
+            // Reserva os IDs de todos os grupos antes de numerar gastos legados idênticos.
+            const ids = new Set();
+            lists.forEach(([entries]) => entries.forEach(entry => {
+                if (entry.id != null && entry.id !== '') ids.add(String(entry.id));
+            }));
+            lists.forEach(([entries, period]) => identifyLegacyExpenses(entries, period, ids));
+            return ids;
+        };
+
+        // A chave de origem acompanha o gasto nas próximas transferências, mesmo se o destino já usar seu ID.
+        const getExpenseOrigin = (envId, expense) => expense.transferOrigin || { envelopeId: envId, expenseId: String(expense.id) };
+        const getExpenseIdentity = (envId, expense) => {
+            const { envelopeId, expenseId } = getExpenseOrigin(envId, expense);
+            return `${envelopeId}:${expenseId}`;
+        };
+
+        const getKnownExpenseIdentities = (currentKey) => {
+            const identities = new Set();
+            envelopes.forEach(env => {
+                let lists = getEnvelopeExpenseLists(env, currentKey);
+                if (lists.some(([entries]) => entries.some(entry => entry.id == null || entry.id === ''))) {
+                    // Compara até com envelopes locais fora da seleção, sem alterar seus registros legados.
+                    lists = lists.map(([entries, period]) => [entries.map(entry => ({ ...entry })), period]);
+                    identifyEnvelopeExpenseIds(lists);
+                }
+                lists.forEach(([entries]) => entries.forEach(entry => identities.add(getExpenseIdentity(env.id, entry))));
+            });
+            if (openMonthlySnapshot?.periodKey === currentKey) {
+                openMonthlySnapshot.envelopes.forEach(row => (row.retainedExpenses || []).forEach(entry => {
+                    identities.add(getExpenseIdentity(Number(row.id), entry));
+                }));
+            }
+            return identities;
         };
 
         // Fotos antigas podem copiar o mesmo gasto no extrato e na lista de gastos retidos.
@@ -7727,25 +7989,32 @@
 
         // A identidade do gasto vale em todo o envelope, mesmo depois de mudar de mês ou
         // de ser arquivado. A posição e os valores da cópia local têm precedência.
-        const mergeImportedEnvelope = (target, source, sourcePeriod, incomingRetained, isNew) => {
+        const mergeImportedEnvelope = (target, source, sourcePeriod, incomingRetained, isNew, knownIdentities) => {
             const currentKey = getMonthKey();
             const localRow = openMonthlySnapshot && openMonthlySnapshot.periodKey === currentKey
                 ? openMonthlySnapshot.envelopes.find(row => Number(row.id) === target.id) : null;
-            const retained = localRow ? localRow.retainedExpenses : [];
-            const prepareExpenses = (env, fallback) => {
-                // Reserva os IDs de todos os grupos antes de numerar gastos legados idênticos.
-                const lists = [...env.history.map(group => [group.expenses,
-                    getHistoryPeriodKey(group) || getEntryPeriodKey(group.expenses[0], fallback)]), [env.expenses, fallback]];
-                const ids = new Set();
-                lists.forEach(([entries]) => entries.forEach(entry => {
-                    if (entry.id != null && entry.id !== '') ids.add(String(entry.id));
-                }));
-                lists.forEach(([entries, period]) => identifyLegacyExpenses(entries, period, ids));
-                return ids;
+            const usedIds = identifyEnvelopeExpenseIds(getEnvelopeExpenseLists(target, currentKey));
+            (localRow?.retainedExpenses || []).forEach(entry => usedIds.add(String(entry.id)));
+            identifyEnvelopeExpenseIds(getEnvelopeExpenseLists(source, sourcePeriod));
+
+            // A mescla privilegia a posição local, inclusive quando o backup mostra o gasto em outro envelope.
+            const acceptExpense = (entry) => {
+                const identity = getExpenseIdentity(target.id, entry);
+                if (knownIdentities.has(identity)) return null;
+
+                let accepted = entry;
+                if (usedIds.has(String(entry.id))) {
+                    // São gastos distintos com o mesmo ID local. Preserva a origem ao atribuir um ID livre.
+                    accepted = {
+                        ...entry,
+                        id: createUniqueNumericId([...usedIds].map(id => ({ id }))),
+                        transferOrigin: getExpenseOrigin(target.id, entry)
+                    };
+                }
+                knownIdentities.add(identity);
+                usedIds.add(String(accepted.id));
+                return accepted;
             };
-            const known = prepareExpenses(target, currentKey);
-            retained.forEach(entry => known.add(String(entry.id)));
-            prepareExpenses(source, sourcePeriod);
 
             const historyByMonth = new Map();
             const historyById = new Map(target.history.map(group => [String(group.id), group]));
@@ -7795,8 +8064,8 @@
             const recover = (entries, fallbackPeriod, archived = false, original = null) => {
                 let sourceGroup;
                 entries.forEach(entry => {
-                    const id = String(entry.id);
-                    if (known.has(id)) return;
+                    const accepted = acceptExpense(entry);
+                    if (!accepted) return;
                     const period = getEntryPeriodKey(entry, fallbackPeriod) || currentKey;
                     let destination = target.expenses;
                     if (archived && period === (fallbackPeriod || currentKey)) {
@@ -7805,8 +8074,7 @@
                     } else if (archived || period !== currentKey) {
                         destination = getArchive(period).expenses;
                     }
-                    destination.push({ ...entry, periodKey: period });
-                    known.add(id);
+                    destination.push({ ...accepted, periodKey: period });
                     recovered++;
                 });
             };
@@ -7820,7 +8088,8 @@
 
             // Uma redefinição sem histórico pode deixar gastos apenas no consolidado aberto.
             // Esses gastos continuam fora do saldo do cartão do envelope.
-            const missingRetained = incomingRetained.filter(entry => getEntryPeriodKey(entry, currentKey) === currentKey && !known.has(String(entry.id)));
+            const missingRetained = incomingRetained.filter(entry => getEntryPeriodKey(entry, currentKey) === currentKey)
+                .map(acceptExpense).filter(Boolean);
             if (missingRetained.length) {
                 if (localRow) missingRetained.forEach(entry => localRow.retainedExpenses.push(entry));
                 else {
@@ -7957,6 +8226,7 @@
 
             let addedEnvelopesCount = 0;
             let recoveredExpensesCount = 0;
+            const knownExpenseIdentities = selectedIndices.length ? getKnownExpenseIdentities(currentKey) : new Set();
             selectedIndices.forEach(index => {
                 const source = JSON.parse(JSON.stringify(pendingImportData.envelopes[index]));
                 let target = envelopes.find(env => env.id === source.id);
@@ -7967,7 +8237,7 @@
                     addedEnvelopesCount++;
                 }
                 const row = importedCurrent && importedCurrent.envelopes.find(item => Number(item.id) === source.id);
-                recoveredExpensesCount += mergeImportedEnvelope(target, source, sourcePeriod, row?.retainedExpenses || [], isNew);
+                recoveredExpensesCount += mergeImportedEnvelope(target, source, sourcePeriod, row?.retainedExpenses || [], isNew, knownExpenseIdentities);
             });
 
             let addedFixedCount = 0;
@@ -8075,7 +8345,8 @@
         }
 
         // Renderização inicial e registro do Service Worker
-        renderEnvelopes();
+        // O mês aberto já foi atualizado no processamento inicial.
+        renderCurrentView();
         // Inicia a contagem preventiva quando há dados, mesmo antes da primeira visita às Configurações.
         ensureBackupReminderStart();
 

@@ -1,5 +1,5 @@
-// v29: Paleta dos gráficos padronizada para os modos claro e escuro.
-const CACHE_NAME = 'envelopes-cache-v29';
+// v31: 8 Ajustes/refinos/implementos
+const CACHE_NAME = 'envelopes-cache-v31';
 
 const ASSETS_TO_CACHE = [
   './',
