@@ -757,50 +757,52 @@
 
         .btn-reset-icon:active { background-color: var(--border-color); transform: scale(0.93); color: var(--primary); }
 
-        /* Separa as ações de arquivo tanto na tela inicial vazia quanto na lista de envelopes. */
+         /* Rodapé de arquivos com as duas ações na mesma faixa. */
         .backup-actions {
             grid-column: 1 / -1;
+            justify-self: center;
             position: relative;
-            margin-top: 12px;
-            margin-bottom: 24px;
-            padding-top: 15px;
-            display: flex;
-            justify-content: center;
-            gap: 12px;
-            flex-wrap: wrap;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            width: min(100%, 320px);
+            margin: 8px 0 24px;
+            padding: 4px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
         }
 
-        .backup-actions::before {
+        .backup-actions::after {
             content: '';
             position: absolute;
-            top: 0;
+            top: 50%;
             left: 50%;
-            transform: translateX(-50%);
-            width: min(84%, 320px);
-            height: 1px;
-            background: var(--dashed-line);
+            width: 1px;
+            height: 18px;
+            transform: translate(-50%, -50%);
+            background: var(--action-divider);
+            pointer-events: none;
         }
 
         .btn-backup {
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
-            padding: 10px 16px;
-            border-radius: 10px;
-            font-size: 0.9rem;
-            color: var(--text-main);
-            cursor: pointer;
-            font-weight: 500;
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 8px;
-            transition: background-color 0.15s, transform 0.15s, box-shadow 0.15s;
-            box-shadow: var(--card-shadow);
+            min-height: 44px;
+            padding: 8px;
+            background: transparent;
+            border: 0;
+            border-radius: 10px;
+            color: var(--text-main);
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.15s;
         }
-        
+
         .btn-backup:active {
             background-color: var(--border-color);
-            transform: scale(0.96);
-            box-shadow: none;
         }
 
         .modal-overlay {
