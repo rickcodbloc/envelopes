@@ -1,5 +1,5 @@
-// v32: correções de integridade e refinamentos de interface
-const CACHE_NAME = 'envelopes-cache-v32';
+// v35: correções de segurança SVG/Alteração visual e comportamento de reordenar.
+const CACHE_NAME = 'envelopes-cache-v35';
 
 const ASSETS_TO_CACHE = [
   './',

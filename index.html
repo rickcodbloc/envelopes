@@ -1139,6 +1139,85 @@
             flex: 1;
         }
 
+        /* Controles de reordenação dos quatro modais. */
+        .reorder-list {
+            position: relative;
+        }
+
+        .reorder-row {
+            flex-wrap: wrap;
+            row-gap: 4px;
+            padding-block: 4px;
+            cursor: default;
+        }
+
+        .reorder-grip {
+            width: 44px;
+            height: 44px;
+            flex: 0 0 44px;
+            cursor: grab;
+            touch-action: none;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        .reorder-grip svg {
+            pointer-events: none;
+        }
+
+        .reorder-options:not([hidden]) {
+            display: flex;
+            flex-basis: 100%;
+            justify-content: flex-end;
+            gap: 6px;
+        }
+
+        .reorder-options .card-btn {
+            min-width: 44px;
+            min-height: 44px;
+            padding-inline: 10px;
+            font-size: 0.85rem;
+            color: var(--text-main);
+            background: var(--border-color);
+        }
+
+        .reorder-options .card-btn:disabled {
+            opacity: 0.4;
+            cursor: default;
+        }
+
+        .reorder-grip:focus-visible,
+        .reorder-options .card-btn:focus-visible {
+            outline: 2px solid var(--primary);
+            outline-offset: -2px;
+        }
+
+        .reorder-list.is-dragging,
+        .reorder-list.is-dragging .reorder-grip {
+            cursor: grabbing;
+        }
+
+        .reorder-list.is-dragging .reorder-row {
+            transform: translateY(var(--reorder-shift, 0px));
+            transition: transform 0.14s ease-out;
+        }
+
+        .reorder-list.is-dragging .reorder-row.is-lifted {
+            position: relative;
+            z-index: 1;
+            background: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: inset 0 0 0 1px var(--primary), var(--card-shadow);
+            transition: none;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .reorder-list.is-dragging .reorder-row {
+                transition: none;
+            }
+        }
+
         /* Resumo em duas linhas no relatório: quantidade e total visíveis sem expandir, inclusive no iPhone. */
         .report-summary-compact { display: flex; flex-direction: column; gap: 5px; }
         .report-summary-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; min-width: 0; }
@@ -2293,11 +2372,13 @@
                     <h2 style="margin:0;">Informações do APP</h2>
                 </div>
                 <div style="font-size: 0.9rem; color: var(--text-main); display: flex; flex-direction: column; gap: 12px; line-height: 1.5; margin-top: 8px;">
-                    <p><strong>Meus Envelopes</strong> Baseado no clássico método de separar o orçamento em envelopes, o aplicativo foi desenhado para ser simples e leve. Ele organiza seus gastos por categorias — unificando cartões, Pix e múltiplos bancos —, resgatando a praticidade de definir limites claros sem a exaustão de precisar registrar cada centavo.</p>
-                    <p>Funciona 100% offline, sem servidores externos ou cadastro. Seus dados ficam armazenados localmente no dispositivo, com opções de exportação e importação de backups.</p>
+                    <p>Organize seu orçamento por envelopes e acompanhe gastos, saldos e históricos com simplicidade.</p>
+                    <p>Funciona offline, sem cadastro. Seus dados ficam salvos localmente, sem sincronização automática.</p>
+                    <p>Exporte backups regularmente e antes de trocar de aparelho ou limpar os dados do navegador.</p>
+                    <p>Use o aplicativo em uma aba por vez para evitar conflitos nas alterações.</p>
 
                     <div style="border-top: 1px solid var(--border-color); padding-top: 10px; margin-top: 4px; font-size: 0.85rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 4px;">
-                        <span><strong>Versão:</strong> 5.0.1</span>
+                        <span><strong>Versão:</strong> 6.0.2</span>
                         <span><strong>Desenvolvedor:</strong> Ricardo Soares</span>
                         <span>© 2026 | Todos os direitos reservados.</span>
                     </div>
@@ -2333,47 +2414,59 @@
                     <input type="text" id="env-icon" placeholder="Ex: 🛒 (ícone ou emoji)" maxlength="10" value="📦">
                     <span class="icon-selector-toggle" onclick="toggleIconGrid()">✨ Escolher ícones do sistema</span>
                     
+                    <!-- MANUTENÇÃO DOS ÍCONES DO SISTEMA
+                         Para substituir um ícone, edite apenas o SVG e o title da opção abaixo.
+                         Para adicionar outro, duplique uma .icon-option, mantendo
+                         onclick="selectSvgIcon(this)", e substitua seu SVG e title.
+                         A quantidade de opções não é limitada a dez; a grade cria novas linhas.
+                         Use as formas e propriedades documentadas em sanitizeSvg e preserve
+                         currentColor para acompanhar os temas. O SVG deve existir só uma vez
+                         na opção, sem repetir o desenho no onclick ou ampliar o filtro por imagem.
+                         Envelopes e backups já salvos conservam seu desenho. Para atualizá-lo,
+                         selecione o novo ícone na edição do envelope.
+                         Ao alterar, confira seleção, salvar/reabrir, temas e exportar/importar.
+                    -->
                      <div class="icon-selector-grid" id="svg-icon-selector">
                         <!-- Supermercado -->
-                        <div class="icon-option" onclick="selectSvgIcon('<svg width=\'20\' height=\'20\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.8\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><circle cx=\'9\' cy=\'21\' r=\'1\'/><circle cx=\'20\' cy=\'21\' r=\'1\'/><path d=\'M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6\'/></svg>', this)" title="Supermercado">
+                        <div class="icon-option" onclick="selectSvgIcon(this)" title="Supermercado">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
                         </div>
                         
                     <!-- Transporte -->
-                    <div class="icon-option" onclick="selectSvgIcon('<svg width=\'20\' height=\'20\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.8\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><circle cx=\'7\' cy=\'17\' r=\'2\'/><circle cx=\'17\' cy=\'17\' r=\'2\'/><path d=\'M5 17H3v-6l2-5h9l4 5h1a2 2 0 0 1 2 2v4h-2m-4 0H9m-6-6h15m-6 0V6\'/></svg>', this)" title="Transporte">
+                    <div class="icon-option" onclick="selectSvgIcon(this)" title="Transporte">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/><path d="M5 17H3v-6l2-5h9l4 5h1a2 2 0 0 1 2 2v4h-2m-4 0H9m-6-6h15m-6 0V6"/></svg>
                     </div>
 
                         <!-- Alimentação (Café / Lanche do dia a dia) -->
-                        <div class="icon-option" onclick="selectSvgIcon('<svg width=\'20\' height=\'20\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.8\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><path d=\'M18 8h1a4 4 0 0 1 0 8h-1\'/><path d=\'M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z\'/><line x1=\'6\' y1=\'1\' x2=\'6\' y2=\'4\'/><line x1=\'10\' y1=\'1\' x2=\'10\' y2=\'4\'/><line x1=\'14\' y1=\'1\' x2=\'14\' y2=\'4\'/></svg>', this)" title="Alimentação">
+                        <div class="icon-option" onclick="selectSvgIcon(this)" title="Alimentação">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
                         </div>
                         <!-- Educação e Leitura -->
-                        <div class="icon-option" onclick="selectSvgIcon('<svg width=\'20\' height=\'20\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.8\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><path d=\'M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z\'/><path d=\'M10 2v6l3-2 3 2V2\'/></svg>', this)" title="Educação e Leitura">
+                        <div class="icon-option" onclick="selectSvgIcon(this)" title="Educação e Leitura">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/><path d="M10 2v6l3-2 3 2V2"/></svg>
                         </div>
                         <!-- Saúde -->
-                        <div class="icon-option" onclick="selectSvgIcon('<svg width=\'20\' height=\'20\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.8\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><path d=\'M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z\'/></svg>', this)" title="Saúde">
+                        <div class="icon-option" onclick="selectSvgIcon(this)" title="Saúde">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
                         </div>
                         <!-- Compras e Lojas -->
-                        <div class="icon-option" onclick="selectSvgIcon('<svg width=\'20\' height=\'20\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.8\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><path d=\'M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z\'/><line x1=\'3\' y1=\'6\' x2=\'21\' y2=\'6\'/><path d=\'M16 10a4 4 0 0 1-8 0\'/></svg>', this)" title="Compras e Lojas">
+                        <div class="icon-option" onclick="selectSvgIcon(this)" title="Compras e Lojas">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
                         </div>
                         <!-- Trabalho -->
-                        <div class="icon-option" onclick="selectSvgIcon('<svg width=\'20\' height=\'20\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.8\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><rect x=\'2\' y=\'7\' width=\'20\' height=\'14\' rx=\'2\' ry=\'2\'/><path d=\'M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16\'/></svg>', this)" title="Trabalho">
+                        <div class="icon-option" onclick="selectSvgIcon(this)" title="Trabalho">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
                         </div>
                         <!-- Cosméticos -->
-                        <div class="icon-option" onclick="selectSvgIcon('<svg width=\'20\' height=\'20\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.8\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><path d=\'M7 10v10a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V10Z\'/><path d=\'M10 10V6a2 2 0 0 1 2-2v0a2 2 0 0 1 2 2v4\'/><path d=\'M10 2h4\'/></svg>', this)" title="Cosméticos">
+                        <div class="icon-option" onclick="selectSvgIcon(this)" title="Cosméticos">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10v10a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V10Z"/><path d="M10 10V6a2 2 0 0 1 2-2v0a2 2 0 0 1 2 2v4"/><path d="M10 2h4"/></svg>
                         </div>
                         <!-- Cartão -->
-                        <div class="icon-option" onclick="selectSvgIcon('<svg width=\'20\' height=\'20\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.8\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><rect x=\'1\' y=\'4\' width=\'22\' height=\'16\' rx=\'2\' ry=\'2\'/><line x1=\'1\' y1=\'10\' x2=\'23\' y2=\'10\'/></svg>', this)" title="Cartão">
+                        <div class="icon-option" onclick="selectSvgIcon(this)" title="Cartão">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
                         </div>
                         <!-- Notebook / Tecnologia e Utilidades Digitais -->
-                        <div class="icon-option" onclick="selectSvgIcon('<svg width=\'20\' height=\'20\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.8\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><rect x=\'2\' y=\'3\' width=\'20\' height=\'14\' rx=\'2\' ry=\'2\'/><line x1=\'2\' y1=\'20\' x2=\'22\' y2=\'20\'/></svg>', this)" title="Notebook e Tecnologia">
+                        <div class="icon-option" onclick="selectSvgIcon(this)" title="Notebook e Tecnologia">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="2" y1="20" x2="22" y2="20"/></svg>
                         </div>
                     </div>
@@ -2728,24 +2821,98 @@
             );
         };
 
+        // Ícones são desenhos estáticos: só estas formas e propriedades entram no DOM.
+        // Para criar/substituir ícones, use SVG com números sem unidades, viewBox e currentColor.
+        // fill/stroke também aceitam none, nomes de cores e hexadecimal; não aceitam url() ou CSS.
+        // Novos desenhos com estas formas não exigem alterar a validação nem cadastrar sua imagem.
+        // Recursos adicionais devem ser avaliados aqui, nunca liberados por uma exceção ao filtro.
+        const svgIconNamespace = 'http://www.w3.org/2000/svg';
+        const svgIconShapes = {
+            svg: ['width', 'height', 'viewBox'], g: [],
+            path: ['d', 'pathLength'], circle: ['cx', 'cy', 'r', 'pathLength'],
+            ellipse: ['cx', 'cy', 'rx', 'ry', 'pathLength'],
+            line: ['x1', 'y1', 'x2', 'y2', 'pathLength'],
+            polyline: ['points', 'pathLength'], polygon: ['points', 'pathLength'],
+            rect: ['x', 'y', 'width', 'height', 'rx', 'ry', 'pathLength']
+        };
+        const svgIconCommonAttributes = new Set([
+            'fill', 'stroke', 'stroke-width', 'stroke-linecap', 'stroke-linejoin',
+            'stroke-miterlimit', 'stroke-dasharray', 'stroke-dashoffset',
+            'opacity', 'fill-opacity', 'stroke-opacity', 'fill-rule', 'clip-rule',
+            'transform', 'vector-effect'
+        ]);
+        const svgIconNumber = /^[+-]?(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?$/i;
+        const isSvgIconNumber = value => svgIconNumber.test(value) && Number.isFinite(Number(value));
+        const isSvgIconAttributeValue = (name, value) => {
+            if (name === 'fill' || name === 'stroke') return /^(?:[a-z]+|#[\da-f]{3,4}|#[\da-f]{6}|#[\da-f]{8})$/i.test(value);
+            if (name === 'stroke-linecap') return /^(butt|round|square)$/.test(value);
+            if (name === 'stroke-linejoin') return /^(miter|round|bevel)$/.test(value);
+            if (name === 'fill-rule' || name === 'clip-rule') return /^(nonzero|evenodd)$/.test(value);
+            if (name === 'vector-effect') return /^(none|non-scaling-stroke)$/.test(value);
+            if (name === 'd' || name === 'transform') {
+                const syntax = name === 'd'
+                    ? /^[MmZzLlHhVvCcSsQqTtAa\d\s.,+eE-]+$/
+                    : /^(?:(?:matrix|translate|scale|rotate|skewX|skewY)\(\s*[\d\s.,+eE-]+\)\s*)+$/;
+                const numbers = value.match(/[+-]?(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?/gi);
+                return syntax.test(value) && !!numbers && numbers.every(isSvgIconNumber);
+            }
+            if (name === 'viewBox' || name === 'points' || name === 'stroke-dasharray') {
+                if (name === 'stroke-dasharray' && value === 'none') return true;
+                const numbers = value.split(/[\s,]+/);
+                if (!numbers.every(isSvgIconNumber)) return false;
+                if (name === 'viewBox') return numbers.length === 4 && Number(numbers[2]) > 0 && Number(numbers[3]) > 0;
+                if (name === 'points') return numbers.length >= 4 && numbers.length % 2 === 0;
+                return numbers.every(number => Number(number) >= 0);
+            }
+            if (!isSvgIconNumber(value)) return false;
+            if (name.includes('opacity')) return Number(value) >= 0 && Number(value) <= 1;
+            if (['width', 'height', 'r', 'rx', 'ry', 'pathLength', 'stroke-width', 'stroke-miterlimit'].includes(name)) return Number(value) >= 0;
+            return true;
+        };
         const sanitizeSvg = (svgStr) => {
-            if (!svgStr || typeof svgStr !== 'string') return svgDefault;
+            // Limites por desenho, independentes da quantidade de ícones disponíveis no aplicativo.
+            if (typeof svgStr !== 'string' || svgStr.length > 16384) return svgDefault;
             const trimmed = svgStr.trim();
-            if (!trimmed.startsWith('<svg') || !trimmed.endsWith('</svg>')) return sanitizeHtml(svgStr);
-            
-            if (
-                /<\s*script/i.test(trimmed) || 
-                /<\s*style/i.test(trimmed) ||
-                /<\s*iframe/i.test(trimmed) || 
-                /<\s*object/i.test(trimmed) || 
-                /<\s*embed/i.test(trimmed) || 
-                /on\w+\s*=/i.test(trimmed) || 
-                /javascript:/i.test(trimmed)
-            ) {
+            if (!/^<svg(?:\s|>)/.test(trimmed) || /<!DOCTYPE|<!ENTITY/i.test(trimmed)) return svgDefault;
+            try {
+                const parsed = new DOMParser().parseFromString(trimmed, 'image/svg+xml');
+                const root = parsed.documentElement;
+                if (!root || root.localName !== 'svg' || parsed.doctype || parsed.getElementsByTagName('parsererror').length) return svgDefault;
+                // Nenhum conteúdo fora da raiz SVG é reaproveitado, nem instruções de processamento.
+                if (Array.from(parsed.childNodes).some(node => node !== root && node.nodeType !== 8
+                    && !(node.nodeType === 3 && !node.textContent.trim()))) return svgDefault;
+                let count = 0;
+                let shapes = 0;
+                const rebuild = (node, depth) => {
+                    const name = node.localName;
+                    if (++count > 128 || depth > 8 || !Object.prototype.hasOwnProperty.call(svgIconShapes, name)
+                        || (name === 'svg' && node !== root) || node.prefix
+                        || (node.namespaceURI && node.namespaceURI !== svgIconNamespace)) throw new Error('Forma SVG inválida.');
+                    if (name !== 'svg' && name !== 'g') shapes++;
+                    // Aceita o formato legado sem xmlns e sempre constrói a saída no namespace SVG.
+                    const clean = document.createElementNS(svgIconNamespace, name);
+                    // Ordem estável permite reconhecer o ícone salvo mesmo após exportar/importar.
+                    const attributes = Array.from(node.attributes).sort((a, b) => a.name < b.name ? -1 : a.name > b.name ? 1 : 0);
+                    for (const attribute of attributes) {
+                        const key = attribute.name;
+                        const value = attribute.value.trim();
+                        if (key === 'xmlns' && (value === svgIconNamespace || value === '')) continue;
+                        if (attribute.namespaceURI || (!svgIconCommonAttributes.has(key) && !svgIconShapes[name].includes(key))
+                            || !isSvgIconAttributeValue(key, value)) throw new Error('Propriedade SVG inválida.');
+                        clean.setAttribute(key, value);
+                    }
+                    for (const child of node.childNodes) {
+                        if (child.nodeType === 1) clean.appendChild(rebuild(child, depth + 1));
+                        else if (child.nodeType !== 8 && !(child.nodeType === 3 && !child.textContent.trim())) throw new Error('Conteúdo SVG inválido.');
+                    }
+                    return clean;
+                };
+                const clean = rebuild(root, 0);
+                return shapes ? new XMLSerializer().serializeToString(clean) : svgDefault;
+            } catch (error) {
+                // Recusa somente o desenho; o envelope e os demais dados do backup são preservados.
                 return svgDefault;
             }
-
-            return trimmed;
         };
 
         // Normaliza o vencimento opcional das despesas fixas: somente dias inteiros de 1 a 31.
@@ -4587,8 +4754,11 @@
             grid.style.display = (grid.style.display === 'grid') ? 'none' : 'grid';
         };
 
-        const selectSvgIcon = (svgMarkup, element) => {
-            currentSelectedSvg = sanitizeSvg(svgMarkup);
+        const selectSvgIcon = (element) => {
+            // A opção exibida é a única fonte do desenho, sem uma segunda cópia no onclick.
+            const svg = element?.querySelector('svg');
+            if (!svg) return;
+            currentSelectedSvg = sanitizeSvg(svg.outerHTML);
             document.getElementById('env-icon').value = '📦';
             document.querySelectorAll('.icon-option').forEach(el => el.classList.remove('selected'));
             if(element) element.classList.add('selected');
@@ -4602,6 +4772,236 @@
             }
         });
 
+        // Reordenação manual compartilhada. O gesto trabalha apenas com a lista do modal.
+        const reorderGripIcon = '<svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" focusable="false"><circle cx="5.5" cy="3.5" r="1.15"/><circle cx="10.5" cy="3.5" r="1.15"/><circle cx="5.5" cy="8" r="1.15"/><circle cx="10.5" cy="8" r="1.15"/><circle cx="5.5" cy="12.5" r="1.15"/><circle cx="10.5" cy="12.5" r="1.15"/></svg>';
+        let cancelReorderGesture = null;
+
+        const resetReorderList = (id) => {
+            cancelReorderGesture?.();
+            const list = document.getElementById(id);
+            list.classList.add('reorder-list');
+            list.innerHTML = '';
+            return list;
+        };
+
+        const setReorderActions = (grip, open) => {
+            grip.setAttribute('aria-expanded', String(open));
+            grip.nextElementSibling.hidden = !open;
+        };
+
+        const closeReorderActions = (list) => {
+            const openGrip = list.querySelector('.reorder-grip[aria-expanded="true"]');
+            if (openGrip) setReorderActions(openGrip, false);
+        };
+
+        const moveReorderItem = (list, items, from, to, render, direction = 0) => {
+            if (from === to || to < 0 || to >= items.length) return;
+
+            const keepFocus = list.contains(document.activeElement);
+            const scrollTop = list.scrollTop;
+            const [item] = items.splice(from, 1);
+            items.splice(to, 0, item);
+            render();
+            list.scrollTop = scrollTop;
+
+            const grip = list.children[to].querySelector('.reorder-grip');
+            if (direction) {
+                setReorderActions(grip, true);
+                const action = grip.nextElementSibling.children[direction === -1 ? 0 : 1];
+                (action.disabled ? grip : action).focus();
+            } else if (keepFocus) {
+                grip.focus({ preventScroll: true });
+            }
+        };
+
+        // Rola a lista na borda. Em um modal muito baixo, acompanha também a rolagem externa do modal.
+        const scrollReorderList = (list, y, elapsed) => {
+            const bounds = list.getBoundingClientRect();
+            const content = list.parentElement;
+            const clip = content.getBoundingClientRect();
+            const top = Math.max(bounds.top, clip.top + content.clientTop);
+            const bottom = Math.min(bounds.bottom, clip.top + content.clientTop + content.clientHeight);
+            const edge = Math.min(44, (bottom - top) / 3);
+            if (edge <= 0) return;
+
+            const distance = y < top + edge ? y - top - edge : Math.max(0, y - bottom + edge);
+            if (distance === 0) return;
+            const strength = Math.min(1, Math.abs(distance) / edge);
+            const step = Math.sign(distance) * Math.max(1, strength * elapsed * 0.75);
+            const previous = list.scrollTop;
+            list.scrollTop += step;
+            if (list.scrollTop === previous) content.scrollTop += step;
+        };
+
+        const startReorderGesture = (event, list, row, items, index, render) => {
+            if (!event.isPrimary || event.button !== 0 || cancelReorderGesture) return;
+            const grip = event.currentTarget;
+            delete grip.dataset.dragged;
+            if (typeof list.setPointerCapture !== 'function') return;
+
+            const modal = list.closest('.modal-overlay');
+            const pointerId = event.pointerId;
+            const startY = event.clientY;
+            const grabOffset = startY - row.getBoundingClientRect().top;
+            let pointerY = startY;
+            let target = index;
+            let layout = null;
+            let frame = 0;
+            let lastTime = null;
+
+            const isActive = () => row.parentElement === list && modal.classList.contains('active-modal');
+
+            const draw = () => {
+                const localY = pointerY - list.getBoundingClientRect().top - list.clientTop + list.scrollTop;
+                const top = Math.max(layout.minTop, Math.min(layout.maxTop, localY - grabOffset));
+                row.style.setProperty('--reorder-shift', (top - layout.top) + 'px');
+
+                let next = index;
+                while (next > 0 && localY < layout.midpoints[next - 1]) next--;
+                while (next < layout.rows.length - 1 && localY > layout.midpoints[next + 1]) next++;
+                if (next === target) return;
+
+                target = next;
+                layout.rows.forEach((other, position) => {
+                    if (position === index) return;
+                    const shiftUp = position > index && position <= target;
+                    const shiftDown = position < index && position >= target;
+                    if (shiftUp || shiftDown) {
+                        other.style.setProperty('--reorder-shift', (shiftUp ? -layout.height : layout.height) + 'px');
+                    } else {
+                        other.style.removeProperty('--reorder-shift');
+                    }
+                });
+            };
+
+            const finish = (commit = false) => {
+                listeners.forEach(([node, type, handler]) => node.removeEventListener(type, handler));
+                cancelAnimationFrame(frame);
+                cancelReorderGesture = null;
+                if (!layout) return;
+
+                list.classList.remove('is-dragging');
+                row.classList.remove('is-lifted');
+                layout.rows.forEach(item => item.style.removeProperty('--reorder-shift'));
+                if (!commit && list.hasPointerCapture(pointerId)) list.releasePointerCapture(pointerId);
+                if (commit) moveReorderItem(list, items, index, target, render);
+            };
+
+            const tick = (time) => {
+                if (!isActive()) {
+                    finish();
+                    return;
+                }
+                const elapsed = lastTime === null ? 16 : Math.min(32, time - lastTime);
+                lastTime = time;
+                scrollReorderList(list, pointerY, elapsed);
+                draw();
+                frame = requestAnimationFrame(tick);
+            };
+
+            const onMove = (move) => {
+                if (move.pointerId !== pointerId) return;
+                pointerY = move.clientY;
+                if (layout || Math.abs(pointerY - startY) < 6) return;
+                if (!isActive()) {
+                    finish();
+                    return;
+                }
+
+                // A lista mantém a captura enquanto as linhas se deslocam.
+                try {
+                    list.setPointerCapture(pointerId);
+                } catch {
+                    finish();
+                    return;
+                }
+
+                closeReorderActions(list);
+                const rows = Array.from(list.children);
+                const last = rows[rows.length - 1];
+                layout = {
+                    rows,
+                    top: row.offsetTop,
+                    height: row.offsetHeight,
+                    minTop: rows[0].offsetTop,
+                    maxTop: last.offsetTop + last.offsetHeight - row.offsetHeight,
+                    midpoints: rows.map(item => item.offsetTop + item.offsetHeight / 2)
+                };
+                grip.dataset.dragged = 'true';
+                list.classList.add('is-dragging');
+                row.classList.add('is-lifted');
+                draw();
+                frame = requestAnimationFrame(tick);
+            };
+
+            const onUp = (up) => {
+                if (up.pointerId !== pointerId) return;
+                if (!layout || !isActive()) {
+                    finish();
+                    return;
+                }
+                pointerY = up.clientY;
+                draw();
+                finish(true);
+            };
+
+            const cancelPointer = (pointerEvent) => {
+                if (pointerEvent.pointerId === pointerId) finish();
+            };
+            const listeners = [
+                [document, 'pointermove', onMove],
+                [document, 'pointerup', onUp],
+                [document, 'pointercancel', cancelPointer],
+                [list, 'lostpointercapture', (e) => { if (e.target === list) cancelPointer(e); }],
+                [document, 'keydown', (e) => { if (e.key === 'Escape') finish(); }],
+                [document, 'visibilitychange', () => { if (document.hidden) finish(); }],
+                [window, 'blur', () => finish()],
+                [window, 'resize', () => finish()]
+            ];
+            cancelReorderGesture = finish;
+            listeners.forEach(([node, type, handler]) => node.addEventListener(type, handler));
+        };
+
+        const appendReorderGrip = (list, row, items, index, render) => {
+            if (items.length < 2) return;
+            row.classList.add('reorder-row');
+            const name = items[index].name;
+            const grip = document.createElement('button');
+            grip.type = 'button';
+            grip.className = 'card-btn reorder-grip';
+            grip.innerHTML = reorderGripIcon;
+            grip.setAttribute('aria-label', 'Mover ' + name + ', posição ' + (index + 1) + ' de ' + items.length);
+            grip.setAttribute('aria-expanded', 'false');
+
+            const actions = document.createElement('div');
+            actions.className = 'reorder-options';
+            actions.hidden = true;
+            for (const [direction, label] of [[-1, 'Subir'], [1, 'Descer']]) {
+                const action = document.createElement('button');
+                action.type = 'button';
+                action.className = 'card-btn';
+                action.textContent = label;
+                action.setAttribute('aria-label', label + ' ' + name);
+                action.disabled = index + direction < 0 || index + direction >= items.length;
+                action.onclick = () => moveReorderItem(list, items, index, index + direction, render, direction);
+                actions.appendChild(action);
+            }
+
+            grip.onclick = (click) => {
+                if (cancelReorderGesture || (click.detail && grip.dataset.dragged)) return;
+                const open = actions.hidden;
+                closeReorderActions(list);
+                if (open) setReorderActions(grip, true);
+            };
+            grip.addEventListener('pointerdown', (e) => startReorderGesture(e, list, row, items, index, render));
+            row.addEventListener('keydown', (e) => {
+                if (e.key !== 'Escape' || actions.hidden) return;
+                setReorderActions(grip, false);
+                grip.focus({ preventScroll: true });
+            });
+            row.append(grip, actions);
+        };
+
         const openReorderModal = () => {
             tempEnvelopes = JSON.parse(JSON.stringify(envelopes));
             renderReorderList();
@@ -4609,67 +5009,32 @@
         };
 
         const renderReorderList = () => {
-            const list = document.getElementById('reorder-list');
-            list.innerHTML = '';
+            const list = resetReorderList('reorder-list');
             if (tempEnvelopes.length === 0) {
                 list.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding: 16px;">Nenhum envelope para reordenar.</p>';
-            } else {
-                tempEnvelopes.forEach((env, index) => {
-                    const item = document.createElement('div');
-                    item.className = 'checkbox-item';
-                    item.style.justifyContent = 'space-between';
-                    
-                    const leftDiv = document.createElement('div');
-                    leftDiv.style.cssText = 'display:flex; align-items:center; gap:10px; min-width:0; flex:1;';
-                    
-                    const iconWrap = document.createElement('div');
-                    iconWrap.className = 'envelope-icon-wrap';
-                    iconWrap.innerHTML = renderIconHtml(env.icon);
-                    
-                    const titleSpan = document.createElement('span');
-                    titleSpan.className = 'checkbox-item-title';
-                    titleSpan.textContent = env.name;
-                    
-                    leftDiv.appendChild(iconWrap);
-                    leftDiv.appendChild(titleSpan);
-
-                    const rightDiv = document.createElement('div');
-                    rightDiv.style.cssText = 'display:flex; gap:6px; flex-shrink:0;';
-
-                    if (index > 0) {
-                        const upBtn = document.createElement('button');
-                        upBtn.className = 'card-btn';
-                        upBtn.title = 'Subir';
-                        upBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>';
-                        upBtn.onclick = () => moveEnvelopeTemp(env.id, -1);
-                        rightDiv.appendChild(upBtn);
-                    }
-
-                    if (index < tempEnvelopes.length - 1) {
-                        const downBtn = document.createElement('button');
-                        downBtn.className = 'card-btn';
-                        downBtn.title = 'Descer';
-                        downBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>';
-                        downBtn.onclick = () => moveEnvelopeTemp(env.id, 1);
-                        rightDiv.appendChild(downBtn);
-                    }
-
-                    item.appendChild(leftDiv);
-                    item.appendChild(rightDiv);
-                    list.appendChild(item);
-                });
+                return;
             }
-        };
 
-        const moveEnvelopeTemp = (envId, direction) => {
-            const index = tempEnvelopes.findIndex(e => e.id === envId);
-            if (index === -1) return;
-            const newIndex = index + direction;
-            if (newIndex < 0 || newIndex >= tempEnvelopes.length) return;
-            const temp = tempEnvelopes[index];
-            tempEnvelopes[index] = tempEnvelopes[newIndex];
-            tempEnvelopes[newIndex] = temp;
-            renderReorderList();
+            tempEnvelopes.forEach((env, index) => {
+                const item = document.createElement('div');
+                item.className = 'checkbox-item';
+
+                const leftDiv = document.createElement('div');
+                leftDiv.style.cssText = 'display:flex; align-items:center; gap:10px; min-width:0; flex:1;';
+
+                const iconWrap = document.createElement('div');
+                iconWrap.className = 'envelope-icon-wrap';
+                iconWrap.innerHTML = renderIconHtml(env.icon);
+
+                const titleSpan = document.createElement('span');
+                titleSpan.className = 'checkbox-item-title';
+                titleSpan.textContent = env.name;
+
+                leftDiv.append(iconWrap, titleSpan);
+                item.appendChild(leftDiv);
+                appendReorderGrip(list, item, tempEnvelopes, index, renderReorderList);
+                list.appendChild(item);
+            });
         };
 
         const saveReorderModal = () => {
@@ -5190,9 +5555,7 @@
         };
 
         const renderFixedReorderList = () => {
-            const list = document.getElementById('fixed-reorder-list');
-            list.innerHTML = '';
-
+            const list = resetReorderList('fixed-reorder-list');
             if (tempFixedExpenses.length === 0) {
                 list.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding:16px;">Nenhuma despesa para reordenar.</p>';
                 return;
@@ -5201,7 +5564,6 @@
             tempFixedExpenses.forEach((item, index) => {
                 const el = document.createElement('div');
                 el.className = 'checkbox-item';
-                el.style.justifyContent = 'space-between';
                 if (tempIsFixedAutoSort) {
                     el.style.opacity = '0.65';
                     el.style.cursor = 'default';
@@ -5222,50 +5584,11 @@
                     ? formatCurrency(item.amount)
                     : `venc. ${dueDay} · ${formatCurrency(item.amount)}`;
 
-                leftDiv.appendChild(titleSpan);
-                leftDiv.appendChild(detailsSpan);
-
-                const rightDiv = document.createElement('div');
-                rightDiv.style.cssText = 'display:flex; gap:6px; flex-shrink:0;';
-
-                if (!tempIsFixedAutoSort) {
-                    if (index > 0) {
-                        const upBtn = document.createElement('button');
-                        upBtn.className = 'card-btn';
-                        upBtn.title = 'Subir';
-                        upBtn.setAttribute('aria-label', `Subir ${item.name}`);
-                        upBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>';
-                        upBtn.onclick = () => moveFixedTemp(item.id, -1);
-                        rightDiv.appendChild(upBtn);
-                    }
-                    if (index < tempFixedExpenses.length - 1) {
-                        const downBtn = document.createElement('button');
-                        downBtn.className = 'card-btn';
-                        downBtn.title = 'Descer';
-                        downBtn.setAttribute('aria-label', `Descer ${item.name}`);
-                        downBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>';
-                        downBtn.onclick = () => moveFixedTemp(item.id, 1);
-                        rightDiv.appendChild(downBtn);
-                    }
-                }
-
+                leftDiv.append(titleSpan, detailsSpan);
                 el.appendChild(leftDiv);
-                el.appendChild(rightDiv);
+                if (!tempIsFixedAutoSort) appendReorderGrip(list, el, tempFixedExpenses, index, renderFixedReorderList);
                 list.appendChild(el);
             });
-        };
-
-        const moveFixedTemp = (itemId, direction) => {
-            if (tempIsFixedAutoSort) return;
-            const index = tempFixedExpenses.findIndex(i => i.id === itemId);
-            if (index === -1) return;
-            const newIndex = index + direction;
-            if (newIndex < 0 || newIndex >= tempFixedExpenses.length) return;
-
-            const temp = tempFixedExpenses[index];
-            tempFixedExpenses[index] = tempFixedExpenses[newIndex];
-            tempFixedExpenses[newIndex] = temp;
-            renderFixedReorderList();
         };
 
         const saveFixedReorderModal = () => {
@@ -5715,67 +6038,40 @@
         };
 
         const renderCreditReorderList = () => {
-            const list = document.getElementById('credit-reorder-list');
-            list.innerHTML = '';
+            const list = resetReorderList('credit-reorder-list');
             if (tempCreditInstallments.length === 0) {
                 list.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding: 16px;">Nenhum parcelamento para reordenar.</p>';
-            } else {
-                tempCreditInstallments.forEach((item, index) => {
-                    const el = document.createElement('div');
-                    el.className = 'checkbox-item';
-                    el.style.justifyContent = 'space-between';
-
-                    const leftDiv = document.createElement('div');
-                    leftDiv.style.cssText = 'display:flex; align-items:center; gap:10px; min-width:0; flex:1;';
-
-                    const titleSpan = document.createElement('span');
-                    titleSpan.className = 'checkbox-item-title';
-                    titleSpan.textContent = `${item.name} (${formatCurrency(item.amount)} - ${item.currentInstallment}/${item.totalInstallments})`;
-                    leftDiv.appendChild(titleSpan);
-
-                    const rightDiv = document.createElement('div');
-                    rightDiv.style.cssText = 'display:flex; gap:6px; flex-shrink:0;';
-
-                    if (index > 0) {
-                        const upBtn = document.createElement('button');
-                        upBtn.className = 'card-btn';
-                        upBtn.title = 'Subir';
-                        upBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>';
-                        upBtn.onclick = () => moveCreditTemp(item.id, -1);
-                        rightDiv.appendChild(upBtn);
-                    }
-
-                    if (index < tempCreditInstallments.length - 1) {
-                        const downBtn = document.createElement('button');
-                        downBtn.className = 'card-btn';
-                        downBtn.title = 'Descer';
-                        downBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>';
-                        downBtn.onclick = () => moveCreditTemp(item.id, 1);
-                        rightDiv.appendChild(downBtn);
-                    }
-
-                    el.appendChild(leftDiv);
-                    el.appendChild(rightDiv);
-                    list.appendChild(el);
-                });
+                return;
             }
+
+            tempCreditInstallments.forEach((item, index) => {
+                const el = document.createElement('div');
+                el.className = 'checkbox-item';
+
+                const leftDiv = document.createElement('div');
+                leftDiv.style.cssText = 'display:flex; align-items:center; gap:10px; min-width:0; flex:1;';
+
+                const titleSpan = document.createElement('span');
+                titleSpan.className = 'checkbox-item-title';
+                titleSpan.textContent = `${item.name} (${formatCurrency(item.amount)} - ${item.currentInstallment}/${item.totalInstallments})`;
+                leftDiv.appendChild(titleSpan);
+
+                el.appendChild(leftDiv);
+                appendReorderGrip(list, el, tempCreditInstallments, index, renderCreditReorderList);
+                list.appendChild(el);
+            });
         };
 
-        const moveCreditTemp = (itemId, direction) => {
-            const index = tempCreditInstallments.findIndex(i => i.id === itemId);
-            if (index === -1) return;
-            const newIndex = index + direction;
-            if (newIndex < 0 || newIndex >= tempCreditInstallments.length) return;
-
-            const temp = tempCreditInstallments[index];
-            tempCreditInstallments[index] = tempCreditInstallments[newIndex];
-            tempCreditInstallments[newIndex] = temp;
-
-            renderCreditReorderList();
+        // Aplica a ordem do modal aos registros atuais, identificados pelo ID.
+        const applyReorderDraft = (items, draft) => {
+            const positions = new Map(draft.map((item, index) => [item.id, index]));
+            return [...items].sort((a, b) =>
+                (positions.get(a.id) ?? draft.length) - (positions.get(b.id) ?? draft.length)
+            );
         };
 
         const saveCreditReorderModal = () => {
-            const nextCreditInstallments = [...tempCreditInstallments];
+            const nextCreditInstallments = applyReorderDraft(creditInstallments, tempCreditInstallments);
             if (!persistFinancialChanges([['myCreditInstallments', JSON.stringify(nextCreditInstallments)]])) return;
             creditInstallments = nextCreditInstallments;
             closeModal('modal-credit-reorder');
@@ -6134,8 +6430,7 @@
         };
 
         const renderOtherReorderList = () => {
-            const list = document.getElementById('other-reorder-list');
-            list.innerHTML = '';
+            const list = resetReorderList('other-reorder-list');
             if (tempOtherCommitments.length === 0) {
                 list.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding:16px;">Nenhum compromisso para reordenar.</p>';
                 return;
@@ -6144,7 +6439,6 @@
             tempOtherCommitments.forEach((item, index) => {
                 const el = document.createElement('div');
                 el.className = 'checkbox-item';
-                el.style.justifyContent = 'space-between';
                 if (tempIsOtherAutoSort) {
                     el.style.opacity = '0.65';
                     el.style.cursor = 'default';
@@ -6159,52 +6453,16 @@
                 const detailsSpan = document.createElement('span');
                 detailsSpan.style.cssText = 'font-size:0.73rem; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%;';
                 detailsSpan.textContent = `venc. ${item.dueDateDay} · ${formatCurrency(item.amount)} · parcela ${item.currentInstallment}/${item.totalInstallments}`;
-                leftDiv.appendChild(titleSpan);
-                leftDiv.appendChild(detailsSpan);
-
-                const rightDiv = document.createElement('div');
-                rightDiv.style.cssText = 'display:flex; gap:6px; flex-shrink:0;';
-                if (!tempIsOtherAutoSort) {
-                    if (index > 0) {
-                        const upBtn = document.createElement('button');
-                        upBtn.className = 'card-btn';
-                        upBtn.title = 'Subir';
-                        upBtn.setAttribute('aria-label', `Subir ${item.name}`);
-                        upBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>';
-                        upBtn.onclick = () => moveOtherTemp(item.id, -1);
-                        rightDiv.appendChild(upBtn);
-                    }
-                    if (index < tempOtherCommitments.length - 1) {
-                        const downBtn = document.createElement('button');
-                        downBtn.className = 'card-btn';
-                        downBtn.title = 'Descer';
-                        downBtn.setAttribute('aria-label', `Descer ${item.name}`);
-                        downBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>';
-                        downBtn.onclick = () => moveOtherTemp(item.id, 1);
-                        rightDiv.appendChild(downBtn);
-                    }
-                }
+                leftDiv.append(titleSpan, detailsSpan);
 
                 el.appendChild(leftDiv);
-                el.appendChild(rightDiv);
+                if (!tempIsOtherAutoSort) appendReorderGrip(list, el, tempOtherCommitments, index, renderOtherReorderList);
                 list.appendChild(el);
             });
         };
 
-        const moveOtherTemp = (itemId, direction) => {
-            if (tempIsOtherAutoSort) return;
-            const index = tempOtherCommitments.findIndex(i => i.id === itemId);
-            if (index === -1) return;
-            const newIndex = index + direction;
-            if (newIndex < 0 || newIndex >= tempOtherCommitments.length) return;
-            const temp = tempOtherCommitments[index];
-            tempOtherCommitments[index] = tempOtherCommitments[newIndex];
-            tempOtherCommitments[newIndex] = temp;
-            renderOtherReorderList();
-        };
-
         const saveOtherReorderModal = () => {
-            const nextOtherCommitments = JSON.parse(JSON.stringify(tempOtherCommitments));
+            const nextOtherCommitments = applyReorderDraft(otherCommitments, tempOtherCommitments);
             if (tempIsOtherAutoSort) sortOtherCommitmentsByDueDate(nextOtherCommitments);
             if (!persistFinancialChanges([
                 ['myOtherAutoSort', String(tempIsOtherAutoSort)],
@@ -7360,11 +7618,10 @@
                 if (env.icon && env.icon.trim().startsWith('<svg')) {
                     currentSelectedSvg = sanitizeSvg(env.icon);
                     iconField.value = '📦';
-                    const cleanEnvIcon = env.icon.replace(/['"\\]/g, '').trim();
                     document.querySelectorAll('.icon-option').forEach(el => {
-                        const onclickAttr = el.getAttribute('onclick') || '';
-                        const cleanOnClick = onclickAttr.replace(/['"\\]/g, '');
-                        if (cleanOnClick.includes(cleanEnvIcon)) {
+                        // Compara a mesma representação validada, preservando o destaque na edição.
+                        const optionSvg = el.querySelector('svg');
+                        if (optionSvg && sanitizeSvg(optionSvg.outerHTML) === currentSelectedSvg) {
                             el.classList.add('selected');
                         }
                     });
