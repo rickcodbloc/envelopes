@@ -1,5 +1,5 @@
-// v35: correções de segurança SVG/Alteração visual e comportamento de reordenar.
-const CACHE_NAME = 'envelopes-cache-v35';
+// v37: Realizados 4 Refinamentos/ajuste emojis no campo. 
+const CACHE_NAME = 'envelopes-cache-v37';
 
 const ASSETS_TO_CACHE = [
   './',

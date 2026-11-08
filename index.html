@@ -909,6 +909,32 @@
             color: var(--text-main);
         }
         
+           .env-icon-field {
+            position: relative;
+            display: flex;
+        }
+
+        #env-icon-preview {
+            position: absolute;
+            top: 50%;
+            left: 12px;
+            transform: translateY(-50%);
+            pointer-events: none;
+        }
+
+        #env-icon-preview:empty {
+            display: none;
+        }
+
+        #env-icon-preview svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        #env-icon-preview:not(:empty) + #env-icon {
+            padding-left: 44px;
+        }
+
         .form-group input:focus, .form-group select:focus {
             outline: none;
             border-color: var(--primary);
@@ -1174,6 +1200,7 @@
         }
 
         .reorder-options .card-btn {
+            width: 72px;
             min-width: 44px;
             min-height: 44px;
             padding-inline: 10px;
@@ -2411,8 +2438,18 @@
                 
                 <div class="form-group">
                     <label>Ícone do Envelope</label>
-                    <input type="text" id="env-icon" placeholder="Ex: 🛒 (ícone ou emoji)" maxlength="10" value="📦">
-                    <span class="icon-selector-toggle" onclick="toggleIconGrid()">✨ Escolher ícones do sistema</span>
+                        <div class="env-icon-field">
+                        <span id="env-icon-preview" class="envelope-icon-wrap" aria-hidden="true"></span>
+                        <input type="text" id="env-icon" placeholder="Ex: 🛒 (ícone ou emoji)">
+                    </div>
+                    <span class="icon-selector-toggle" onclick="toggleIconGrid()">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true" focusable="false" style="vertical-align: -2px;">
+                            <rect x="3" y="3" width="7" height="7" rx="1.4"/>
+                            <rect x="14" y="3" width="7" height="7" rx="1.4"/>
+                            <rect x="3" y="14" width="7" height="7" rx="1.4"/>
+                            <rect x="14" y="14" width="7" height="7" rx="1.4"/>
+                        </svg> Escolher ícones do sistema
+                    </span>
                     
                     <!-- MANUTENÇÃO DOS ÍCONES DO SISTEMA
                          Para substituir um ícone, edite apenas o SVG e o title da opção abaixo.
@@ -4754,21 +4791,49 @@
             grid.style.display = (grid.style.display === 'grid') ? 'none' : 'grid';
         };
 
+        const envelopeIconSegmenter = typeof Intl.Segmenter === 'function'
+            ? new Intl.Segmenter(undefined, { granularity: 'grapheme' })
+            : null;
+
+        const firstEnvelopeIcon = (value) => {
+            // Também reconhece símbolos que o app já gravou escapados no JSON.
+            const text = value.trim().replace(/^&(?:amp;)*(amp|lt|gt|quot|#39);/,
+                (_, code) => ({ amp: '&', lt: '<', gt: '>', quot: '"', '#39': "'" }[code]));
+            if (!envelopeIconSegmenter) return text;
+            const [first] = envelopeIconSegmenter.segment(text);
+            return first?.segment ?? '';
+        };
+
+        const envIconField = document.getElementById('env-icon');
+        const envIconPlaceholder = envIconField.placeholder;
+
+        const updateEnvelopeIconPreview = () => {
+            const preview = document.getElementById('env-icon-preview');
+            // A seleção guarda o SVG que já passou por sanitizeSvg.
+            preview.innerHTML = currentSelectedSvg || '';
+            envIconField.placeholder = currentSelectedSvg ? 'Trocar por emoji' : envIconPlaceholder;
+        };
+
         const selectSvgIcon = (element) => {
             // A opção exibida é a única fonte do desenho, sem uma segunda cópia no onclick.
             const svg = element?.querySelector('svg');
             if (!svg) return;
             currentSelectedSvg = sanitizeSvg(svg.outerHTML);
-            document.getElementById('env-icon').value = '📦';
+            envIconField.value = '';
             document.querySelectorAll('.icon-option').forEach(el => el.classList.remove('selected'));
             if(element) element.classList.add('selected');
             document.getElementById('svg-icon-selector').style.display = 'none';
+            updateEnvelopeIconPreview();
         };
 
-        document.getElementById('env-icon').addEventListener('input', (e) => {
-            if (!e.target.value.trim().startsWith('<svg')) {
+        envIconField.addEventListener('input', (e) => {
+            if (e.isComposing) return;
+            const icon = firstEnvelopeIcon(e.target.value);
+            if (e.target.value !== icon) e.target.value = icon;
+            if (icon) {
                 currentSelectedSvg = null;
                 document.querySelectorAll('.icon-option').forEach(el => el.classList.remove('selected'));
+                updateEnvelopeIconPreview();
             }
         });
 
@@ -6915,7 +6980,7 @@
             if (!iconStr) return svgDefault;
             const trimmed = iconStr.trim();
             if (trimmed.startsWith('<svg')) return sanitizeSvg(trimmed);
-            return `<span>${sanitizeHtml(iconStr)}</span>`;
+            return `<span>${sanitizeHtml(firstEnvelopeIcon(trimmed))}</span>`;
         };
 
         const renderEnvelopes = () => {
@@ -7617,7 +7682,7 @@
                 
                 if (env.icon && env.icon.trim().startsWith('<svg')) {
                     currentSelectedSvg = sanitizeSvg(env.icon);
-                    iconField.value = '📦';
+                    iconField.value = '';
                     document.querySelectorAll('.icon-option').forEach(el => {
                         // Compara a mesma representação validada, preservando o destaque na edição.
                         const optionSvg = el.querySelector('svg');
@@ -7627,34 +7692,26 @@
                     });
                 } else {
                     currentSelectedSvg = null;
-                    iconField.value = env.icon || '📦';
+                    const icon = firstEnvelopeIcon(env.icon || '');
+                    iconField.value = icon === '📦' ? '' : icon;
                 }
             } else {
                 titleEl.innerText = 'Criar Novo Envelope';
                 btnEl.innerText = 'Criar';
                 idField.value = '';
                 currentSelectedSvg = null;
-                iconField.value = '📦';
+                iconField.value = '';
                 nameField.value = '';
                 totalField.value = '';
             }
+            updateEnvelopeIconPreview();
             openModal('modal-new-envelope');
         };
 
         const saveEnvelope = () => {
             const idField = document.getElementById('edit-env-id').value;
-            const iconFieldVal = document.getElementById('env-icon').value.trim();
-            
-            let icon;
-            if (iconFieldVal && iconFieldVal !== '📦' && !iconFieldVal.startsWith('<svg')) {
-                icon = sanitizeHtml(iconFieldVal);
-            } else if (iconFieldVal.startsWith('<svg')) {
-                icon = sanitizeSvg(iconFieldVal);
-            } else if (currentSelectedSvg) {
-                icon = currentSelectedSvg;
-            } else {
-                icon = '📦';
-            }
+            const iconFieldVal = firstEnvelopeIcon(document.getElementById('env-icon').value);
+            const icon = iconFieldVal ? sanitizeHtml(iconFieldVal) : currentSelectedSvg || '📦';
 
             const name = document.getElementById('env-name').value.trim();
             const totalStr = document.getElementById('env-total').value.trim();
@@ -7687,7 +7744,7 @@
             document.getElementById('edit-env-id').value = '';
             document.getElementById('env-name').value = '';
             document.getElementById('env-total').value = '';
-            document.getElementById('env-icon').value = '📦';
+            document.getElementById('env-icon').value = '';
             currentSelectedSvg = null;
             
             closeModal('modal-new-envelope');
