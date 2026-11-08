@@ -34,6 +34,7 @@
 
         body[data-theme="blue"] {
             --primary: #0059C7;
+            --primary-progress: #2466CC;
             --primary-fill: #006CE6;
             --primary-chart: #006CE6;
             --primary-dark: #0058C2;
@@ -1790,6 +1791,47 @@
             }
         }
 
+        /* Faixa de desfazer no rodapé, dentro da área segura. */
+        #envelope-undo {
+            --undo-side: max(12px, env(safe-area-inset-left), env(safe-area-inset-right));
+            flex: 0 0 auto;
+            width: min(440px, calc(100% - 2 * var(--undo-side)));
+            margin: 0 auto max(12px, env(safe-area-inset-bottom));
+            padding: 4px 6px 4px 12px;
+            align-items: center;
+            gap: 8px;
+            background: var(--card-bg);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            font-size: 0.85rem;
+        }
+        #envelope-undo:not([hidden]) { display: flex; }
+        .modal-overlay.active-modal ~ #envelope-undo { visibility: hidden; }
+        #envelope-undo-text {
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        #envelope-undo .btn {
+            flex: 0 0 auto;
+            min-height: 44px;
+            padding: 0 10px;
+            background: var(--primary-light-bg);
+            color: var(--primary);
+            font-size: inherit;
+        }
+        #envelope-undo-status {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+            clip-path: inset(50%);
+        }
+
     </style>
 </head>
 <body data-theme="purple">
@@ -1836,7 +1878,7 @@
                         </button>
                         <button class="drawer-item" onclick="toggleOptionsDrawer(); openMultiResetModal()">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                            Recomeçar o mês
+                            Reiniciar envelopes
                         </button>
                         <button class="drawer-item" onclick="toggleOptionsDrawer(); openMultiDeleteModal()">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
@@ -2244,9 +2286,9 @@
             <div class="modal-content">
                 <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
                     <div style="width:20px; height:20px; display:flex; align-items:center; justify-content:center; color:var(--primary);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg></div>
-                    <h2 style="margin:0;">Recomeçar o mês</h2>
+                    <h2 style="margin:0;">Reiniciar envelopes</h2>
                 </div>
-                <p class="modal-subtitle">Selecione os envelopes para iniciar um novo mês. Toque na tag "Histórico: S/N" para alternar a preservação do histórico.</p>
+                <p class="modal-subtitle">Selecione os envelopes para reiniciar. Toque na tag "Histórico: S/N" para alternar a preservação do histórico.</p>
                 <div id="multi-reset-list" class="checkbox-list"></div>
                 <div class="modal-buttons">
                     <button class="btn btn-cancel" onclick="closeModal('modal-multi-reset')">Cancelar</button>
@@ -2619,7 +2661,7 @@
                             <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
                             <line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line>
                         </svg>
-                        Virar o mês
+                        Reiniciar
                     </h2>
                     <label class="modal-checkbox-label">
                         <input type="checkbox" id="reset-keep-history" checked style="width: 20px; height: 20px; accent-color: var(--primary-fill); cursor: pointer;"> Manter histórico
@@ -2627,7 +2669,7 @@
                 </div>
                 <p id="reset-envelope-name" style="margin-bottom:12px; color:var(--primary); font-weight:bold;"></p>
                 <p class="modal-subtitle" style="margin-bottom: 20px;">
-                    Os gastos deste envelope voltarão para R$ 0,00. Ajuste o orçamento limite para este novo mês abaixo se necessário:
+                Os gastos do período encerrado deixam de contar no saldo do envelope. Ajuste o orçamento, se necessário.
                 </p>
                 <input type="hidden" id="reset-id">
                 <div class="form-group">
@@ -2636,7 +2678,7 @@
                 </div>
                 <div class="modal-buttons">
                     <button class="btn btn-cancel" onclick="closeModal('modal-reset')">Cancelar</button>
-                    <button class="btn btn-confirm" onclick="confirmReset()">Iniciar mês</button>
+                    <button class="btn btn-confirm" onclick="confirmReset()">Reiniciar</button>
                 </div>
             </div>
         </div>
@@ -2691,9 +2733,14 @@
                 </div>
             </div>
         </div>
-    </div>
+        <div id="envelope-undo" hidden>
+            <span id="envelope-undo-text"></span>
+            <button type="button" class="btn" aria-describedby="envelope-undo-text" onclick="undoEnvelopeDeletion()">Desfazer</button>
+        </div>
+        <div id="envelope-undo-status" role="status"></div>
+        </div>
 
-    <script>
+        <script>
         const svgDefault = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4H3a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h18a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2Z"/><path d="M16 12h2"/><path d="M12 12h.01"/></svg>';
 
         // Integridade local: gravações financeiras relacionadas usam um registro de recuperação.
@@ -5284,9 +5331,7 @@
             }
 
             showCustomConfirm('Excluir Envelopes', `Deseja realmente excluir os ${selectedIds.length} envelope(s) selecionado(s)? Os históricos associados serão removidos.`, () => {
-                envelopes = envelopes.filter(env => !selectedIds.includes(env.id));
-                updateApp();
-                closeModal('modal-multi-delete');
+                                if (deleteEnvelopesWithUndo(selectedIds)) closeModal('modal-multi-delete');
             });
         };
 
@@ -5322,6 +5367,7 @@
                 alert('A redefinição não foi concluída. Os dados financeiros anteriores foram preservados ou permanecem no registro de recuperação. Verifique o armazenamento e tente novamente.');
                 return;
             } finally { allowUnreadableReplacement = false; }
+            clearEnvelopeUndo();
             monthlySnapshots = [];
             openMonthlySnapshot = null;
             monthlySnapshotSaveError = false;
@@ -7077,7 +7123,7 @@
 
                         <div class="action-buttons">
                             <button class="btn-action" onclick="openExpenseModal(${env.id})">➖ Registrar Gasto</button>
-                            <button class="btn-reset-icon" onclick="openResetModal(${env.id})" title="Recomeçar o mês">
+                            <button class="btn-reset-icon" onclick="openResetModal(${env.id})" title="Reiniciar envelope">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                                     <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
                                     <line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line>
@@ -7796,10 +7842,95 @@
             }
         };
 
+                // Só a última exclusão confirmada pode ser desfeita nesta sessão.
+        const ENVELOPE_UNDO_MS = 20000;
+        const envelopeUndoBar = document.getElementById('envelope-undo');
+        const envelopeUndoText = document.getElementById('envelope-undo-text');
+        const envelopeUndoStatus = document.getElementById('envelope-undo-status');
+        let pendingEnvelopeUndo = null;
+
+        const clearEnvelopeUndo = () => {
+            clearTimeout(pendingEnvelopeUndo?.timer);
+            pendingEnvelopeUndo = null;
+            envelopeUndoBar.hidden = true;
+            envelopeUndoText.textContent = '';
+            envelopeUndoStatus.textContent = '';
+        };
+
+        const getActiveEnvelopeUndo = () => {
+            const undo = pendingEnvelopeUndo;
+            if (undo && (Date.now() >= undo.expiresAt || getMonthKey() !== undo.periodKey)) {
+                clearEnvelopeUndo();
+                return null;
+            }
+            return undo;
+        };
+
+        document.addEventListener('visibilitychange', getActiveEnvelopeUndo);
+
+        const deleteEnvelopesWithUndo = (ids) => {
+            const selected = new Set(ids);
+            const periodKey = getMonthKey();
+            const rows = openMonthlySnapshot?.periodKey === periodKey ? openMonthlySnapshot.envelopes : [];
+            const deleted = [];
+            envelopes.forEach((envelope, index) => {
+                if (!selected.has(envelope.id)) return;
+                const retainedExpenses = rows.find(row => row.id === envelope.id)?.retainedExpenses || [];
+                deleted.push({ envelope, index, retainedExpenses });
+            });
+            if (!deleted.length) return false;
+
+            envelopes = envelopes.filter(envelope => !selected.has(envelope.id));
+            if (!updateApp()) return false;
+
+            clearEnvelopeUndo();
+            pendingEnvelopeUndo = {
+                deleted,
+                periodKey,
+                expiresAt: Date.now() + ENVELOPE_UNDO_MS,
+                timer: setTimeout(clearEnvelopeUndo, ENVELOPE_UNDO_MS)
+            };
+            const message = deleted.length === 1
+                ? `${deleted[0].envelope.name} excluído`
+                : `${deleted.length} envelopes excluídos`;
+            envelopeUndoText.textContent = message;
+            envelopeUndoBar.hidden = false;
+            envelopeUndoStatus.textContent = `${message}. Desfazer disponível por 20 segundos.`;
+            return true;
+        };
+
+        const undoEnvelopeDeletion = () => {
+            const undo = getActiveEnvelopeUndo();
+            if (!undo) return;
+            if (undo.deleted.some(({ envelope }) => envelopes.some(item => item.id === envelope.id))) {
+                clearEnvelopeUndo();
+                return;
+            }
+
+            const retainedRows = [];
+            for (const { envelope, index, retainedExpenses } of undo.deleted) {
+                envelopes.splice(index, 0, envelope);
+                if (retainedExpenses.length) retainedRows.push({ id: envelope.id, retainedExpenses });
+            }
+            // Devolve ao mês aberto os gastos preservados apenas no Histórico mensal.
+            if (retainedRows.length) {
+                const currentRows = openMonthlySnapshot?.periodKey === undo.periodKey ? openMonthlySnapshot.envelopes : [];
+                openMonthlySnapshot = {
+                    ...openMonthlySnapshot,
+                    periodKey: undo.periodKey,
+                    envelopes: [...currentRows, ...retainedRows]
+                };
+            }
+
+            if (updateApp()) {
+                clearEnvelopeUndo();
+                envelopeUndoStatus.textContent = 'Exclusão desfeita.';
+            }
+        };
+
         const deleteEnvelope = (id) => {
             showCustomConfirm('Excluir Envelope', 'Excluir este envelope e seu histórico individual? Os meses encerrados serão mantidos.', () => {
-                envelopes = envelopes.filter(env => env.id !== id);
-                updateApp();
+                deleteEnvelopesWithUndo([id]);
             });
         };
 
@@ -8589,6 +8720,7 @@
                 if (!updateApp({ suppressSaveAlert: true }) || !updateOpenMonthlySnapshot()) throw new Error('Não foi possível concluir a restauração.');
                 activeStorageTransaction = null;
                 commitStoredChanges(importTransaction);
+                clearEnvelopeUndo();
                 storageReadProblems.clear();
                 allowUnreadableReplacement = false;
                 closeModal('modal-import');
@@ -8665,6 +8797,7 @@
             }
             activeStorageTransaction = null;
             commitStoredChanges(importTransaction);
+            clearEnvelopeUndo();
             closeModal('modal-import');
             alert(`Importação concluída! Recuperados: ${addedEnvelopesCount} envelope(s), ${recoveredExpensesCount} gasto(s), ${addedFixedCount} despesa(s) fixa(s), ${addedCreditCount} parcelamento(s), ${addedOtherCount} outro(s) compromisso(s) e ${addedSnapshotsCount} mês(es) encerrado(s).`);
             // Consulta o volume somente após a importação concluída; não interfere no rollback.

@@ -1,5 +1,5 @@
-// v37: Realizados 4 Refinamentos/ajuste emojis no campo. 
-const CACHE_NAME = 'envelopes-cache-v37';
+// v38: Ajustes de rotulos e função desfazer envelope excluido
+const CACHE_NAME = 'envelopes-cache-v38';
 
 const ASSETS_TO_CACHE = [
   './',
