@@ -1713,11 +1713,25 @@
         .monthly-snapshot-details { border-top: 1px solid var(--border-color); margin-top: 11px; padding-top: 10px; }
         .monthly-snapshot-section { margin-top: 11px; }
         .monthly-snapshot-section:first-child { margin-top: 0; }
-        .monthly-snapshot-section h3 { margin: 0 0 6px; font-size: 0.78rem; color: var(--text-main); }
-        .monthly-snapshot-row { display: flex; justify-content: space-between; gap: 8px; padding: 5px 0; border-bottom: 1px solid var(--border-color); font-size: 0.76rem; color: var(--text-muted); }
+        /* A descrição pode ocupar mais linhas. O valor fica inteiro e alinhado à primeira. */
+        .monthly-snapshot-section h3 { margin: 0 0 6px; font-size: 0.85rem; color: var(--text-main); }
+        .monthly-snapshot-details .monthly-snapshot-caption { font-size: 0.8rem; }
+        .monthly-snapshot-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            padding: 5px 0;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.85rem;
+            line-height: 1.35;
+            color: var(--text-muted);
+        }
         .monthly-snapshot-row:last-child { border-bottom: 0; }
-        .monthly-snapshot-row-name { min-width: 0; overflow-wrap: anywhere; }
+        .monthly-snapshot-row-name { flex: 1; min-width: 0; overflow-wrap: anywhere; }
         .monthly-snapshot-row-value { flex-shrink: 0; color: var(--text-main); font-weight: 600; white-space: nowrap; }
+        /* No par gasto/orçamento, cada valor fica inteiro e o nome conserva espaço em telas estreitas. */
+        .monthly-snapshot-row-value.monthly-snapshot-pair { max-width: calc(100% - 3rem); text-align: right; white-space: normal; }
+        .monthly-snapshot-pair > span { display: inline-block; white-space: nowrap; }
         .monthly-history-empty { padding: 22px 12px; color: var(--text-muted); text-align: center; font-size: 0.85rem; line-height: 1.5; }
         @media (max-width: 360px) {
             .cycle-notice { gap: 5px; padding-left: 10px; padding-right: 10px; font-size: 0.73rem; }
@@ -1774,6 +1788,7 @@
             cursor: pointer;
         }
         .projection-action:active { background: var(--primary-light-bg); }
+        .projection-action:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
         .projection-more { display: block; margin: 0 auto; }
         .projection-month > summary { align-items: center; min-height: 22px; }
         .projection-month > summary > div { min-width: 0; text-align: right; }
@@ -1791,6 +1806,8 @@
             color: var(--text-main);
         }
         .projection-dialog:not([open]) { display: none; }
+        /* O título recebe o foco inicial para leitura. O destaque visual fica nos controles. */
+        #projection-scenario-title:focus { outline: none; }
         .projection-dialog::backdrop {
             background: rgba(0,0,0,0.55);
             backdrop-filter: blur(8px);
@@ -1801,9 +1818,9 @@
         .projection-filter-group .checkbox-item { padding: 8px 0; gap: 8px; }
         .projection-filter-name { flex: 1; min-width: 0; overflow-wrap: anywhere; font-size: 0.84rem; }
         .projection-fixed-filter { flex-wrap: wrap; }
-        .projection-fixed-filter .projection-filter-name { flex-basis: 7rem; }
+        .projection-fixed-filter .projection-filter-name { flex-basis: 5.25rem; }
         .projection-fixed-filter select {
-            flex: 0 1 11.75rem;
+            flex: 0 1 9rem;
             width: 100%;
             max-width: 100%;
             min-height: 36px;
@@ -2176,10 +2193,10 @@
                     <p class="monthly-history-intro">Acompanhe o mês atual e até 12 meses encerrados. Compare os totais e consulte os lançamentos.</p>
                     <div id="monthly-history-body" style="display:flex; flex-direction:column; gap:0;"></div>
                 </div>
-                <div id="monthly-projection-panel" role="tabpanel" aria-labelledby="monthly-tab-projection" tabindex="0" hidden>
+                <div id="monthly-projection-panel" role="tabpanel" aria-labelledby="monthly-tab-projection" hidden>
                     <div class="projection-toolbar">
                         <h2>Despesas previstas</h2>
-                        <button type="button" class="projection-action" aria-haspopup="dialog" onclick="openProjectionScenario()">Ajustar cenário</button>
+                        <button type="button" class="projection-action" aria-haspopup="dialog" onclick="openProjectionScenario(this)">Ajustar cenário</button>
                     </div>
                     <p id="monthly-projection-status" class="monthly-history-intro" role="status" hidden></p>
                     <div id="monthly-projection-body"></div>
@@ -2193,7 +2210,7 @@
             <h2 id="projection-scenario-title" tabindex="-1" autofocus>Ajustar cenário</h2>
             <form method="dialog" onsubmit="applyProjectionScenario(event)">
                 <div class="form-group">
-                    <label for="projection-limit">Teto mensal (opcional)</label>
+                    <label for="projection-limit">Limite mensal de gastos (opcional)</label>
                     <input type="text" id="projection-limit" inputmode="decimal" maxlength="15" placeholder="Ex. 3.600,00" autocomplete="off" oninput="this.setCustomValidity('')">
                 </div>
                 <div id="projection-scenario-filters"></div>
@@ -6778,7 +6795,7 @@
                     const margin = moneyDifference(projectionScenario.limit, total);
                     const tone = margin > 0 ? 'down' : (margin < 0 ? 'up' : 'neutral');
                     const label = margin > 0 ? `Folga de ${formatCurrency(margin)}`
-                        : margin < 0 ? `${formatCurrency(-margin)} acima do teto` : 'No limite';
+                        : margin < 0 ? `${formatCurrency(-margin)} acima do limite` : 'No limite';
                     comparison = `<span class="monthly-snapshot-change ${tone}">${label}</span>`;
                 }
                 return `<details class="monthly-snapshot-card report-details projection-month" data-period="${period}"${openPeriods.has(period) ? ' open' : ''}>
@@ -6808,7 +6825,7 @@
             const status = [];
             if (outside) status.push(outside === 1 ? '1 item fora' : `${outside} itens fora`);
             if (endings) status.push(endings === 1 ? '1 última cobrança ajustada' : `${endings} últimas cobranças ajustadas`);
-            if (projectionScenario.limit !== null) status.push(`Teto de ${formatCurrency(projectionScenario.limit)}`);
+            if (projectionScenario.limit !== null) status.push(`Limite de ${formatCurrency(projectionScenario.limit)}`);
             const statusEl = document.getElementById('monthly-projection-status');
             statusEl.textContent = status.join(' · ');
             statusEl.hidden = !status.length;
@@ -6826,7 +6843,7 @@
             renderMonthlyProjection();
         };
 
-        const openProjectionScenario = () => {
+        const openProjectionScenario = (trigger) => {
             const periods = projectionPeriodKeys(getMonthKey(), PROJECTION_MAX_MONTHS);
             const envelopeRows = envelopes.map(item => `<label class="checkbox-item">
                 <input type="checkbox" name="projection-envelope" value="${item.id}"${projectionScenario.excludedEnvelopeIds.has(item.id) ? '' : ' checked'}>
@@ -6843,8 +6860,8 @@
                 return `<label class="checkbox-item projection-fixed-filter">
                     <span class="projection-filter-name">${sanitizeHtml(item.name)}<span class="monthly-snapshot-caption">${formatCurrency(item.amount)}/mês</span></span>
                     <select name="projection-fixed" data-id="${item.id}">
-                        <option value="">Conforme cadastro</option>
-                        <option value="exclude"${outside ? ' selected' : ''}>Fora da projeção</option>
+                        <option value="">Manter</option>
+                        <option value="exclude"${outside ? ' selected' : ''}>Não incluir</option>
                         ${options}
                     </select>
                 </label>`;
@@ -6852,7 +6869,7 @@
             document.getElementById('projection-scenario-filters').innerHTML =
                 (envelopeRows ? `<fieldset class="projection-filter-group"><legend>Envelopes incluídos</legend>${envelopeRows}</fieldset>` : '')
                 + (fixedRows ? `<fieldset class="projection-filter-group"><legend>Despesas fixas</legend>
-                    <p class="monthly-snapshot-caption">O mês escolhido inclui a última cobrança.</p>${fixedRows}</fieldset>` : '');
+                    <p class="monthly-snapshot-caption">Manter segue o cadastro. Até inclui o mês da última cobrança.</p>${fixedRows}</fieldset>` : '');
 
             const input = document.getElementById('projection-limit');
             input.value = projectionScenario.limit === null ? '' : projectionScenario.limit.toFixed(2).replace('.', ',');
@@ -6860,6 +6877,8 @@
             document.getElementById('projection-scenario-restore').hidden = projectionScenario.limit === null
                 && !projectionScenario.excludedEnvelopeIds.size && !projectionScenario.fixedLastMonths.size;
             const dialog = document.getElementById('projection-scenario');
+            // Foca o acionador antes de abrir para o diálogo devolver o foco a ele também no Safari.
+            trigger.focus({ preventScroll: true });
             dialog.showModal();
             dialog.scrollTop = 0;
         };
@@ -6869,7 +6888,7 @@
             const limit = input.value.trim() ? parseBrNumber(input.value) : null;
             if (Number.isNaN(limit)) {
                 event.preventDefault();
-                input.setCustomValidity('Informe um teto mensal válido.');
+                input.setCustomValidity('Informe um limite de gastos válido.');
                 input.reportValidity();
                 return;
             }
@@ -6965,7 +6984,7 @@
 
                 const envelopeSections = snapshot.envelopes.map(env => {
                     const expenseRows = (env.expenses || []).map(expense => `<div class="monthly-snapshot-row"><span class="monthly-snapshot-row-name">${sanitizeHtml(expense.desc || 'Gasto sem descrição')}${expense.paymentMethod ? ` · ${sanitizeHtml(expense.paymentMethod)}` : ''}</span><span class="monthly-snapshot-row-value">${formatCurrency(expense.amount)}</span></div>`).join('');
-                    return `<div class="monthly-snapshot-row"><span class="monthly-snapshot-row-name">${renderIconHtml(env.icon)} ${sanitizeHtml(env.name)}</span><span class="monthly-snapshot-row-value">${formatCurrency(env.spent)} / ${formatCurrency(env.total)}</span></div>${expenseRows ? `<div style="padding-left:12px;">${expenseRows}</div>` : ''}`;
+                    return `<div class="monthly-snapshot-row"><span class="monthly-snapshot-row-name">${renderIconHtml(env.icon)} ${sanitizeHtml(env.name)}</span><span class="monthly-snapshot-row-value monthly-snapshot-pair"><span>${formatCurrency(env.spent)}</span> <span>/ ${formatCurrency(env.total)}</span></span></div>${expenseRows ? `<div style="padding-left:12px;">${expenseRows}</div>` : ''}`;
                 }).join('');
                 const fixedRows = renderRows(snapshot.fixedExpenses, 'Nenhuma despesa fixa contabilizada neste mês.');
                 const creditRows = renderRows(snapshot.creditInstallments, 'Nenhum parcelamento ativo.');

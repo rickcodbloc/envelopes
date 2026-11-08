@@ -1,5 +1,5 @@
-// v39: Novo implemento no historico para mostrar de 3 a 6 meses de previsão mensal futura.
-const CACHE_NAME = 'envelopes-cache-v39';
+// v40: Novo implemento no historico para mostrar de 3 a 6 meses de previsão mensal futura.
+const CACHE_NAME = 'envelopes-cache-v40';
 
 const ASSETS_TO_CACHE = [
   './',
