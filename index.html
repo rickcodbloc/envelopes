@@ -583,7 +583,7 @@
             overflow: hidden;
         }
 
-        .envelope-title span {
+        .envelope-title > span:not(.envelope-icon-wrap) {
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
@@ -592,6 +592,17 @@
         }
 
         .envelope-title:active { opacity: 0.6; }
+
+        /* Botões semânticos com a aparência dos acionadores anteriores. */
+        .envelope-title, .icon-selector-toggle, .toggle-desc, .toggle-date {
+            background: none;
+            border: 0;
+            text-align: left;
+        }
+        .icon-selector-toggle, .toggle-desc, .toggle-date { padding: 0; }
+        button:focus-visible, summary:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+        .header-icon-btn:focus-visible { outline-color: white; }
+        .modal-content h2[tabindex="-1"]:focus { outline: none; }
 
         .envelope-icon-wrap {
             width: 24px;
@@ -765,12 +776,12 @@
             position: relative;
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
-            width: min(100%, 320px);
+            width: min(100%, 272px);
             margin: 8px 0 24px;
-            padding: 4px;
+            padding: 2px;
             background: var(--card-bg);
             border: 1px solid var(--border-color);
-            border-radius: 14px;
+            border-radius: 12px;
         }
 
         .backup-actions::after {
@@ -789,12 +800,12 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: 6px;
             min-height: 44px;
-            padding: 8px;
+            padding: 6px;
             background: transparent;
             border: 0;
-            border-radius: 10px;
+            border-radius: 8px;
             color: var(--text-main);
             font-size: 0.9rem;
             font-weight: 500;
@@ -1684,14 +1695,15 @@
         .monthly-snapshot-metrics {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 8px;
-            margin-top: 11px;
+            /* Compactação dos quatro indicadores: ajuste os espaços aqui, sem reduzir as fontes. */
+            gap: 6px;
+            margin-top: 9px;
         }
         
         /* Histórico mensal: superfície dos totais, contorno suave e melhor leitura. */
         .monthly-snapshot-metric {
             min-width: 0;
-            padding: 10px;
+            padding: 8px 10px;
             border: 1px solid var(--border-color);
             border-radius: 8px;
             background: color-mix(in srgb, var(--card-bg) 94%, var(--text-main) 6%);
@@ -1794,7 +1806,20 @@
         .projection-month > summary > div { min-width: 0; text-align: right; }
         .projection-month .monthly-snapshot-total,
         .projection-month .monthly-snapshot-change { white-space: normal; overflow-wrap: anywhere; text-align: right; }
-        .projection-month .monthly-snapshot-section h3 { display: flex; justify-content: space-between; gap: 8px; }
+        /* Hierarquia exclusiva da projeção: faixa da categoria, subtotal e grupos de cartões.
+           Para refinar a densidade, altere estes espaços; os lançamentos mantêm a fonte original. */
+        .projection-month .monthly-snapshot-section h3 {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 8px;
+            padding: 6px 8px;
+            border-radius: 6px;
+            background: color-mix(in srgb, var(--card-bg) 94%, var(--text-main) 6%);
+        }
+        .projection-month .monthly-snapshot-section h3 > span { min-width: 0; overflow-wrap: anywhere; }
+        .projection-month .monthly-snapshot-section h3 > strong { font-size: 0.92rem; font-weight: 700; }
+        .projection-card-heading { margin: 9px 0 3px; color: var(--text-main); font-size: 0.78rem; font-weight: 600; overflow-wrap: anywhere; }
 
         /* O diálogo nativo mantém o foco no cenário e retorna ao acionador ao fechar. */
         .projection-dialog {
@@ -1814,9 +1839,34 @@
             -webkit-backdrop-filter: blur(8px);
         }
         .projection-filter-group { min-width: 0; border: 0; margin-bottom: 14px; }
-        .projection-filter-group legend { font-size: 0.9rem; font-weight: 600; margin-bottom: 4px; }
+        .projection-filter-group legend {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 4px;
+        }
         .projection-filter-group .checkbox-item { padding: 8px 0; gap: 8px; }
-        .projection-filter-name { flex: 1; min-width: 0; overflow-wrap: anywhere; font-size: 0.84rem; }
+        .projection-filter-name {
+        flex: 1;
+        min-width: 0;
+        overflow-wrap: anywhere;
+        font-size: 1rem;
+        line-height: 1.4;
+        font-weight: 500;
+        }
+        /* Cenário: explicações legíveis e valores das fixas em tamanho de leitura.
+           Escopo restrito ao diálogo, preservando as legendas do Histórico. */
+        #projection-scenario .projection-filter-group .monthly-snapshot-caption {
+            font-size: 0.875rem;
+            line-height: 1.45;
+            font-weight: 400;
+            color: color-mix(in srgb, var(--text-main) 25%, var(--text-muted) 75%);
+        }
+
+        #projection-scenario .projection-fixed-filter .monthly-snapshot-caption {
+            font-size: 0.9375rem;
+            font-weight: 400;
+            color: var(--text-main);
+        }
         .projection-fixed-filter { flex-wrap: wrap; }
         .projection-fixed-filter .projection-filter-name { flex-basis: 5.25rem; }
         .projection-fixed-filter select {
@@ -1952,9 +2002,9 @@
                     <polyline points="15 18 9 12 15 6"></polyline>
                 </svg>
             </button>
-            <span class="header-title" id="main-header-title">Meus Envelopes</span>
+            <span class="header-title" id="main-header-title" tabindex="-1">Meus Envelopes</span>
             <div class="header-actions" id="header-actions-container">
-                <button class="header-icon-btn" onclick="toggleOptionsDrawer()" title="Organizar Ordem e Opções" id="header-options-btn" aria-label="Opções">
+                <button class="header-icon-btn" onclick="toggleOptionsDrawer()" title="Organizar Ordem e Opções" id="header-options-btn" aria-label="Opções" aria-controls="options-drawer" aria-expanded="false">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                         <line x1="8" y1="6" x2="21" y2="6"></line>
                         <line x1="8" y1="12" x2="21" y2="12"></line>
@@ -1972,7 +2022,7 @@
                 </button>
 
                 <!-- Menu Dropdown de Opções (Popover) -->
-                <div id="options-drawer">
+                <div id="options-drawer" inert aria-hidden="true">
                     <div class="drawer-header">
                         <span class="drawer-title">Opções</span>
                         <button class="header-icon-btn" onclick="toggleOptionsDrawer()" style="color: var(--text-main); width: 28px; height: 28px;" title="Fechar">
@@ -2167,8 +2217,8 @@
 
                 <!-- Botões de Alternância (Pílula) -->
                 <div style="display: flex; background: var(--border-color); padding: 4px; border-radius: 10px; margin-bottom: 16px;">
-                    <button class="btn chart-tab-pill" id="chart-tab-general" onclick="switchChartTab('general')" style="flex: 1; padding: 8px 4px; font-size: 0.85rem; white-space: nowrap; background: var(--primary-fill); color: white; border-radius: 8px;">Geral</button>
-                    <button class="btn chart-tab-pill" id="chart-tab-envelopes" onclick="switchChartTab('envelopes')" style="flex: 1; padding: 8px 4px; font-size: 0.85rem; white-space: nowrap; background: transparent; color: var(--text-main); border-radius: 8px;">Envelopes</button>
+                    <button class="btn chart-tab-pill" id="chart-tab-general" aria-pressed="true" onclick="switchChartTab('general')" style="flex: 1; padding: 8px 4px; font-size: 0.85rem; white-space: nowrap; background: var(--primary-fill); color: white; border-radius: 8px;">Geral</button>
+                    <button class="btn chart-tab-pill" id="chart-tab-envelopes" aria-pressed="false" onclick="switchChartTab('envelopes')" style="flex: 1; padding: 8px 4px; font-size: 0.85rem; white-space: nowrap; background: transparent; color: var(--text-main); border-radius: 8px;">Envelopes</button>
                 </div>
 
                 <!-- Container do Gráfico SVG e Legenda -->
@@ -2239,16 +2289,16 @@
                 <h2 id="fixed-modal-title">Adicionar Despesa Fixa</h2>
                 <input type="hidden" id="edit-fixed-id">
                 <div class="form-group">
-                    <label>Nome da Despesa</label>
+                    <label for="fixed-item-name">Nome da Despesa</label>
                     <input type="text" id="fixed-item-name" placeholder="Ex: Aluguel" maxlength="35">
                 </div>
                 <div style="display: flex; gap: 8px;">
                     <div class="form-group" style="flex: 1.3; min-width: 0;">
-                        <label>Valor (R$)</label>
+                        <label for="fixed-item-amount">Valor (R$)</label>
                         <input type="text" id="fixed-item-amount" inputmode="decimal" placeholder="Ex: 150,00" maxlength="15">
                     </div>
                     <div class="form-group" style="flex: 0 0 96px; min-width: 0;">
-                        <label>Venc.</label>
+                        <label for="fixed-item-dueday">Venc.</label>
                         <input type="text" id="fixed-item-dueday" inputmode="numeric" pattern="[0-9]*" maxlength="2" oninput="limitIntegerInput(this, 31, 2)" placeholder="1">
                     </div>
                 </div>
@@ -2270,36 +2320,36 @@
                 <h2 id="credit-modal-title">Adicionar Compra Parcelada</h2>
                 <input type="hidden" id="edit-credit-id">
                 <div class="form-group">
-                    <label>Nome da Compra</label>
+                    <label for="credit-item-name">Nome da Compra</label>
                     <input type="text" id="credit-item-name" placeholder="Smartphone" maxlength="35">
                 </div>
                 <div style="display: flex; gap: 8px;">
                     <div class="form-group" style="flex: 1.3; min-width: 0;">
-                        <label>Valor da Parcela (R$)</label>
+                        <label for="credit-item-amount">Valor da Parcela (R$)</label>
                         <input type="text" id="credit-item-amount" inputmode="decimal" placeholder="150,00" maxlength="15">
                     </div>
                     <div class="form-group" style="width: 100px; flex-shrink: 0;">
-                        <label>Vencimento</label>
+                        <label for="credit-item-dueday">Vencimento</label>
                         <input type="text" id="credit-item-dueday" inputmode="numeric" pattern="[0-9]*" maxlength="2" oninput="limitIntegerInput(this, 31, 2)" placeholder="10">
                     </div>
                 </div>
                 <div style="display: flex; gap: 8px;">
                     <div class="form-group" style="flex: 1; min-width: 0;">
-                        <label>Parcela Atual</label>
+                        <label for="credit-item-current">Parcela Atual</label>
                         <input type="text" id="credit-item-current" inputmode="numeric" pattern="[0-9]*" maxlength="4" oninput="limitIntegerInput(this, 1001, 4)" placeholder="1">
                     </div>
                     <div class="form-group" style="flex: 1; min-width: 0;">
-                        <label>Total de Parcelas</label>
+                        <label for="credit-item-total">Total de Parcelas</label>
                         <input type="text" id="credit-item-total" inputmode="numeric" pattern="[0-9]*" maxlength="4" oninput="limitIntegerInput(this, 1000, 4)" placeholder="10">
                     </div>
                 </div>
                 <div class="form-group" style="position: relative;">
-                    <label>Banco / Cartão</label>
+                    <label for="credit-item-card-input">Banco / Cartão</label>
                     <input type="text" id="credit-item-card-input" placeholder="Ex: Nubank" maxlength="25" autocomplete="off">
                     <div id="custom-bank-dropdown" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: var(--card-bg); border: 1px solid var(--input-border); border-radius: 8px; max-height: 160px; overflow-y: auto; z-index: 100; box-shadow: var(--card-shadow); margin-top: 4px;"></div>
                 </div>
                 <!-- Primeiro vencimento: acionador de abertura única; campo e estilos originais preservados. -->
-                <button type="button" class="toggle-desc" id="credit-first-month-toggle" onclick="setFirstDueMonthFieldVisible('credit', true)" style="background:none; border:0; padding:0; text-align:left;">+ Definir primeiro vencimento</button>
+                <button type="button" class="toggle-desc" id="credit-first-month-toggle" aria-expanded="false" aria-controls="credit-first-month-container" onclick="setFirstDueMonthFieldVisible('credit', true, true)" style="background:none; border:0; padding:0; text-align:left;">+ Definir primeiro vencimento</button>
                 <div class="form-group" id="credit-first-month-container" style="display:none; margin-top:12px;">
                     <label for="credit-item-first-month">Primeiro vencimento (opcional)</label>
                     <input type="text" id="credit-item-first-month" inputmode="numeric" maxlength="7" placeholder="MM/AAAA" oninput="limitMonthYearInput(this)" autocomplete="off">
@@ -2365,31 +2415,33 @@
             <h2 id="other-modal-title">Adicionar Compromisso</h2>
             <input type="hidden" id="edit-other-id">
             <div class="form-group">
-                <label>Nome do Compromisso</label>
+                <label for="other-item-name">Nome do Compromisso</label>
                 <input type="text" id="other-item-name" placeholder="Ex: Financiamento Imóvel" maxlength="35">
             </div>
             <div style="display: flex; gap: 8px;">
                 <div class="form-group" style="flex: 1.3; min-width: 0;">
-                    <label>Valor da Parcela (R$)</label>
+                    <label for="other-item-amount" id="other-amount-label">Valor (R$)</label>
                     <input type="text" id="other-item-amount" inputmode="decimal" placeholder="1.200,00" maxlength="15">
                 </div>
                 <div class="form-group" style="width: 100px; flex-shrink: 0;">
-                    <label>Vencimento</label>
+                    <label for="other-item-dueday">Vencimento</label>
                     <input type="text" id="other-item-dueday" inputmode="numeric" pattern="[0-9]*" maxlength="2" oninput="limitIntegerInput(this, 31, 2)" placeholder="10">
                 </div>
             </div>
-            <div style="display: flex; gap: 8px;">
+            <!-- Cobrança única usa 1/1. A expansão só revela os mesmos campos do backup. -->
+            <button type="button" class="toggle-desc" id="other-installment-toggle" aria-expanded="false" aria-controls="other-installment-fields" onclick="setOtherInstallmentFieldsVisible(true, true)">+ Informar parcelamento</button>
+            <div id="other-installment-fields" style="display: none; gap: 8px;" hidden>
                 <div class="form-group" style="flex: 1; min-width: 0;">
-                    <label>Parcela Atual</label>
-                    <input type="text" id="other-item-current" inputmode="numeric" pattern="[0-9]*" maxlength="4" oninput="limitIntegerInput(this, 1001, 4)" placeholder="1">
+                    <label for="other-item-current">Parcela Atual</label>
+                    <input type="text" id="other-item-current" value="1" inputmode="numeric" pattern="[0-9]*" maxlength="4" oninput="limitIntegerInput(this, 1001, 4)" placeholder="1">
                 </div>
                 <div class="form-group" style="flex: 1; min-width: 0;">
-                    <label>Total de Parcelas</label>
-                    <input type="text" id="other-item-total" inputmode="numeric" pattern="[0-9]*" maxlength="4" oninput="limitIntegerInput(this, 1000, 4)" placeholder="360">
+                    <label for="other-item-total">Total de Parcelas</label>
+                    <input type="text" id="other-item-total" value="1" inputmode="numeric" pattern="[0-9]*" maxlength="4" oninput="limitIntegerInput(this, 1000, 4)" placeholder="360">
                 </div>
             </div>
             <!-- Primeiro vencimento: acionador de abertura única; campo e estilos originais preservados. -->
-            <button type="button" class="toggle-desc" id="other-first-month-toggle" onclick="setFirstDueMonthFieldVisible('other', true)" style="background:none; border:0; padding:0; text-align:left;">+ Definir primeiro vencimento</button>
+            <button type="button" class="toggle-desc" id="other-first-month-toggle" aria-expanded="false" aria-controls="other-first-month-container" onclick="setFirstDueMonthFieldVisible('other', true, true)" style="background:none; border:0; padding:0; text-align:left;">+ Definir primeiro vencimento</button>
             <div class="form-group" id="other-first-month-container" style="display:none; margin-top:12px;">
                 <label for="other-item-first-month">Primeiro vencimento (opcional)</label>
                 <input type="text" id="other-item-first-month" inputmode="numeric" maxlength="7" placeholder="MM/AAAA" oninput="limitMonthYearInput(this)" autocomplete="off">
@@ -2494,7 +2546,7 @@
                             <span style="font-size: 0.8rem; color: var(--text-muted);">Ativar ou desativar o gesto de pinça.</span>
                         </div>
                         <label class="switch">
-                            <input type="checkbox" id="zoom-toggle-input" onchange="toggleZoomSetting(this)">
+                            <input type="checkbox" id="zoom-toggle-input" aria-label="Permitir Zoom na Tela" onchange="toggleZoomSetting(this)">
                             <span class="slider"></span>
                         </label>
                     </div>
@@ -2616,19 +2668,19 @@
                 <input type="hidden" id="edit-env-id">
                 
                 <div class="form-group">
-                    <label>Ícone do Envelope</label>
+                    <label for="env-icon">Ícone do Envelope</label>
                         <div class="env-icon-field">
                         <span id="env-icon-preview" class="envelope-icon-wrap" aria-hidden="true"></span>
                         <input type="text" id="env-icon" placeholder="Ex: 🛒 (ícone ou emoji)">
                     </div>
-                    <span class="icon-selector-toggle" onclick="toggleIconGrid()">
+                    <button type="button" class="icon-selector-toggle" onclick="toggleIconGrid()" id="icon-grid-toggle" aria-controls="svg-icon-selector" aria-expanded="false">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true" focusable="false" style="vertical-align: -2px;">
                             <rect x="3" y="3" width="7" height="7" rx="1.4"/>
                             <rect x="14" y="3" width="7" height="7" rx="1.4"/>
                             <rect x="3" y="14" width="7" height="7" rx="1.4"/>
                             <rect x="14" y="14" width="7" height="7" rx="1.4"/>
                         </svg> Escolher ícones do sistema
-                    </span>
+                    </button>
                     
                     <!-- MANUTENÇÃO DOS ÍCONES DO SISTEMA
                          Para substituir um ícone, edite apenas o SVG e o title da opção abaixo.
@@ -2644,57 +2696,57 @@
                     -->
                      <div class="icon-selector-grid" id="svg-icon-selector">
                         <!-- Supermercado -->
-                        <div class="icon-option" onclick="selectSvgIcon(this)" title="Supermercado">
+                        <button type="button" class="icon-option" onclick="selectSvgIcon(this)" title="Supermercado" aria-label="Supermercado" aria-pressed="false">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
-                        </div>
+                        </button>
                         
                     <!-- Transporte -->
-                    <div class="icon-option" onclick="selectSvgIcon(this)" title="Transporte">
+                    <button type="button" class="icon-option" onclick="selectSvgIcon(this)" title="Transporte" aria-label="Transporte" aria-pressed="false">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/><path d="M5 17H3v-6l2-5h9l4 5h1a2 2 0 0 1 2 2v4h-2m-4 0H9m-6-6h15m-6 0V6"/></svg>
-                    </div>
+                    </button>
 
                         <!-- Alimentação (Café / Lanche do dia a dia) -->
-                        <div class="icon-option" onclick="selectSvgIcon(this)" title="Alimentação">
+                        <button type="button" class="icon-option" onclick="selectSvgIcon(this)" title="Alimentação" aria-label="Alimentação" aria-pressed="false">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
-                        </div>
+                        </button>
                         <!-- Educação e Leitura -->
-                        <div class="icon-option" onclick="selectSvgIcon(this)" title="Educação e Leitura">
+                        <button type="button" class="icon-option" onclick="selectSvgIcon(this)" title="Educação e Leitura" aria-label="Educação e Leitura" aria-pressed="false">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/><path d="M10 2v6l3-2 3 2V2"/></svg>
-                        </div>
+                        </button>
                         <!-- Saúde -->
-                        <div class="icon-option" onclick="selectSvgIcon(this)" title="Saúde">
+                        <button type="button" class="icon-option" onclick="selectSvgIcon(this)" title="Saúde" aria-label="Saúde" aria-pressed="false">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-                        </div>
+                        </button>
                         <!-- Compras e Lojas -->
-                        <div class="icon-option" onclick="selectSvgIcon(this)" title="Compras e Lojas">
+                        <button type="button" class="icon-option" onclick="selectSvgIcon(this)" title="Compras e Lojas" aria-label="Compras e Lojas" aria-pressed="false">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-                        </div>
+                        </button>
                         <!-- Trabalho -->
-                        <div class="icon-option" onclick="selectSvgIcon(this)" title="Trabalho">
+                        <button type="button" class="icon-option" onclick="selectSvgIcon(this)" title="Trabalho" aria-label="Trabalho" aria-pressed="false">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
-                        </div>
+                        </button>
                         <!-- Cosméticos -->
-                        <div class="icon-option" onclick="selectSvgIcon(this)" title="Cosméticos">
+                        <button type="button" class="icon-option" onclick="selectSvgIcon(this)" title="Cosméticos" aria-label="Cosméticos" aria-pressed="false">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10v10a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V10Z"/><path d="M10 10V6a2 2 0 0 1 2-2v0a2 2 0 0 1 2 2v4"/><path d="M10 2h4"/></svg>
-                        </div>
+                        </button>
                         <!-- Cartão -->
-                        <div class="icon-option" onclick="selectSvgIcon(this)" title="Cartão">
+                        <button type="button" class="icon-option" onclick="selectSvgIcon(this)" title="Cartão" aria-label="Cartão" aria-pressed="false">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-                        </div>
+                        </button>
                         <!-- Notebook / Tecnologia e Utilidades Digitais -->
-                        <div class="icon-option" onclick="selectSvgIcon(this)" title="Notebook e Tecnologia">
+                        <button type="button" class="icon-option" onclick="selectSvgIcon(this)" title="Notebook e Tecnologia" aria-label="Notebook e Tecnologia" aria-pressed="false">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="2" y1="20" x2="22" y2="20"/></svg>
-                        </div>
+                        </button>
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label>Nome do Envelope</label>
+                    <label for="env-name">Nome do Envelope</label>
                     <input type="text" id="env-name" placeholder="Ex: Supermercado" maxlength="35">
                 </div>
 
                 <div class="form-group">
-                    <label>Orçamento do Mês (R$)</label>
+                    <label for="env-total">Orçamento do Mês (R$)</label>
                     <input type="text" id="env-total" inputmode="decimal" placeholder="Ex: 1000,00" maxlength="15">
                 </div>
 
@@ -2719,23 +2771,23 @@
                 <input type="hidden" id="expense-env-id">
                 
                 <div class="form-group">
-                    <label>Valor Gasto (R$)</label>
+                    <label for="expense-amount">Valor Gasto (R$)</label>
                     <input type="text" id="expense-amount" inputmode="decimal" placeholder="Ex: 50,00" maxlength="15">
                 </div>
 
                 <div class="form-group">
-                    <label>Forma de Pagamento (Opcional)</label>
-                    <div class="payment-methods-grid">
-                        <div class="payment-option" onclick="selectPaymentMethod('Crédito', this)">Crédito</div>
-                        <div class="payment-option" onclick="selectPaymentMethod('Débito', this)">Débito</div>
-                        <div class="payment-option" onclick="selectPaymentMethod('Pix', this)">Pix</div>
-                        <div class="payment-option" onclick="selectPaymentMethod('Dinheiro', this)">Dinheiro</div>
+                    <label id="expense-payment-label">Forma de Pagamento (Opcional)</label>
+                    <div class="payment-methods-grid" role="group" aria-labelledby="expense-payment-label">
+                        <button type="button" class="payment-option" aria-pressed="false" onclick="selectPaymentMethod('Crédito', this)">Crédito</button>
+                        <button type="button" class="payment-option" aria-pressed="false" onclick="selectPaymentMethod('Débito', this)">Débito</button>
+                        <button type="button" class="payment-option" aria-pressed="false" onclick="selectPaymentMethod('Pix', this)">Pix</button>
+                        <button type="button" class="payment-option" aria-pressed="false" onclick="selectPaymentMethod('Dinheiro', this)">Dinheiro</button>
                     </div>
                     <input type="hidden" id="expense-payment-method" value="">
                 </div>
 
                 <div class="form-group">
-                    <span class="toggle-date" id="toggle-date-btn" onclick="toggleDateField()">+ Alterar data/hora do gasto</span>
+                    <button type="button" class="toggle-date" id="toggle-date-btn" onclick="toggleDateField()" aria-controls="date-container" aria-expanded="false">+ Alterar data/hora do gasto</button>
                     <div id="date-container">
                         <div>
                             <label for="expense-date">Data do gasto</label>
@@ -2749,9 +2801,9 @@
                 </div>
 
                 <div class="form-group" style="margin-top: -8px;">
-                    <span class="toggle-desc" id="toggle-desc-btn" onclick="toggleDescField()">+ Adicionar descrição</span>
+                    <button type="button" class="toggle-desc" id="toggle-desc-btn" onclick="toggleDescField()" aria-controls="desc-container" aria-expanded="false">+ Adicionar descrição</button>
                     <div id="desc-container">
-                        <label>Descrição (Opcional)</label>
+                        <label for="expense-desc">Descrição (Opcional)</label>
                         <input type="text" id="expense-desc" placeholder="Ex: Posto Ipiranga" maxlength="50">
                     </div>
                 </div>
@@ -2778,7 +2830,7 @@
                 </div>
                 
                 <div id="history-period-container" style="margin-bottom: 12px; display: none;">
-                    <label style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Período:</label>
+                    <label for="history-period-select" style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Período:</label>
                     <select id="history-period-select" onchange="onHistoryPeriodChange()" style="width: 100%; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--input-border); font-size: 16px; background: var(--card-bg); color: var(--text-main);">
                     </select>
                 </div>
@@ -2810,7 +2862,7 @@
                 </p>
                 <input type="hidden" id="reset-id">
                 <div class="form-group">
-                    <label>Novo Orçamento (R$)</label>
+                    <label for="reset-total">Novo Orçamento (R$)</label>
                     <input type="text" id="reset-total" inputmode="decimal" maxlength="15">
                 </div>
                 <div class="modal-buttons">
@@ -2837,7 +2889,7 @@
                 </label>
                 
                 <div class="form-group" style="margin-top: 8px;">
-                    <label>Formato de Exportação</label>
+                    <label for="export-format">Formato de Exportação</label>
                     <select id="export-format" onchange="updateExportFormatView()">
                         <option value="json">Arquivo de Backup (.json)</option>
                         <option value="txt" selected>Relatório em Texto (.txt)</option>
@@ -4698,9 +4750,21 @@
         // O saldo do cartão de envelope considera apenas os lançamentos do mês corrente.
         const getEnvSpent = (env) => getEnvCurrentExpenses(env).reduce((acc, curr) => acc + curr.amount, 0);
 
+        // Menu recolhido não recebe foco. Fechar pelo teclado devolve o foco ao botão Opções.
+        const setOptionsDrawerOpen = (open, restoreFocus = false) => {
+            const drawer = document.getElementById('options-drawer');
+            const trigger = document.getElementById('header-options-btn');
+            if (!open && restoreFocus) trigger.focus({ preventScroll: true });
+            drawer.inert = !open;
+            drawer.setAttribute('aria-hidden', String(!open));
+            drawer.classList.toggle('active', open);
+            trigger.setAttribute('aria-expanded', String(open));
+            if (open) drawer.querySelector('.drawer-item')?.focus({ preventScroll: true });
+        };
+
         const toggleOptionsDrawer = () => {
             const drawer = document.getElementById('options-drawer');
-            drawer.classList.toggle('active');
+            setOptionsDrawerOpen(!drawer.classList.contains('active'), drawer.contains(document.activeElement));
         };
 
         document.addEventListener('click', (e) => {
@@ -4708,9 +4772,15 @@
             const headerBtn = document.getElementById('header-options-btn');
             if (drawer.classList.contains('active')) {
                 if (!drawer.contains(e.target) && !headerBtn.contains(e.target)) {
-                    drawer.classList.remove('active');
+                    setOptionsDrawerOpen(false, drawer.contains(document.activeElement));
                 }
             }
+        });
+
+        document.addEventListener('focusin', event => {
+            const drawer = document.getElementById('options-drawer');
+            if (drawer.classList.contains('active') && !drawer.contains(event.target)
+                && !document.getElementById('header-options-btn').contains(event.target)) setOptionsDrawerOpen(false);
         });
 
         let currentChartTab = 'general';
@@ -4731,6 +4801,8 @@
                 btnGeneral.style.background = 'transparent';
                 btnGeneral.style.color = 'var(--text-main)';
             }
+            btnGeneral.setAttribute('aria-pressed', String(tab === 'general'));
+            btnEnvelopes.setAttribute('aria-pressed', String(tab === 'envelopes'));
             renderGraphicsView();
         };
 
@@ -4983,6 +5055,7 @@
         const toggleIconGrid = () => {
             const grid = document.getElementById('svg-icon-selector');
             grid.style.display = (grid.style.display === 'grid') ? 'none' : 'grid';
+            document.getElementById('icon-grid-toggle').setAttribute('aria-expanded', String(grid.style.display === 'grid'));
         };
 
         const envelopeIconSegmenter = typeof Intl.Segmenter === 'function'
@@ -5014,9 +5087,11 @@
             if (!svg) return;
             currentSelectedSvg = sanitizeSvg(svg.outerHTML);
             envIconField.value = '';
-            document.querySelectorAll('.icon-option').forEach(el => el.classList.remove('selected'));
-            if(element) element.classList.add('selected');
+            document.querySelectorAll('.icon-option').forEach(el => { el.classList.remove('selected'); el.setAttribute('aria-pressed', 'false'); });
+            if(element) { element.classList.add('selected'); element.setAttribute('aria-pressed', 'true'); }
             document.getElementById('svg-icon-selector').style.display = 'none';
+            document.getElementById('icon-grid-toggle').setAttribute('aria-expanded', 'false');
+            document.getElementById('icon-grid-toggle').focus({ preventScroll: true });
             updateEnvelopeIconPreview();
         };
 
@@ -5026,7 +5101,7 @@
             if (e.target.value !== icon) e.target.value = icon;
             if (icon) {
                 currentSelectedSvg = null;
-                document.querySelectorAll('.icon-option').forEach(el => el.classList.remove('selected'));
+                document.querySelectorAll('.icon-option').forEach(el => { el.classList.remove('selected'); el.setAttribute('aria-pressed', 'false'); });
                 updateEnvelopeIconPreview();
             }
         });
@@ -5255,6 +5330,8 @@
             grip.addEventListener('pointerdown', (e) => startReorderGesture(e, list, row, items, index, render));
             row.addEventListener('keydown', (e) => {
                 if (e.key !== 'Escape' || actions.hidden) return;
+                e.preventDefault();
+                e.stopPropagation();
                 setReorderActions(grip, false);
                 grip.focus({ preventScroll: true });
             });
@@ -5330,6 +5407,7 @@
                     cb.value = env.id;
                     cb.checked = true;
                     cb.className = 'multi-reset-cb';
+                    cb.setAttribute('aria-label', `Redefinir ${env.name}`);
                     cb.onclick = (e) => e.stopPropagation();
 
                     const iconWrap = document.createElement('div');
@@ -5344,11 +5422,14 @@
                     leftDiv.appendChild(iconWrap);
                     leftDiv.appendChild(titleSpan);
 
-                    const tagSpan = document.createElement('span');
+                    const tagSpan = document.createElement('button');
+                    tagSpan.type = 'button';
+                    tagSpan.setAttribute('aria-label', `Manter histórico de ${env.name}`);
+                    tagSpan.setAttribute('aria-pressed', 'true');
                     tagSpan.className = 'multi-reset-hist-tag';
                     tagSpan.setAttribute('data-id', env.id);
                     tagSpan.setAttribute('data-keep', 'true');
-                    tagSpan.style.cssText = 'font-size: 0.72rem; font-weight: 600; padding: 4px 8px; border-radius: 6px; background-color: var(--primary-light-bg); color: var(--primary); cursor: pointer; white-space: nowrap; flex-shrink: 0; transition: all 0.15s;';
+                    tagSpan.style.cssText = 'border:0; font-size: 0.72rem; font-weight: 600; padding: 4px 8px; border-radius: 6px; background-color: var(--primary-light-bg); color: var(--primary); cursor: pointer; white-space: nowrap; flex-shrink: 0; transition: all 0.15s;';
                     tagSpan.textContent = 'Histórico: S';
                     tagSpan.onclick = (e) => {
                         e.stopPropagation();
@@ -5365,6 +5446,7 @@
 
         const toggleResetHistoryTag = (el) => {
             const currentKeep = el.getAttribute('data-keep') === 'true';
+            el.setAttribute('aria-pressed', String(!currentKeep));
             if (currentKeep) {
                 el.setAttribute('data-keep', 'false');
                 el.innerText = 'Histórico: N';
@@ -5574,7 +5656,7 @@
             // Reinicia o valor permitido após cada abertura do modal (inclusive em edições).
             document.querySelectorAll('#modal-fixed-expense input[oninput^="limitIntegerInput"]').forEach(field => { field.dataset.lastValidNumeric = field.value; });
             openModal('modal-fixed-expense');
-            setTimeout(() => nameField.focus(), 100);
+            setTimeout(() => focusModalInput(nameField), 100);
         };
 
         const renderFixedExpensesList = () => {
@@ -5868,12 +5950,14 @@
 
         // Exibe o primeiro vencimento uma única vez por abertura do modal.
         // No cadastro inicia recolhido; na edição com data gravada, abre preenchido.
-        const setFirstDueMonthFieldVisible = (section, visible) => {
+        const setFirstDueMonthFieldVisible = (section, visible, focusField = false) => {
             const trigger = document.getElementById(`${section}-first-month-toggle`);
             const container = document.getElementById(`${section}-first-month-container`);
             if (!trigger || !container) return;
             trigger.style.display = visible ? 'none' : 'inline-block';
+            trigger.setAttribute('aria-expanded', String(visible));
             container.style.display = visible ? 'block' : 'none';
+            if (visible && focusField) document.getElementById(`${section}-item-first-month`).focus();
         };
 
         // Atualiza a parcela do rascunho quando o mês avançou, preservando uma alteração manual.
@@ -5889,6 +5973,10 @@
                 field.dataset.lastValidNumeric = current;
             }
             field.dataset.syncedInstallment = current;
+            // Um compromisso 1/1 aberto durante a virada pode ter se tornado concluído.
+            if (section === 'other' && (Number(field.value) !== 1 || Number(document.getElementById('other-item-total').value) !== 1)) {
+                setOtherInstallmentFieldsVisible(true);
+            }
         };
 
         const prepareInstallmentSave = () => {
@@ -5947,7 +6035,7 @@
             // Reinicia o valor permitido após cada abertura do modal (inclusive em edições).
             document.querySelectorAll('#modal-credit-installment input[oninput^="limitIntegerInput"]').forEach(field => { field.dataset.lastValidNumeric = field.value; });
             openModal('modal-credit-installment');
-            setTimeout(() => nameField.focus(), 100);
+            setTimeout(() => focusModalInput(nameField), 100);
         };
 
         const renderCreditInstallmentsList = () => {
@@ -6340,6 +6428,20 @@
             renderOtherCommitmentsList();
         };
 
+        // Revelação de abertura única: a visibilidade não muda os valores nem o formato 1/1.
+        // Na edição, qualquer estado diferente de 1/1 (inclusive concluído) fica explícito.
+        const setOtherInstallmentFieldsVisible = (visible, focusField = false) => {
+            const trigger = document.getElementById('other-installment-toggle');
+            const fields = document.getElementById('other-installment-fields');
+            trigger.hidden = visible;
+            trigger.style.display = visible ? 'none' : 'inline-block';
+            trigger.setAttribute('aria-expanded', String(visible));
+            fields.hidden = !visible;
+            fields.style.display = visible ? 'flex' : 'none';
+            document.getElementById('other-amount-label').textContent = visible ? 'Valor da parcela (R$)' : 'Valor (R$)';
+            if (visible && focusField) document.getElementById('other-item-current').focus();
+        };
+
         const openOtherCommitmentModal = (id = null) => {
             const titleEl = document.getElementById('other-modal-title');
             const btnEl = document.getElementById('other-submit-btn');
@@ -6370,10 +6472,12 @@
                 nameField.value = '';
                 amountField.value = '';
                 dueDayField.value = '';
-                currentField.value = '';
-                totalField.value = '';
+                currentField.value = '1';
+                totalField.value = '1';
                 startField.value = '';
             }
+
+            setOtherInstallmentFieldsVisible(Number(currentField.value) !== 1 || Number(totalField.value) !== 1);
 
             // Cada abertura reinicia o acionador, exceto ao editar um vencimento já definido.
             setFirstDueMonthFieldVisible('other', !!startField.value.trim());
@@ -6382,7 +6486,7 @@
             // Reinicia o valor permitido após cada abertura do modal (inclusive em edições).
             document.querySelectorAll('#modal-other-commitment input[oninput^="limitIntegerInput"]').forEach(field => { field.dataset.lastValidNumeric = field.value; });
             openModal('modal-other-commitment');
-            setTimeout(() => nameField.focus(), 100);
+            setTimeout(() => focusModalInput(nameField), 100);
         };
 
         // Mantém os mesmos botões, ícones, divisor e espaçamento usados nas despesas fixas/parcelamentos.
@@ -6751,7 +6855,7 @@
             const number = installmentNumberForPeriod(item, periodKey, currentKey);
             if (number === null) return [];
             const note = number === item.totalInstallments ? ' · última parcela' : '';
-            return [{ name: item.name, amount: item.amount, note: `${number}/${item.totalInstallments}${note}` }];
+            return [{ name: item.name, amount: item.amount, note: `${number}/${item.totalInstallments}${note}`, cardName: item.cardName }];
         });
 
         // A projeção lê os cadastros atuais, sem montar fotografias do Histórico.
@@ -6765,18 +6869,35 @@
             return [
                 { label: 'Orçamento dos envelopes', rows: variableRows },
                 { label: 'Despesas fixas', rows: fixedRows },
-                { label: 'Parcelamentos', rows: projectionInstallmentRows(creditInstallments, periodKey, currentKey) },
+                { label: 'Parcelamentos', rows: projectionInstallmentRows(creditInstallments, periodKey, currentKey), groupByCard: true },
                 { label: 'Outros compromissos', rows: projectionInstallmentRows(otherCommitments, periodKey, currentKey) }
             ].map(group => ({ ...group, total: group.rows.reduce((sum, item) => sum + item.amount, 0) }));
+        };
+
+        const renderProjectionRows = (rows) => rows.map(item => `<div class="monthly-snapshot-row">
+            <span class="monthly-snapshot-row-name">${sanitizeHtml(item.name)}${item.note ? ` · ${item.note}` : ''}</span>
+            <span class="monthly-snapshot-row-value">${formatCurrency(item.amount)}</span>
+        </div>`).join('');
+
+        // Mesma regra de bancos das telas de Parcelamentos e Consolidado: agrupa sem ordenar
+        // os cadastros. O filtro mensal já foi aplicado; cada grupo preserva sua ordem relativa.
+        const renderProjectionCardRows = (rows) => {
+            const grouped = Object.create(null);
+            rows.forEach(item => {
+                const displayName = (item.cardName || 'Outros').trim();
+                const key = displayName.toLowerCase();
+                if (!grouped[key]) grouped[key] = { displayName, items: [] };
+                grouped[key].items.push(item);
+            });
+            return Object.values(grouped).map(group => `
+                <h4 class="projection-card-heading">💳 ${sanitizeHtml(group.displayName)} (${group.items.length})</h4>
+                ${renderProjectionRows(group.items)}`).join('');
         };
 
         const renderProjectionDetails = (groups) => groups.filter(group => group.rows.length).map(group => `
             <div class="monthly-snapshot-section">
                 <h3><span>${group.label}</span><strong class="monthly-snapshot-row-value">${formatCurrency(group.total)}</strong></h3>
-                ${group.rows.map(item => `<div class="monthly-snapshot-row">
-                    <span class="monthly-snapshot-row-name">${sanitizeHtml(item.name)}${item.note ? ` · ${item.note}` : ''}</span>
-                    <span class="monthly-snapshot-row-value">${formatCurrency(item.amount)}</span>
-                </div>`).join('')}
+                ${group.groupByCard ? renderProjectionCardRows(group.rows) : renderProjectionRows(group.rows)}
             </div>`).join('') || '<p class="monthly-snapshot-caption">Nenhuma despesa prevista neste mês.</p>';
 
         const renderMonthlyProjection = () => {
@@ -7444,13 +7565,13 @@
                     card.className = 'envelope-card';
                     card.innerHTML = `
                         <div class="envelope-header">
-                            <div class="envelope-title" onclick="openHistoryModal(${env.id})">
-                                <div class="envelope-icon-wrap">${renderIconHtml(env.icon)}</div> 
+                            <button type="button" class="envelope-title" onclick="openHistoryModal(${env.id})" aria-label="Histórico de ${sanitizeHtml(env.name)}">
+                                <span class="envelope-icon-wrap" aria-hidden="true">${renderIconHtml(env.icon)}</span> 
                                 <span>${sanitizeHtml(env.name)}</span>
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-muted); opacity: 0.5; flex-shrink: 0;">
                                     <polyline points="9 18 15 12 9 6"></polyline>
                                 </svg>
-                            </div>
+                            </button>
                             <div style="display: flex; gap: 8px; align-items: center;">
                                 <button class="card-btn edit-btn" onclick="openEnvelopeModal(${env.id})" title="Editar Envelope">
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -7546,18 +7667,104 @@
             list.appendChild(backupDiv);
         };
 
+        // Acessibilidade dos overlays existentes. A pilha controla apenas foco e camadas:
+        // não grava preferências nem altera dados. Cada modal conserva seu CSS/z-index de origem.
+        // Novos modais .modal-overlay precisam de um h2 e de um botão de fechar/cancelar;
+        // o ciclo obrigatório é a exceção intencional ao Escape.
+        const modalLayers = [];
+        const modalBackgroundState = new Map();
+        const modalElements = Array.from(document.querySelectorAll('.modal-overlay'));
+        modalElements.forEach(modal => {
+            const title = modal.querySelector('h2');
+            if (title) {
+                if (!title.id) title.id = `${modal.id}-title`;
+                title.tabIndex = -1;
+                modal.setAttribute('aria-labelledby', title.id);
+            }
+            modal.setAttribute('role', 'dialog');
+            modal.setAttribute('tabindex', '-1');
+            modal.setAttribute('aria-hidden', 'true');
+            modal.inert = true;
+        });
+
+        const getTopModal = () => modalLayers.length ? modalLayers[modalLayers.length - 1].element : null;
+        const canFocusModalTarget = element => !!element && element.isConnected && !element.disabled
+            && !element.closest('[inert]') && element.getClientRects().length > 0
+            && getComputedStyle(element).visibility !== 'hidden';
+        const focusModalTitle = modal => (modal.querySelector('h2') || modal).focus({ preventScroll: true });
+
+        const focusModalInput = input => {
+            const top = getTopModal();
+            if (top && top.contains(input) && document.activeElement === top.querySelector('h2')) input.focus();
+        };
+
+        const syncModalAccessibility = () => {
+            const top = getTopModal();
+            // inert é aplicado só aos irmãos diretos; estados internos (como o seletor de
+            // envelope aberto) são preservados. Ao sair, devolve exatamente o estado anterior.
+            Array.from(document.getElementById('app-container').children).forEach(child => {
+                if (child.classList.contains('modal-overlay')) return;
+                if (top) {
+                    if (!modalBackgroundState.has(child)) modalBackgroundState.set(child, child.inert);
+                    child.inert = true;
+                }
+            });
+            if (!top) {
+                modalBackgroundState.forEach((inert, element) => { element.inert = inert; });
+                modalBackgroundState.clear();
+            }
+            modalElements.forEach(modal => {
+                modal.inert = modal !== top;
+                modal.setAttribute('aria-hidden', String(modal !== top));
+                modal.setAttribute('aria-modal', String(modal === top));
+            });
+        };
+
         const openModal = (id) => {
             const el = document.getElementById(id);
             if (!el) return;
+            const drawer = document.getElementById('options-drawer');
+            if (drawer.classList.contains('active')) setOptionsDrawerOpen(false, drawer.contains(document.activeElement));
+            const previousIndex = modalLayers.findIndex(layer => layer.element === el);
+            const layer = previousIndex >= 0 ? modalLayers.splice(previousIndex, 1)[0]
+                : { element: el, opener: document.activeElement, inlineZIndex: el.style.zIndex,
+                    baseZIndex: Number(getComputedStyle(el).zIndex) || 200 };
+            const top = getTopModal();
+            el.style.zIndex = String(Math.max(layer.baseZIndex, top ? Number(top.style.zIndex) + 1 : 0));
+            modalLayers.push(layer);
             el.style.display = 'flex';
             void el.offsetWidth;
             el.classList.add('active-modal');
+            // Libera a nova camada antes de focá-la. A camada anterior só fica indisponível
+            // depois da transferência de foco, evitando esconder o foco atual da tecnologia assistiva.
+            el.inert = false;
+            el.setAttribute('aria-hidden', 'false');
+            if (!el.contains(document.activeElement)) focusModalTitle(el);
+            syncModalAccessibility();
         };
 
         const closeModal = (id) => {
             const el = document.getElementById(id);
             if (!el) return;
+            const wasTop = el === getTopModal();
+            const index = modalLayers.findIndex(layer => layer.element === el);
+            const layer = index >= 0 ? modalLayers.splice(index, 1)[0] : null;
             el.classList.remove('active-modal');
+            if (layer) el.style.zIndex = layer.inlineZIndex;
+            // Primeiro libera o destino. Só então devolve o foco e oculta semanticamente
+            // a camada que fechou; fechar um modal por baixo não rouba o foco do superior.
+            const top = getTopModal();
+            if (top) { top.inert = false; top.setAttribute('aria-hidden', 'false'); }
+            if (!top) {
+                modalBackgroundState.forEach((inert, element) => { element.inert = inert; });
+            }
+            if (wasTop) {
+                if (canFocusModalTarget(layer?.opener) && (!top || top.contains(layer.opener))) {
+                    layer.opener.focus({ preventScroll: true });
+                } else if (top) focusModalTitle(top);
+                else document.getElementById('main-header-title').focus({ preventScroll: true });
+            }
+            syncModalAccessibility();
             setTimeout(() => {
                 if (!el.classList.contains('active-modal')) {
                     el.style.display = 'none';
@@ -7565,15 +7772,55 @@
             }, 160);
         };
 
+        // Tab permanece na camada superior. Escape cancela primeiro os seletores/gestos
+        // internos e nunca confirma exclusões nem dispensa a regularização obrigatória.
+        document.addEventListener('keydown', event => {
+            if (event.defaultPrevented || document.getElementById('projection-scenario').open) return;
+            const drawer = document.getElementById('options-drawer');
+            if (event.key === 'Escape' && drawer.classList.contains('active')) {
+                event.preventDefault();
+                setOptionsDrawerOpen(false, true);
+                return;
+            }
+            const modal = getTopModal();
+            if (!modal) return;
+            if (event.key === 'Escape') {
+                event.preventDefault();
+                if (cancelReorderGesture) { cancelReorderGesture(); return; }
+                const picker = document.getElementById('expense-envelope-picker');
+                if (modal.id === 'modal-expense' && picker.open) {
+                    picker.open = false;
+                    document.getElementById('expense-envelope-summary').focus({ preventScroll: true });
+                    return;
+                }
+                if (modal.id === 'modal-cycle-required') return;
+                if (modal.id === 'modal-custom-confirm') closeCustomConfirm(false);
+                else closeModal(modal.id);
+            } else if (event.key === 'Tab') {
+                const targets = Array.from(modal.querySelectorAll('button, [href], input:not([type="hidden"]), select, textarea, summary, [tabindex]:not([tabindex="-1"])'))
+                    .filter(canFocusModalTarget);
+                const active = document.activeElement;
+                const index = targets.indexOf(active);
+                if (!targets.length) { event.preventDefault(); focusModalTitle(modal); }
+                else if (index < 0 || (event.shiftKey && index === 0) || (!event.shiftKey && index === targets.length - 1)) {
+                    event.preventDefault();
+                    targets[event.shiftKey ? targets.length - 1 : 0].focus({ preventScroll: true });
+                }
+            }
+        });
+
         const toggleDateField = (forceShow = false) => {
             const container = document.getElementById('date-container');
             const btn = document.getElementById('toggle-date-btn');
             if (forceShow || container.style.display === 'none' || container.style.display === '') {
+                btn.setAttribute('aria-expanded', 'true');
                 container.style.display = 'grid';
                 btn.style.display = 'none';
+                if (!forceShow) document.getElementById('expense-date').focus();
             } else {
                 container.style.display = 'none';
                 btn.style.display = 'inline-block';
+                btn.setAttribute('aria-expanded', 'false');
             }
         };
 
@@ -7581,22 +7828,25 @@
             const container = document.getElementById('desc-container');
             const btn = document.getElementById('toggle-desc-btn');
             if (forceShow || container.style.display === 'none' || container.style.display === '') {
+                btn.setAttribute('aria-expanded', 'true');
                 container.style.display = 'block';
                 btn.style.display = 'none';
+                if (!forceShow) document.getElementById('expense-desc').focus();
             } else {
                 container.style.display = 'none';
                 btn.style.display = 'inline-block';
+                btn.setAttribute('aria-expanded', 'false');
             }
         };
 
         const selectPaymentMethod = (method, element) => {
             const currentSelected = document.getElementById('expense-payment-method').value;
-            document.querySelectorAll('.payment-option').forEach(el => el.classList.remove('selected'));
+            document.querySelectorAll('.payment-option').forEach(el => { el.classList.remove('selected'); el.setAttribute('aria-pressed', 'false'); });
             if (currentSelected === method) {
                 document.getElementById('expense-payment-method').value = '';
             } else {
                 document.getElementById('expense-payment-method').value = method;
-                if(element) element.classList.add('selected');
+                if(element) { element.classList.add('selected'); element.setAttribute('aria-pressed', 'true'); }
             }
         };
 
@@ -7640,11 +7890,13 @@
             document.getElementById('expense-date').value = '';
             expenseTimeField.value = '';
             document.getElementById('expense-payment-method').value = '';
-            document.querySelectorAll('.payment-option').forEach(el => el.classList.remove('selected'));
+            document.querySelectorAll('.payment-option').forEach(el => { el.classList.remove('selected'); el.setAttribute('aria-pressed', 'false'); });
             document.getElementById('date-container').style.display = 'none';
             document.getElementById('toggle-date-btn').style.display = 'inline-block';
+            document.getElementById('toggle-date-btn').setAttribute('aria-expanded', 'false');
             document.getElementById('desc-container').style.display = 'none';
             document.getElementById('toggle-desc-btn').style.display = 'inline-block';
+            document.getElementById('toggle-desc-btn').setAttribute('aria-expanded', 'false');
         };
 
         const formatExpenseDateInput = (value) => {
@@ -7724,7 +7976,7 @@
                 if (expense.paymentMethod) {
                     document.getElementById('expense-payment-method').value = expense.paymentMethod;
                     document.querySelectorAll('.payment-option').forEach(el => {
-                        if (el.innerText === expense.paymentMethod) el.classList.add('selected');
+                        if (el.innerText === expense.paymentMethod) { el.classList.add('selected'); el.setAttribute('aria-pressed', 'true'); }
                     });
                 }
                 const dateInput = formatExpenseDateInput(expense.date);
@@ -7742,7 +7994,7 @@
             }
 
             openModal('modal-expense');
-            setTimeout(() => document.getElementById('expense-amount').focus(), 100);
+            setTimeout(() => focusModalInput(document.getElementById('expense-amount')), 100);
         };
 
         const saveExpense = () => {
@@ -8075,7 +8327,8 @@
             const totalField = document.getElementById('env-total');
 
             document.getElementById('svg-icon-selector').style.display = 'none';
-            document.querySelectorAll('.icon-option').forEach(el => el.classList.remove('selected'));
+            document.getElementById('icon-grid-toggle').setAttribute('aria-expanded', 'false');
+            document.querySelectorAll('.icon-option').forEach(el => { el.classList.remove('selected'); el.setAttribute('aria-pressed', 'false'); });
 
             if (envId) {
                 const env = envelopes.find(e => e.id === envId);
@@ -8094,6 +8347,7 @@
                         const optionSvg = el.querySelector('svg');
                         if (optionSvg && sanitizeSvg(optionSvg.outerHTML) === currentSelectedSvg) {
                             el.classList.add('selected');
+                            el.setAttribute('aria-pressed', 'true');
                         }
                     });
                 } else {
@@ -9217,6 +9471,11 @@
                 customConfirmCallback();
             }
             customConfirmCallback = null;
+            const top = getTopModal();
+            if (top && !top.contains(document.activeElement)) focusModalTitle(top);
+            else if (!top && (document.activeElement === document.body || !document.activeElement?.isConnected)) {
+                document.getElementById('main-header-title').focus({ preventScroll: true });
+            }
         };
 
         // Mantém barra e gráficos coerentes quando o sistema muda a aparência no modo automático.
