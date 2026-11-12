@@ -873,6 +873,43 @@
             opacity: 1;
         }
 
+        /*
+         * Aproveitamento horizontal dos modais em telas estreitas.
+         * Margens externas: 12px, acrescidas das áreas seguras do dispositivo.
+         * Espaçamento interno lateral: 16px.
+         * Preserva os espaçamentos verticais, limites de altura e fontes.
+         * Exclui confirmações, redefinição do aplicativo e aviso de ciclo pendente.
+         * Para ajustes futuros, edite este bloco sem duplicá-lo.
+         */
+        @media (max-width: 600px) {
+            .modal-overlay:not(#modal-custom-confirm):not(#modal-restore):not(#modal-cycle-required) {
+                padding-left: calc(12px + env(safe-area-inset-left, 0px));
+                padding-right: calc(12px + env(safe-area-inset-right, 0px));
+            }
+
+            .modal-overlay:not(#modal-custom-confirm):not(#modal-restore):not(#modal-cycle-required) > .modal-content,
+            #projection-scenario {
+                padding-left: 16px;
+                padding-right: 16px;
+            }
+
+            /*
+             * "Ajustar cenário" usa um diálogo nativo, sem modal-overlay.
+             * Mantém a centralização e considera a maior área segura lateral.
+             */
+            #projection-scenario {
+                width: min(
+                    480px,
+                    calc(
+                        100% - 24px - 2 * max(
+                            env(safe-area-inset-left, 0px),
+                            env(safe-area-inset-right, 0px)
+                        )
+                    )
+                );
+            }
+        }
+
         .modal-content h2 {
             margin-bottom: 16px;
             font-size: 1.3rem;

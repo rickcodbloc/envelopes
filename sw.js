@@ -1,5 +1,5 @@
-// v42: 4 novos refinos/implementos
-const CACHE_NAME = 'envelopes-cache-v42';
+// v43: 4 novos refinos/implementos + Refino botão Exportar/Importar + Refino textos Consolidado e Projeção + Layout
+const CACHE_NAME = 'envelopes-cache-v43';
 
 const ASSETS_TO_CACHE = [
   './',
