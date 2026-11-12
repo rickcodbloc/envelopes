@@ -465,9 +465,16 @@
         }
 
         .dash-progress-fill-modern {
+            width: 0%;
             height: 100%;
             border-radius: 6px;
             transition: width 0.7s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.4s ease;
+        }
+
+        /* A entrada conserva a curva original; mudanças seguintes percorrem o saldo anterior.
+           Ajuste os 0.9s aqui para alterar apenas a duração das atualizações. */
+        .dash-progress-fill-modern.is-updating {
+            transition: width 0.9s ease-in-out, background-color 0.4s ease;
         }
 
         .dash-footer-modern {
@@ -1976,6 +1983,11 @@
         }
 
         @media (prefers-reduced-motion: reduce) {
+            .dash-progress-fill-modern,
+            .dash-progress-fill-modern.is-updating {
+                transition: none;
+            }
+
             .chart-guide-ring {
                 display: none;
             }
@@ -5985,6 +5997,53 @@
             renderCreditInstallmentsList();
         };
 
+        // Microinterações locais: não gravam dados e não atrasam ações ou foco.
+        // Cada elemento tem no máximo um efeito; concluir, cancelar ou reduzir movimento o libera.
+        const uiMotionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
+        const localFeedbackAnimations = new Map();
+
+        const stopLocalFeedback = (element) => {
+            const animation = localFeedbackAnimations.get(element);
+            if (!animation) return;
+            localFeedbackAnimations.delete(element);
+            animation.cancel();
+        };
+
+        const playLocalFeedback = (element, keyframes, options) => {
+            stopLocalFeedback(element);
+            if (uiMotionPreference.matches || typeof element.animate !== 'function') return;
+            try {
+                const animation = element.animate(keyframes, options);
+                localFeedbackAnimations.set(element, animation);
+                const release = () => {
+                    if (localFeedbackAnimations.get(element) === animation) localFeedbackAnimations.delete(element);
+                };
+                animation.onfinish = release;
+                animation.oncancel = release;
+            } catch (ignored) { /* Efeito opcional: sem suporte, a interface mantém o estado final. */ }
+        };
+
+        const cancelFeedbackForReducedMotion = () => {
+            if (!uiMotionPreference.matches) return;
+            Array.from(localFeedbackAnimations.keys()).forEach(stopLocalFeedback);
+        };
+        if (typeof uiMotionPreference.addEventListener === 'function') {
+            uiMotionPreference.addEventListener('change', cancelFeedbackForReducedMotion);
+        } else if (typeof uiMotionPreference.addListener === 'function') {
+            uiMotionPreference.addListener(cancelFeedbackForReducedMotion);
+        }
+
+        // O campo já ocupa seu espaço final: o teclado/foco não depende do fim da animação.
+        // Só a abertura solicitada pelo usuário anima; preencher uma edição permanece imediato.
+        // Para refinar a entrada, ajuste os 200ms e o deslocamento de 4px abaixo.
+        const animateOptionalFieldReveal = (container, animate) => {
+            if (!animate) { stopLocalFeedback(container); return; }
+            playLocalFeedback(container, [
+                { opacity: 0, transform: 'translateY(-4px)' },
+                { opacity: 1, transform: 'none' }
+            ], { duration: 200, easing: 'ease-out' });
+        };
+
         // Exibe o primeiro vencimento uma única vez por abertura do modal.
         // No cadastro inicia recolhido; na edição com data gravada, abre preenchido.
         const setFirstDueMonthFieldVisible = (section, visible, focusField = false) => {
@@ -5995,6 +6054,7 @@
             trigger.setAttribute('aria-expanded', String(visible));
             container.style.display = visible ? 'block' : 'none';
             if (visible && focusField) document.getElementById(`${section}-item-first-month`).focus();
+            animateOptionalFieldReveal(container, visible && focusField);
         };
 
         // Atualiza a parcela do rascunho quando o mês avançou, preservando uma alteração manual.
@@ -6477,6 +6537,7 @@
             fields.style.display = visible ? 'flex' : 'none';
             document.getElementById('other-amount-label').textContent = visible ? 'Valor da parcela (R$)' : 'Valor (R$)';
             if (visible && focusField) document.getElementById('other-item-current').focus();
+            animateOptionalFieldReveal(fields, visible && focusField);
         };
 
         const openOtherCommitmentModal = (id = null) => {
@@ -7552,6 +7613,29 @@
             return `<span>${sanitizeHtml(firstEnvelopeIcon(trimmed))}</span>`;
         };
 
+        // A barra é um elemento persistente. Só a primeira apresentação começa em zero.
+        // Cancelar o quadro pendente impede uma atualização antiga de substituir a mais recente.
+        let dashboardProgressFrame = 0;
+        let dashboardProgressInitialized = false;
+        const updateDashboardProgress = (percent) => {
+            const fill = document.getElementById('dash-progress-fill');
+            cancelAnimationFrame(dashboardProgressFrame);
+            dashboardProgressFrame = 0;
+            if (dashboardProgressInitialized || uiMotionPreference.matches) {
+                dashboardProgressInitialized = true;
+                fill.classList.add('is-updating');
+                fill.style.width = `${percent}%`;
+                return;
+            }
+            dashboardProgressFrame = requestAnimationFrame(() => {
+                dashboardProgressFrame = requestAnimationFrame(() => {
+                    dashboardProgressFrame = 0;
+                    dashboardProgressInitialized = true;
+                    fill.style.width = `${percent}%`;
+                });
+            });
+        };
+
         const renderEnvelopes = () => {
             updateOpenMonthlySnapshot();
             const list = document.getElementById('envelope-list');
@@ -7605,6 +7689,7 @@
 
                     const card = document.createElement('div');
                     card.className = 'envelope-card';
+                    card.dataset.envelopeId = String(env.id);
                     card.innerHTML = `
                         <div class="envelope-header">
                             <button type="button" class="envelope-title" onclick="openHistoryModal(${env.id})" aria-label="Histórico de ${sanitizeHtml(env.name)}">
@@ -7668,12 +7753,7 @@
                 const grandPercentSpent = grandTotal > 0 ? (grandSpent / grandTotal) * 100 : 0;
                 const grandBarWidth = Math.min(grandPercentSpent, 100);
 
-                dashProgressFill.style.width = '0%';
-                requestAnimationFrame(() => {
-                    requestAnimationFrame(() => {
-                        dashProgressFill.style.width = `${grandBarWidth}%`;
-                    });
-                });
+                updateDashboardProgress(grandBarWidth);
 
                 if (grandAvailable >= 0 || grandTotal === 0) {
                     dashAvailableEl.innerText = formatCurrency(grandAvailable);
@@ -7864,6 +7944,7 @@
                 btn.style.display = 'inline-block';
                 btn.setAttribute('aria-expanded', 'false');
             }
+            animateOptionalFieldReveal(container, !forceShow && container.style.display !== 'none');
         };
 
         const toggleDescField = (forceShow = false) => {
@@ -7879,6 +7960,7 @@
                 btn.style.display = 'inline-block';
                 btn.setAttribute('aria-expanded', 'false');
             }
+            animateOptionalFieldReveal(container, !forceShow && container.style.display !== 'none');
         };
 
         const selectPaymentMethod = (method, element) => {
@@ -8037,6 +8119,38 @@
 
             openModal('modal-expense');
             setTimeout(() => focusModalInput(document.getElementById('expense-amount')), 100);
+        };
+
+        // Realça apenas o envelope visível após salvar um gasto do mês atual.
+        // Aguarda 350ms para permitir a saída do modal e separar o início do destaque da atualização da barra.
+        // O destaque dura 1600ms, sem atrasar a gravação nem bloquear a interação.
+        // O anel de 1px usa a cor do tema; a borda e a sombra originais ficam preservadas.
+        const highlightSavedEnvelope = (envelopeId) => {
+            if (currentView !== 'home' || getTopModal() || uiMotionPreference.matches) return;
+            const list = document.getElementById('envelope-list');
+            const card = Array.from(list.children).find(element => element.dataset.envelopeId === String(envelopeId));
+            if (!card || typeof card.animate !== 'function') return;
+            setTimeout(() => {
+                if (!card.isConnected || document.hidden || currentView !== 'home' || getTopModal()
+                    || document.getElementById('projection-scenario').open
+                    || document.getElementById('options-drawer').classList.contains('active')
+                    || uiMotionPreference.matches) return;
+                const bounds = card.getBoundingClientRect();
+                const viewport = list.getBoundingClientRect();
+                if (bounds.width <= 0 || bounds.height <= 0 || bounds.bottom <= viewport.top
+                    || bounds.top >= viewport.bottom || bounds.right <= viewport.left || bounds.left >= viewport.right) return;
+                const style = getComputedStyle(card);
+                const shadow = style.boxShadow === 'none' ? '' : `${style.boxShadow}, `;
+                const themeColor = style.getPropertyValue('--primary').trim();
+                const resting = `${shadow}0 0 0 1px transparent`;
+                const highlighted = `${shadow}0 0 0 1px color-mix(in srgb, ${themeColor} 55%, transparent)`;
+                // Uma única passagem de 1600ms; nenhum estilo permanece após a conclusão.
+                playLocalFeedback(card, [
+                    { boxShadow: resting },
+                    { boxShadow: highlighted, offset: 0.2 },
+                    { boxShadow: resting }
+                ], { duration: 1600, easing: 'ease-out' });
+            }, 350);
         };
 
         const saveExpense = () => {
@@ -8198,6 +8312,8 @@
             
             if(document.getElementById('modal-history').classList.contains('active-modal')) {
                 openHistoryModal(envId, 'current');
+            } else if (expensePeriodKey === currentKey) {
+                highlightSavedEnvelope(destination.id);
             }
         };
 
