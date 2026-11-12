@@ -875,22 +875,22 @@
 
         /*
          * Aproveitamento horizontal dos modais em telas estreitas.
-         * Margens externas: 12px, acrescidas das áreas seguras do dispositivo.
-         * Espaçamento interno lateral: 16px.
+         * Margens externas: 16px, acrescidas das áreas seguras do dispositivo.
+         * Espaçamento interno lateral: 20px.
          * Preserva os espaçamentos verticais, limites de altura e fontes.
          * Exclui confirmações, redefinição do aplicativo e aviso de ciclo pendente.
          * Para ajustes futuros, edite este bloco sem duplicá-lo.
          */
         @media (max-width: 600px) {
             .modal-overlay:not(#modal-custom-confirm):not(#modal-restore):not(#modal-cycle-required) {
-                padding-left: calc(12px + env(safe-area-inset-left, 0px));
-                padding-right: calc(12px + env(safe-area-inset-right, 0px));
+                padding-left: calc(16px + env(safe-area-inset-left, 0px));
+                padding-right: calc(16px + env(safe-area-inset-right, 0px));
             }
 
             .modal-overlay:not(#modal-custom-confirm):not(#modal-restore):not(#modal-cycle-required) > .modal-content,
             #projection-scenario {
-                padding-left: 16px;
-                padding-right: 16px;
+                padding-left: 20px;
+                padding-right: 20px;
             }
 
             /*
@@ -901,7 +901,7 @@
                 width: min(
                     480px,
                     calc(
-                        100% - 24px - 2 * max(
+                        100% - 32px - 2 * max(
                             env(safe-area-inset-left, 0px),
                             env(safe-area-inset-right, 0px)
                         )
