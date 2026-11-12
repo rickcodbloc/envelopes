@@ -7354,7 +7354,7 @@
                             <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.85rem; padding:6px 0; border-bottom:${index === group.items.length - 1 ? 'none' : '1px solid var(--border-color)'}; gap:8px;">
                                 <div style="display:flex; flex-direction:column; min-width:0; flex:1;">
                                     <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-weight:500;">${sanitizeHtml(item.name)}</span>
-                                    <span style="font-size:0.75rem; color:var(--text-muted);">Parcela ${item.currentInstallment}/${item.totalInstallments} (Venc. ${effectiveDueDay(item.dueDateDay, getMonthKey())})</span>
+                                    <span style="font-size:0.8rem; color:var(--text-muted);">Parcela ${item.currentInstallment}/${item.totalInstallments} (Venc. ${effectiveDueDay(item.dueDateDay, getMonthKey())})</span>
                                 </div>
                                 <span style="white-space:nowrap; flex-shrink:0;"><strong>${formatCurrency(item.amount)}</strong></span>
                             </div>
@@ -7373,7 +7373,7 @@
                         <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.85rem; padding:6px 0; border-bottom:1px solid var(--border-color); gap:8px;">
                             <div style="display:flex; flex-direction:column; min-width:0; flex:1;">
                                 <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-weight:500;">${sanitizeHtml(item.name)}</span>
-                                <span style="font-size:0.75rem; color:var(--text-muted);">Parcela ${item.currentInstallment}/${item.totalInstallments} (Venc. ${effectiveDueDay(item.dueDateDay, getMonthKey())})</span>
+                                <span style="font-size:0.8rem; color:var(--text-muted);">Parcela ${item.currentInstallment}/${item.totalInstallments} (Venc. ${effectiveDueDay(item.dueDateDay, getMonthKey())})</span>
                             </div>
                             <span style="white-space:nowrap; flex-shrink:0;"><strong>${formatCurrency(item.amount)}</strong></span>
                         </div>
