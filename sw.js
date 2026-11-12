@@ -1,5 +1,5 @@
-// v41: 4 novos refinos/implementos
-const CACHE_NAME = 'envelopes-cache-v41';
+// v42: 4 novos refinos/implementos
+const CACHE_NAME = 'envelopes-cache-v42';
 
 const ASSETS_TO_CACHE = [
   './',

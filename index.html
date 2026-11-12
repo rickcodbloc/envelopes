@@ -2441,7 +2441,7 @@
                 </div>
             </div>
             <!-- Primeiro vencimento: acionador de abertura única; campo e estilos originais preservados. -->
-            <button type="button" class="toggle-desc" id="other-first-month-toggle" aria-expanded="false" aria-controls="other-first-month-container" onclick="setFirstDueMonthFieldVisible('other', true, true)" style="background:none; border:0; padding:0; text-align:left;">+ Definir primeiro vencimento</button>
+            <button type="button" class="toggle-desc" id="other-first-month-toggle" aria-expanded="false" aria-controls="other-first-month-container" onclick="setFirstDueMonthFieldVisible('other', true, true)" style="background:none; border:0; padding:0; text-align:left; margin-top:16px;">+ Definir primeiro vencimento</button>
             <div class="form-group" id="other-first-month-container" style="display:none; margin-top:12px;">
                 <label for="other-item-first-month">Primeiro vencimento (opcional)</label>
                 <input type="text" id="other-item-first-month" inputmode="numeric" maxlength="7" placeholder="MM/AAAA" oninput="limitMonthYearInput(this)" autocomplete="off">
@@ -6851,11 +6851,16 @@
             Array.from({ length: count }, (_, index) => shiftMonthKey(currentKey, index + 1));
 
         const projectionInstallmentRows = (items, periodKey, currentKey) => items.flatMap(item => {
-            if (item.currentInstallment > item.totalInstallments) return [];
-            const number = installmentNumberForPeriod(item, periodKey, currentKey);
-            if (number === null) return [];
-            const note = number === item.totalInstallments ? ' · última parcela' : '';
-            return [{ name: item.name, amount: item.amount, note: `${number}/${item.totalInstallments}${note}`, cardName: item.cardName }];
+        if (item.currentInstallment > item.totalInstallments) return [];
+        const number = installmentNumberForPeriod(item, periodKey, currentKey);
+        if (number === null) return [];
+
+        // Apenas apresentação: cobrança única dispensa a indicação redundante 1/1.
+        const note = item.totalInstallments === 1
+            ? 'Parcela única'
+            : `${number}/${item.totalInstallments}${number === item.totalInstallments ? ' · última parcela' : ''}`;
+
+        return [{ name: item.name, amount: item.amount, note, cardName: item.cardName }];
         });
 
         // A projeção lê os cadastros atuais, sem montar fotografias do Histórico.
