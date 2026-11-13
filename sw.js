@@ -1,5 +1,5 @@
-// v45: Inclusao de despesas variavéis sem orçamento.
-const CACHE_NAME = 'envelopes-cache-v45';
+// v46: Inclusao de despesas variavéis sem orçamento.
+const CACHE_NAME = 'envelopes-cache-v46';
 
 const ASSETS_TO_CACHE = [
   './',

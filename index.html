@@ -1102,7 +1102,7 @@
         .btn-confirm { background-color: var(--primary-fill); color: white; }
         .btn-danger { background-color: var(--danger); color: white; }
 
-        #history-list {
+        #history-list, #standalone-history-list {
             overflow-y: auto;
             flex: 1;
             margin-bottom: 8px;
@@ -2039,6 +2039,61 @@
             clip-path: inset(50%);
         }
 
+        /* Gastos avulsos: acesso entre envelopes e backup, sem cartão ou meta fictícia.
+           Ajustes visuais deste acesso ficam concentrados aqui; usa os seis temas existentes. */
+        .standalone-access {
+            grid-column: 1 / -1;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            padding: 8px 0;
+            margin-top: 2px;
+            border-top: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 1px 0 var(--card-bg);
+        }
+        .standalone-access-main {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 0;
+            flex: 1;
+            min-height: 44px;
+            padding: 6px 0;
+            border: 0;
+            border-radius: 8px;
+            background: transparent;
+            color: var(--text-main);
+            text-align: left;
+            font: inherit;
+            cursor: pointer;
+        }
+        .standalone-access-main > .envelope-icon-wrap { color: var(--text-muted); flex-shrink: 0; }
+        .standalone-access-copy { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+        .standalone-access-copy strong { font-size: 0.9rem; font-weight: 600; }
+        .standalone-access-copy small { font-size: 0.75rem; color: var(--text-muted); }
+        .standalone-access-chevron { margin-left: auto; flex-shrink: 0; color: var(--text-muted); opacity: 0.6; }
+        .standalone-add {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            padding: 0;
+            flex-shrink: 0;
+            border: 0;
+            border-radius: 10px;
+            background: var(--primary-light-bg);
+            color: var(--primary);
+            cursor: pointer;
+        }
+        .standalone-modal-heading { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+        .standalone-modal-heading h2 { flex: 1; min-width: 0; margin: 0; }
+        .standalone-modal-heading .envelope-icon-wrap { color: var(--primary); flex-shrink: 0; }
+        .standalone-modal-heading .card-btn { min-width: 44px; min-height: 44px; display: flex; align-items: center; justify-content: center; }
+        .standalone-history-total { display: block; margin-bottom: 12px; color: var(--text-main); font-weight: 700; font-size: 1rem; white-space: nowrap; }
+
     </style>
 </head>
 <body data-theme="purple">
@@ -2465,7 +2520,7 @@
             <input type="hidden" id="edit-other-id">
             <div class="form-group">
                 <label for="other-item-name">Nome do Compromisso</label>
-                <input type="text" id="other-item-name" placeholder="Ex: Financiamento Imóvel" maxlength="35">
+                <input type="text" id="other-item-name" placeholder="Ex: Reforma da casa" maxlength="35">
             </div>
             <div style="display: flex; gap: 8px;">
                 <div class="form-group" style="flex: 1.3; min-width: 0;">
@@ -2477,8 +2532,8 @@
                     <input type="text" id="other-item-dueday" inputmode="numeric" pattern="[0-9]*" maxlength="2" oninput="limitIntegerInput(this, 31, 2)" placeholder="10">
                 </div>
             </div>
-            <!-- Cobrança única usa 1/1. A expansão só revela os mesmos campos do backup. -->
-            <button type="button" class="toggle-desc" id="other-installment-toggle" aria-expanded="false" aria-controls="other-installment-fields" onclick="setOtherInstallmentFieldsVisible(true, true)">+ Informar parcelamento</button>
+            <!-- Cobrança única usa 1/1. Ao solicitar parcelamento, os campos padrão abrem vazios. -->
+            <button type="button" class="toggle-desc" id="other-installment-toggle" aria-expanded="false" aria-controls="other-installment-fields" onclick="setOtherInstallmentFieldsVisible(this.getAttribute('aria-expanded') !== 'true', true)">+ Informar parcelamento</button>
             <div id="other-installment-fields" style="display: none; gap: 8px;" hidden>
                 <div class="form-group" style="flex: 1; min-width: 0;">
                     <label for="other-item-current">Parcela Atual</label>
@@ -2486,7 +2541,7 @@
                 </div>
                 <div class="form-group" style="flex: 1; min-width: 0;">
                     <label for="other-item-total">Total de Parcelas</label>
-                    <input type="text" id="other-item-total" value="1" inputmode="numeric" pattern="[0-9]*" maxlength="4" oninput="limitIntegerInput(this, 1000, 4)" placeholder="360">
+                    <input type="text" id="other-item-total" value="1" inputmode="numeric" pattern="[0-9]*" maxlength="4" oninput="limitIntegerInput(this, 1000, 4)" placeholder="12">
                 </div>
             </div>
             <!-- Primeiro vencimento: acionador de abertura única; campo e estilos originais preservados. -->
@@ -2806,6 +2861,30 @@
             </div>
         </div>
 
+
+        <!-- Gastos avulsos reutilizam o formulário de gasto; esta janela só consulta o histórico.
+             Não há atalho redundante para o consolidado, que mantém seu acesso no menu. -->
+        <div id="modal-standalone-history" class="modal-overlay">
+            <div class="modal-content">
+                <div class="standalone-modal-heading">
+                    <span id="standalone-history-icon" class="envelope-icon-wrap" aria-hidden="true"></span>
+                    <h2 id="standalone-history-title" style="font-size: 1.2rem;">Histórico: Gastos avulsos</h2>
+                    <button type="button" class="card-btn" onclick="openStandaloneExpenseModal()" aria-label="Registrar gasto avulso" title="Registrar gasto avulso">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+                    </button>
+                </div>
+                <div id="standalone-history-period-container" style="margin-bottom: 12px; display: none;">
+                    <label for="standalone-history-period" style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Período:</label>
+                    <select id="standalone-history-period" onchange="renderStandaloneHistory(this.value)" style="width: 100%; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--input-border); font-size: 16px; background: var(--card-bg); color: var(--text-main);"></select>
+                </div>
+                <strong id="standalone-history-total" class="standalone-history-total"></strong>
+                <div id="standalone-history-list"></div>
+                <div class="modal-buttons" style="margin-top: 10px;">
+                    <button type="button" class="btn btn-cancel" onclick="closeModal('modal-standalone-history')">Fechar</button>
+                </div>
+            </div>
+        </div>
+
         <div id="modal-expense" class="modal-overlay">
             <div class="modal-content">
                 <h2 id="expense-modal-title">Registrar Gasto</h2>
@@ -2930,11 +3009,11 @@
                 <p class="modal-subtitle">Selecione o que deseja incluir na exportação:</p>
                 <div id="export-list" class="checkbox-list"></div>
 
-                <!-- O TXT filtra o relatório dos envelopes. O Histórico mensal pertence ao backup JSON. -->
-                <!-- Agrupa a opção de conteúdo com os envelopes selecionados, antes do formato. -->
+                <!-- O TXT inclui gastos dos envelopes e avulsos. O Histórico mensal completo pertence ao backup JSON. -->
+                <!-- Agrupa a opção de histórico com os gastos selecionados, antes do formato. -->
                 <label id="export-txt-history-option" class="modal-checkbox-label" style="display:none; margin-top:12px;">
                     <input type="checkbox" id="export-txt-history-cb" checked style="width:20px; height:20px; accent-color:var(--primary-fill);">
-                    Incluir histórico dos envelopes
+                    Incluir histórico dos gastos
                 </label>
                 
                 <div class="form-group" style="margin-top: 8px;">
@@ -2981,13 +3060,16 @@
         <script>
         const svgDefault = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4H3a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h18a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2Z"/><path d="M16 12h2"/><path d="M12 12h.01"/></svg>';
 
+        // Ícone do acesso a Gastos avulsos; não altera a grade de ícones dos envelopes.
+        const standaloneExpenseIcon = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 3l2 1 2-1 2 1 2-1 2 1 2-1 2 1 2-1v18l-2-1-2 1-2-1-2 1-2-1-2 1-2-1-2 1z"/><path d="M8 8h8M8 12h8M8 16h4"/></svg>';
+
         // Integridade local: gravações financeiras relacionadas usam um registro de recuperação.
-        // O formato dos dados e dos backups permanece igual; este registro interno guarda apenas
+        // O registro de recuperação não altera as coleções de negócio; guarda apenas
         // os valores anteriores até que todas as chaves tenham sido gravadas com sucesso.
         const FINANCIAL_STORAGE_KEYS = [
             'myEnvelopes', 'myFixedExpenses', 'myFixedAutoSort', 'myCreditInstallments',
             'myOtherCommitments', 'myOtherAutoSort', 'myMonthlySnapshots',
-            'myOpenMonthlySnapshot', 'myCycleState'
+            'myOpenMonthlySnapshot', 'myCycleState', 'myStandaloneExpenses'
         ];
         const FINANCIAL_RECOVERY_KEY = 'myPendingFinancialWrite';
         const storageReadProblems = new Set();
@@ -3107,9 +3189,11 @@
         let currentHistoryEnvId = null;
         // Rascunho do formulário. Escolher um destino só altera o estado do modal.
         let expenseBeingEdited = null;
+        let expenseEntryContext = 'envelope';
+        let standaloneExpenses = [];
         let expenseDestinationId = null;
         // Inclui Outros Compromissos no estado temporário para manter o fluxo de backup/importação completo.
-        let pendingImportData = { envelopes: [], fixedExpenses: [], creditInstallments: [], otherCommitments: [], monthlySnapshots: [], openMonthlySnapshot: null, fixedAutoSort: null, otherAutoSort: null, completeBackup: false, cycleState: null };
+        let pendingImportData = { envelopes: [], fixedExpenses: [], creditInstallments: [], otherCommitments: [], standaloneExpenses: [], monthlySnapshots: [], openMonthlySnapshot: null, fixedAutoSort: null, otherAutoSort: null, completeBackup: false, cycleState: null };
         let currentView = 'home'; // 'home', 'despesas-fixas', 'parcelamentos', 'relatorio'
         let otherCommitments = [];
         let tempOtherCommitments = [];
@@ -3402,9 +3486,21 @@
                     }
                 });
             };
-            ['envelopes', 'fixedExpenses', 'creditInstallments', 'otherCommitments', 'monthlySnapshots'].forEach(key => {
+            ['envelopes', 'fixedExpenses', 'creditInstallments', 'otherCommitments', 'standaloneExpenses', 'monthlySnapshots'].forEach(key => {
                 require(data[key] === undefined || Array.isArray(data[key]), `${key}: lista inválida.`);
             });
+            const standaloneEntries = (items, label) => {
+                entries(items, label);
+                (items || []).forEach(entry => {
+                    require(typeof entry.date === 'string' && entry.date.trim() !== '', 'Gasto avulso com data inválida.');
+                    const dateOnly = /^(\d{4})-(\d{2})-(\d{2})$/.exec(entry.date);
+                    const date = dateOnly ? new Date(Number(dateOnly[1]), Number(dateOnly[2]) - 1, Number(dateOnly[3])) : new Date(entry.date);
+                    require(!isNaN(date.getTime()) && date.getFullYear() >= 1000 && date.getFullYear() <= 9999, 'Gasto avulso com data inválida.');
+                    if (dateOnly) require(date.getFullYear() === Number(dateOnly[1]) && date.getMonth() + 1 === Number(dateOnly[2]) && date.getDate() === Number(dateOnly[3]), 'Gasto avulso com data inválida.');
+                    require(entry.periodKey == null || /^\d{4}-(0[1-9]|1[0-2])$/.test(entry.periodKey), 'Competência do gasto avulso inválida.');
+                });
+            };
+            standaloneEntries(data.standaloneExpenses, 'Gastos avulsos');
             (data.envelopes || []).forEach(env => {
                 require(env && typeof env.name === 'string' && env.name.trim() && money(env.total) && optionalText(env.icon), 'Envelope com nome, orçamento ou ícone inválido.');
                 entries(env.expenses, 'Gastos do envelope');
@@ -3429,6 +3525,7 @@
                     && snapshot.totals && typeof snapshot.totals === 'object', 'Registro mensal inválido.');
                 Object.values(snapshot.totals).forEach(value => require(money(value), 'Valor inválido no registro mensal.'));
                 ['envelopes', 'fixedExpenses', 'creditInstallments', 'otherCommitments'].forEach(key => require(snapshot[key] == null || Array.isArray(snapshot[key]), 'Lista inválida no registro mensal.'));
+                standaloneEntries(snapshot.standaloneExpenses, 'Gastos avulsos mensais');
                 (snapshot.envelopes || []).forEach(row => {
                     require(row && typeof row.name === 'string' && optionalText(row.icon) && (row.total == null || money(row.total)) && (row.spent == null || money(row.spent)), 'Envelope inválido no registro mensal.');
                     entries(row.expenses, 'Gastos mensais');
@@ -3443,7 +3540,7 @@
         // Verifica todas as coleções antes de qualquer migração automática. Ausência é diferente
         // de conteúdo ilegível: nesse caso, preserva as strings e bloqueia novas gravações financeiras.
         const storedCollectionFields = {
-            myEnvelopes: 'envelopes', myFixedExpenses: 'fixedExpenses',
+            myEnvelopes: 'envelopes', myStandaloneExpenses: 'standaloneExpenses', myFixedExpenses: 'fixedExpenses',
             myCreditInstallments: 'creditInstallments', myOtherCommitments: 'otherCommitments',
             myMonthlySnapshots: 'monthlySnapshots', myOpenMonthlySnapshot: 'openMonthlySnapshot', myCycleState: 'cycleState'
         };
@@ -3663,7 +3760,7 @@
         const STORAGE_WARNING_REFERENCE = 3 * 1024 * 1024;
         const APP_LOCAL_STORAGE_KEYS = [
             'myEnvelopes', 'myFixedExpenses', 'myFixedAutoSort',
-            'myCreditInstallments', 'myOtherCommitments', 'myOtherAutoSort',
+            'myCreditInstallments', 'myOtherCommitments', 'myOtherAutoSort', 'myStandaloneExpenses',
             'myMonthlySnapshots', 'myOpenMonthlySnapshot', 'myCycleState',
             'myAppTheme', 'myColorMode', 'myAllowZoom',
             'myBackupReminderStart', 'myBackupLastRequestedAt', 'myBackupReminderDismissedAt', FINANCIAL_RECOVERY_KEY
@@ -3731,7 +3828,7 @@
 
         const hasFinancialDataForBackup = () =>
             envelopes.length > 0 || fixedExpenses.length > 0 || creditInstallments.length > 0 ||
-            otherCommitments.length > 0 || monthlySnapshots.length > 0 || !!openMonthlySnapshot;
+            otherCommitments.length > 0 || standaloneExpenses.length > 0 || monthlySnapshots.length > 0 || !!openMonthlySnapshot;
 
         const getBackupTimestamp = (key) => {
             try {
@@ -3886,6 +3983,37 @@
             }
             return isValidMonthKey(fallbackKey) ? fallbackKey : null;
         };
+
+        // Avulsos são lançamentos realizados, não envelopes nem compromissos previstos.
+        // Cada um possui identidade própria e competência; nenhum orçamento é criado.
+        // Ausência da coleção em backups anteriores à versão 10 significa lista vazia.
+        const normalizeStandaloneExpenses = (entries, fallbackPeriod = null) => {
+            const used = new Set(entries.filter(entry => entry.id != null && entry.id !== '').map(entry => String(entry.id)));
+            return entries.map((entry, index) => {
+                if (typeof entry.date !== 'string' || !getEntryPeriodKey({ date: entry.date })) throw new Error('Gasto avulso com data inválida.');
+                const periodKey = getEntryPeriodKey(entry, fallbackPeriod);
+                if (!periodKey) throw new Error('Gasto avulso sem data ou competência válida.');
+                let id = entry.id;
+                if (id == null || id === '') {
+                    id = legacyImportId(['avulso', periodKey, entry.date || '', entry.amount, entry.desc || '', entry.paymentMethod || '', index]);
+                    while (used.has(String(id))) id++;
+                }
+                used.add(String(id));
+                return { ...entry, id, periodKey };
+            });
+        };
+        try {
+            const savedStandalone = takeValidatedStoredCollection('myStandaloneExpenses');
+            if (Array.isArray(savedStandalone)) standaloneExpenses = normalizeStandaloneExpenses(savedStandalone);
+        } catch (error) {
+            storageReadProblems.add('myStandaloneExpenses');
+            console.error('Gastos avulsos preservados para recuperação:', error);
+        }
+        const getStandaloneExpensesForPeriod = (periodKey = getMonthKey()) =>
+            standaloneExpenses.filter(entry => getEntryPeriodKey(entry) === periodKey);
+        const getStandaloneSpent = (periodKey = getMonthKey()) =>
+            getStandaloneExpensesForPeriod(periodKey).reduce((sum, entry) => sum + entry.amount, 0);
+
         const getHistoryPeriodKey = (historyItem) => {
             if (historyItem && isValidMonthKey(historyItem.periodKey)) return historyItem.periodKey;
             const label = historyItem && typeof historyItem.label === 'string' ? historyItem.label : '';
@@ -3949,6 +4077,7 @@
                 closedAt: typeof snapshot.closedAt === 'string' ? snapshot.closedAt : '',
                 totals,
                 envelopes: normalizedEnvelopes,
+                standaloneExpenses: normalizeStandaloneExpenses(snapshot.standaloneExpenses || [], snapshot.periodKey),
                 fixedExpenses: normalizeFixedItems,
                 creditInstallments: normalizeCommitments(snapshot.creditInstallments, true),
                 otherCommitments: normalizeCommitments(snapshot.otherCommitments, false)
@@ -4152,7 +4281,7 @@
             return collected;
         };
 
-        const buildMonthlySnapshot = (periodKey, closedAt = new Date().toISOString(), state = { envelopes, fixedExpenses, creditInstallments, otherCommitments }) => {
+        const buildMonthlySnapshot = (periodKey, closedAt = new Date().toISOString(), state = { envelopes, fixedExpenses, creditInstallments, otherCommitments, standaloneExpenses }) => {
             const envelopeRows = state.envelopes.map(env => {
                 const expenses = collectEnvelopeExpensesForPeriod(env, periodKey);
                 // Apenas gastos explicitamente preservados numa redefinição sem histórico
@@ -4185,7 +4314,8 @@
                 .map(item => ({ ...item, currentInstallment: installmentNumberForPeriod(item, periodKey) }));
             const otherRows = state.otherCommitments.filter(item => isInstallmentDueInPeriod(item, periodKey))
                 .map(item => ({ ...item, currentInstallment: installmentNumberForPeriod(item, periodKey) }));
-            const variable = envelopeRows.reduce((sum, env) => sum + env.spent, 0);
+            const standaloneRows = state.standaloneExpenses.filter(entry => getEntryPeriodKey(entry) === periodKey).map(entry => ({ ...entry }));
+            const variable = envelopeRows.reduce((sum, env) => sum + env.spent, 0) + standaloneRows.reduce((sum, entry) => sum + entry.amount, 0);
             const fixed = fixedRows.reduce((sum, item) => sum + item.amount, 0);
             const credit = creditRows.reduce((sum, item) => sum + item.amount, 0);
             const other = otherRows.reduce((sum, item) => sum + item.amount, 0);
@@ -4197,6 +4327,7 @@
                 closedAt,
                 totals: { variable, fixed, credit, other, grandTotal: variable + fixed + credit + other, budget },
                 envelopes: envelopeRows,
+                standaloneExpenses: standaloneRows,
                 fixedExpenses: fixedRows,
                 creditInstallments: creditRows,
                 otherCommitments: otherRows
@@ -4245,8 +4376,8 @@
             if ((storageReadProblems.size && !allowUnreadableReplacement) || storageRecoveryPending) { monthlySnapshotSaveError = true; return false; }
             const currentKey = getMonthKey();
             if (monthCycleState.lastObservedCycle !== currentKey) return false;
-            const liveSnapshot = buildMonthlySnapshot(currentKey, undefined, { envelopes, fixedExpenses, creditInstallments, otherCommitments, ...candidates });
-            const hasData = liveSnapshot.envelopes.length > 0 || liveSnapshot.fixedExpenses.length > 0 || liveSnapshot.creditInstallments.length > 0 || liveSnapshot.otherCommitments.length > 0;
+            const liveSnapshot = buildMonthlySnapshot(currentKey, undefined, { envelopes, fixedExpenses, creditInstallments, otherCommitments, standaloneExpenses, ...candidates });
+            const hasData = liveSnapshot.envelopes.length > 0 || liveSnapshot.fixedExpenses.length > 0 || liveSnapshot.creditInstallments.length > 0 || liveSnapshot.otherCommitments.length > 0 || liveSnapshot.standaloneExpenses.length > 0;
             if (!hasData && !openMonthlySnapshot) return true;
             if (!hasData && openMonthlySnapshot && openMonthlySnapshot.periodKey !== currentKey) return true;
             const nextSnapshot = liveSnapshot;
@@ -4760,6 +4891,7 @@
             suspendMonthlySnapshotUpdates = true;
             try {
                 renderCycleNotice();
+                if (document.getElementById('modal-standalone-history').classList.contains('active-modal')) renderStandaloneHistory();
                 if (currentView === 'home') renderEnvelopes();
                 else if (currentView === 'despesas-fixas') renderFixedExpensesList();
                 else if (currentView === 'parcelamentos') renderCreditInstallmentsList();
@@ -4862,7 +4994,7 @@
             container.innerHTML = '';
 
             if (currentChartTab === 'general') {
-                let totalSpentCurrent = 0;
+                let totalSpentCurrent = getStandaloneSpent();
                 envelopes.forEach(env => { totalSpentCurrent += getEnvSpent(env); });
                 let totalFixed = fixedExpenses.filter(i => isRecurringDueInPeriod(i, getMonthKey())).reduce((acc, curr) => acc + curr.amount, 0);
                 let activeCreditTotal = creditInstallments
@@ -5424,7 +5556,8 @@
 
         const saveReorderModal = () => {
             envelopes = [...tempEnvelopes];
-            updateApp();
+            // Conserva o rascunho e a janela para nova tentativa se a gravação falhar.
+            if (!updateApp()) return;
             closeModal('modal-reorder');
         };
 
@@ -5623,6 +5756,7 @@
             try {
                 withStorageTransaction(() => {
                     removeStoredValue('myEnvelopes');
+                    removeStoredValue('myStandaloneExpenses');
                     removeStoredValue('myFixedExpenses');
                     removeStoredValue('myFixedAutoSort');
                     removeStoredValue('myCreditInstallments');
@@ -5652,6 +5786,7 @@
             monthCycleState = restoredCycle;
             cycleStateWasStored = true;
             envelopes = [];
+            standaloneExpenses = [];
             fixedExpenses = [];
             isFixedAutoSort = true;
             tempIsFixedAutoSort = true;
@@ -6525,13 +6660,26 @@
             renderOtherCommitmentsList();
         };
 
-        // Revelação de abertura única: a visibilidade não muda os valores nem o formato 1/1.
+        // Parcelamento opcional: cobrança única mantém 1/1; a abertura manual prepara os campos para digitação.
         // Na edição, qualquer estado diferente de 1/1 (inclusive concluído) fica explícito.
         const setOtherInstallmentFieldsVisible = (visible, focusField = false) => {
             const trigger = document.getElementById('other-installment-toggle');
+            const current = document.getElementById('other-item-current');
+            const total = document.getElementById('other-item-total');
+            // Só a expansão manual da cobrança única limpa os padrões 1/1.
+            // Edição/sincronização de parcelas existentes preservam os valores gravados.
+            if (visible && focusField && trigger.getAttribute('aria-expanded') !== 'true'
+                && current.value === '1' && total.value === '1') {
+                [current, total].forEach(field => { field.value = ''; field.dataset.lastValidNumeric = ''; });
+            }
             const fields = document.getElementById('other-installment-fields');
-            trigger.hidden = visible;
-            trigger.style.display = visible ? 'none' : 'inline-block';
+            // O mesmo acionador permite voltar à cobrança única, sem apagar o restante do rascunho.
+            if (!visible && focusField) {
+                [current, total].forEach(field => { field.value = '1'; field.dataset.lastValidNumeric = '1'; });
+            }
+            trigger.hidden = false;
+            trigger.style.display = 'inline-block';
+            trigger.textContent = visible ? 'Não parcelar' : '+ Informar parcelamento';
             trigger.setAttribute('aria-expanded', String(visible));
             fields.hidden = !visible;
             fields.style.display = visible ? 'flex' : 'none';
@@ -7210,6 +7358,9 @@
                     const expenseRows = (env.expenses || []).map(expense => `<div class="monthly-snapshot-row"><span class="monthly-snapshot-row-name">${sanitizeHtml(expense.desc || 'Gasto sem descrição')}${expense.paymentMethod ? ` · ${sanitizeHtml(expense.paymentMethod)}` : ''}</span><span class="monthly-snapshot-row-value">${formatCurrency(expense.amount)}</span></div>`).join('');
                     return `<div class="monthly-snapshot-row"><span class="monthly-snapshot-row-name">${renderIconHtml(env.icon)} ${sanitizeHtml(env.name)}</span><span class="monthly-snapshot-row-value monthly-snapshot-pair"><span>${formatCurrency(env.spent)}</span> <span>/ ${formatCurrency(env.total)}</span></span></div>${expenseRows ? `<div style="padding-left:12px;">${expenseRows}</div>` : ''}`;
                 }).join('');
+                const standaloneRows = (snapshot.standaloneExpenses || []).map(entry => `<div class="monthly-snapshot-row"><span class="monthly-snapshot-row-name">${sanitizeHtml(entry.desc || 'Gasto sem descrição')}${entry.paymentMethod ? ` · ${sanitizeHtml(entry.paymentMethod)}` : ''}</span><span class="monthly-snapshot-row-value">${formatCurrency(entry.amount)}</span></div>`).join('');
+                const standaloneTotal = (snapshot.standaloneExpenses || []).reduce((sum, entry) => sum + entry.amount, 0);
+                const standaloneSection = standaloneRows ? `<div class="monthly-snapshot-row"><span class="monthly-snapshot-row-name">${standaloneExpenseIcon} Gastos avulsos</span><span class="monthly-snapshot-row-value monthly-snapshot-pair"><span>${formatCurrency(standaloneTotal)}</span></span></div><div style="padding-left:12px;">${standaloneRows}</div>` : '';
                 const fixedRows = renderRows(snapshot.fixedExpenses, 'Nenhuma despesa fixa contabilizada neste mês.');
                 const creditRows = renderRows(snapshot.creditInstallments, 'Nenhum parcelamento ativo.');
                 const otherRows = renderRows(snapshot.otherCommitments, 'Nenhum outro compromisso ativo.');
@@ -7234,11 +7385,11 @@
                             <div class="monthly-snapshot-metric"><span>Outros compromissos</span><strong>${formatCurrency(snapshot.totals.other)}</strong></div>
                         </div>
                         <div class="monthly-snapshot-details">
-                            <div class="monthly-snapshot-section"><h3>Envelopes e gastos</h3>${envelopeSections || '<div class="monthly-snapshot-caption">Nenhum envelope registrado neste período.</div>'}</div>
+                            <div class="monthly-snapshot-section"><h3>Envelopes e gastos</h3>${(envelopeSections + standaloneSection) || '<div class="monthly-snapshot-caption">Nenhum envelope registrado neste período.</div>'}</div>
                             <div class="monthly-snapshot-section"><h3>Despesas fixas cadastradas</h3>${fixedRows}</div>
                             <div class="monthly-snapshot-section"><h3>Parcelamentos ativos</h3>${creditRows}</div>
                             <div class="monthly-snapshot-section"><h3>Outros compromissos ativos</h3>${otherRows}</div>
-                            <div class="monthly-snapshot-caption" style="margin-top:8px;">Total consolidado inclui gastos dos envelopes e valores mensais cadastrados de compromissos; não significa confirmação de pagamento.</div>
+                            <div class="monthly-snapshot-caption" style="margin-top:8px;">Total consolidado inclui gastos dos envelopes, gastos avulsos e valores mensais cadastrados de compromissos; não significa confirmação de pagamento.</div>
                         </div>
                     </details>`;
             };
@@ -7265,7 +7416,7 @@
             const container = document.getElementById('financial-report-body');
             container.innerHTML = '';
 
-            if (envelopes.length === 0 && fixedExpenses.length === 0 && creditInstallments.length === 0 && otherCommitments.length === 0) {
+            if (envelopes.length === 0 && fixedExpenses.length === 0 && creditInstallments.length === 0 && otherCommitments.length === 0 && standaloneExpenses.length === 0) {
                 container.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding: 20px;">Nenhum dado financeiro disponível para gerar relatório.</p>';
                 return;
             }
@@ -7308,6 +7459,14 @@
                 });
             });
 
+            const envelopeSpentCurrent = totalSpentCurrent;
+            const currentStandalone = getStandaloneExpensesForPeriod();
+            const standaloneTotal = getStandaloneSpent();
+            totalSpentCurrent += standaloneTotal;
+            currentStandalone.forEach(exp => {
+                if (Object.prototype.hasOwnProperty.call(paymentTotals, exp.paymentMethod)) paymentTotals[exp.paymentMethod] += exp.amount;
+            });
+
             let totalFixed = fixedExpenses.filter(i => isRecurringDueInPeriod(i, getMonthKey())).reduce((acc, curr) => acc + curr.amount, 0);
             let activeCreditTotal = creditInstallments
                 .filter(i => isInstallmentDueInPeriod(i, getMonthKey()))
@@ -7317,8 +7476,8 @@
 
             const totalSpentWithFixed = totalSpentCurrent + totalFixed + activeCreditTotal + totalOther;
             const totalBudgetWithFixed = totalBudgetCurrent + totalFixed + activeCreditTotal + totalOther;
-            const variableRemaining = moneyDifference(totalBudgetCurrent, totalSpentCurrent);
-            const variablePercent = totalBudgetCurrent > 0 ? Math.round((totalSpentCurrent / totalBudgetCurrent) * 100) : 0;
+            const variableRemaining = moneyDifference(totalBudgetCurrent, envelopeSpentCurrent);
+            const variablePercent = totalBudgetCurrent > 0 ? Math.round((envelopeSpentCurrent / totalBudgetCurrent) * 100) : 0;
 
             let prevSpentTotal = 0;
             let matchingEnvelopesCount = 0;
@@ -7348,6 +7507,7 @@
                         }
                     }
                 });
+                prevSpentTotal += getStandaloneSpent(prevPeriodKey);
                 hasPreviousComparison = envelopes.length > 0 && matchingEnvelopesCount === envelopes.length;
             }
 
@@ -7395,6 +7555,10 @@
                 } else if (variablePercent < 50 && totalBudgetCurrent > 0) {
                     smartInsight = "Bom ritmo de economia: menos da metade do orçamento de envelopes utilizada.";
                 }
+            }
+
+            if (currentStandalone.length && variableRemaining >= 0) {
+                smartInsight = `${envelopes.length ? 'Orçamento dos envelopes sob controle. ' : ''}Gastos avulsos no mês: ${formatCurrency(standaloneTotal)}.`;
             }
 
             let paymentHtml = '';
@@ -7495,6 +7659,16 @@
                 `;
             });
 
+            // O consolidado resume a categoria; os lançamentos ficam nos históricos.
+            const standaloneBreakdownHtml = currentStandalone.length ? `
+                <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.85rem; padding:6px 0; border-bottom:1px solid var(--border-color); gap:8px;">
+                    <div style="display:flex; align-items:center; gap:6px; min-width:0; flex:1; overflow:hidden;">
+                        <div class="envelope-icon-wrap" style="width:18px;height:18px; flex-shrink:0;" aria-hidden="true">${standaloneExpenseIcon}</div>
+                        <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">Gastos avulsos</span>
+                    </div>
+                    <span style="white-space:nowrap; flex-shrink:0;"><strong>${formatCurrency(standaloneTotal)}</strong></span>
+                </div>` : '';
+
             container.innerHTML = `
                 <div style="background:var(--card-bg); border:1px solid var(--border-color); box-shadow:var(--card-shadow); padding:16px; border-radius:14px; display:flex; flex-direction:column; gap:6px;">
                     <span style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; font-weight:600; letter-spacing:0.5px;">Total ativo</span>
@@ -7504,7 +7678,7 @@
                             <span>Meta: <strong>${formatCurrency(totalBudgetWithFixed)}</strong></span>
                             <span>
                                 ${variableRemaining >= 0 
-                                    ? `(<span style="color:var(--success); font-weight:500; font-size:0.8rem;">${formatCurrency(variableRemaining)} livre</span>)` 
+                                    ? `(<span style="color:var(--success); font-weight:500; font-size:0.8rem;">${formatCurrency(variableRemaining)} livre${currentStandalone.length ? ' nos envelopes' : ''}</span>)` 
                                     : `(<span style="color:var(--danger); font-weight:500; font-size:0.8rem;">-${formatCurrency(Math.abs(variableRemaining))}</span>)`}
                             </span>
                         </div>
@@ -7522,12 +7696,13 @@
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="report-chevron"><polyline points="6 9 12 15 18 9"></polyline></svg>
                         </div>
                         <div class="report-summary-row">
-                            <span class="report-summary-count">${totalVariableCount} ${totalVariableCount === 1 ? 'envelope' : 'envelopes'}</span>
+                            <span class="report-summary-count">${totalVariableCount} ${totalVariableCount === 1 ? 'envelope' : 'envelopes'}${currentStandalone.length ? ` · ${currentStandalone.length} ${currentStandalone.length === 1 ? 'avulso' : 'avulsos'}` : ''}</span>
                             <strong class="report-summary-total">${formatCurrency(totalSpentCurrent)}</strong>
                         </div>
                     </summary>
                     <div style="margin-top:10px; padding-top:8px; border-top:1px solid var(--border-color); display:flex; flex-direction:column; gap:6px;">
                         ${envelopesBreakdownHtml}
+                        ${standaloneBreakdownHtml}
                     </div>
                 </details>     
 
@@ -7768,6 +7943,8 @@
                     dashProgressFill.style.backgroundColor = 'var(--danger)';
                 }
             }
+
+            list.appendChild(createStandaloneAccess());
 
             const backupDiv = document.createElement('div');
             backupDiv.className = 'backup-actions';
@@ -8070,30 +8247,7 @@
             expenseEnvelopeSummary.focus({ preventScroll: true });
         };
 
-        const openExpenseModal = (envId, expense = null) => {
-            // O bloqueio vale somente para novos lançamentos; edição não deve ser impedida.
-            if (!expense && !ensureCycleAllowsNewExpense()) return;
-            const env = envelopes.find(e => e.id === envId);
-            if (!env || (expense && !getEnvCurrentExpenses(env).includes(expense))) return;
-
-            resetExpenseModal();
-            expenseBeingEdited = expense;
-            expenseDestinationId = envId;
-            document.getElementById('expense-env-id').value = envId;
-            const envelopeName = document.getElementById('expense-envelope-name');
-            const canTransfer = !!expense && envelopes.length > 1;
-            envelopeName.textContent = `Envelope: ${env.name}`;
-            envelopeName.hidden = canTransfer;
-            expenseEnvelopePicker.hidden = !canTransfer;
-            expenseEnvelopePicker.open = false;
-            document.getElementById('expense-envelope-selection').textContent = envelopeName.textContent;
-            document.getElementById('expense-envelope-options').innerHTML = canTransfer ? envelopes.map(item => `
-                <button type="button" class="checkbox-item expense-envelope-option" value="${item.id}" aria-pressed="${item.id === envId}" onclick="selectExpenseEnvelope(Number(this.value))">
-                    <span class="envelope-icon-wrap" aria-hidden="true">${renderIconHtml(item.icon)}</span>
-                    <span class="checkbox-item-title">${sanitizeHtml(item.name)}</span>
-                </button>
-            `).join('') : '';
-
+        const populateExpenseForm = (expense) => {
             if (expense) {
                 document.getElementById('expense-modal-title').innerText = 'Editar Gasto';
                 document.getElementById('expense-amount').value = expense.amount.toFixed(2).replace('.', ',');
@@ -8116,6 +8270,35 @@
             } else {
                 document.getElementById('expense-modal-title').innerText = 'Registrar Gasto';
             }
+
+        };
+
+        const openExpenseModal = (envId, expense = null) => {
+            // O bloqueio vale somente para novos lançamentos; edição não deve ser impedida.
+            if (!expense && !ensureCycleAllowsNewExpense()) return;
+            const env = envelopes.find(e => e.id === envId);
+            if (!env || (expense && !getEnvCurrentExpenses(env).includes(expense))) return;
+
+            resetExpenseModal();
+            expenseEntryContext = 'envelope';
+            expenseBeingEdited = expense;
+            expenseDestinationId = envId;
+            document.getElementById('expense-env-id').value = envId;
+            const envelopeName = document.getElementById('expense-envelope-name');
+            const canTransfer = !!expense && envelopes.length > 1;
+            envelopeName.textContent = `Envelope: ${env.name}`;
+            envelopeName.hidden = canTransfer;
+            expenseEnvelopePicker.hidden = !canTransfer;
+            expenseEnvelopePicker.open = false;
+            document.getElementById('expense-envelope-selection').textContent = envelopeName.textContent;
+            document.getElementById('expense-envelope-options').innerHTML = canTransfer ? envelopes.map(item => `
+                <button type="button" class="checkbox-item expense-envelope-option" value="${item.id}" aria-pressed="${item.id === envId}" onclick="selectExpenseEnvelope(Number(this.value))">
+                    <span class="envelope-icon-wrap" aria-hidden="true">${renderIconHtml(item.icon)}</span>
+                    <span class="checkbox-item-title">${sanitizeHtml(item.name)}</span>
+                </button>
+            `).join('') : '';
+
+            populateExpenseForm(expense);
 
             openModal('modal-expense');
             setTimeout(() => focusModalInput(document.getElementById('expense-amount')), 100);
@@ -8153,28 +8336,9 @@
             }, 350);
         };
 
-        const saveExpense = () => {
-            if (!document.getElementById('modal-expense').classList.contains('active-modal')) return;
-            const envId = Number(document.getElementById('expense-env-id').value);
-            // Revalida no salvamento para cobrir modal aberto antes da virada do mês.
-            if (!expenseBeingEdited && !ensureCycleAllowsNewExpense()) return;
-            if (expenseBeingEdited && monthCycleState.lastObservedCycle !== getMonthKey()) checkMonthCycleBoundary();
-            const currentKey = getMonthKey();
-            const source = envelopes.find(env => env.id === envId);
-            const destination = envelopes.find(env => env.id === expenseDestinationId);
-            if (!source || !destination) {
-                alert('Um dos envelopes já não está disponível. Abra o formulário novamente.');
-                return;
-            }
-
-            // A referência do formulário distingue também gastos legados que vieram sem ID.
-            const expIndex = expenseBeingEdited ? source.expenses.indexOf(expenseBeingEdited) : -1;
-            const existingExp = expIndex === -1 ? null : source.expenses[expIndex];
-            if (expenseBeingEdited && (!existingExp || monthCycleState.lastObservedCycle !== currentKey || getEntryPeriodKey(existingExp, currentKey) !== currentKey)) {
-                alert('Este gasto já não está disponível para edição no mês atual. Abra o histórico novamente.');
-                return;
-            }
-
+        // Validação única do formulário, reutilizada por envelopes e avulsos.
+        // Preserva as regras anteriores de moeda, fuso, datas legadas e edição de timestamps.
+        const readExpenseForm = (existingExp, currentKey, isStandalone = false) => {
             const amountStr = document.getElementById('expense-amount').value.trim();
             const amountUnchanged = existingExp && amountStr === existingExp.amount.toFixed(2).replace('.', ',');
             const amount = amountUnchanged ? existingExp.amount : parseBrNumber(amountStr);
@@ -8246,7 +8410,9 @@
             today.setHours(23, 59, 59, 999);
 
             if (!timestampUnchanged && selectedDate > today) {
-                alert('Não é permitido registrar gastos com data futura nos envelopes. O sistema de envelopes controla o mês atual. Para despesas futuras, utilize o módulo de Despesas Fixas ou Parcelamentos.');
+                alert(isStandalone
+                    ? 'Não é permitido registrar gastos avulsos com data futura. Para obrigações futuras, utilize os módulos de compromissos.'
+                    : 'Não é permitido registrar gastos com data futura nos envelopes. O sistema de envelopes controla o mês atual. Para despesas futuras, utilize o módulo de Despesas Fixas ou Parcelamentos.');
                 return;
             }
 
@@ -8259,6 +8425,289 @@
                     : selectedDate.toISOString();
             }
 
+            return { amount, paymentMethod, desc, expenseDate,
+                expensePeriodKey: dateUnchanged ? currentKey : getMonthKey(selectedDate) };
+        };
+
+
+        /* GASTOS AVULSOS — pontos de manutenção
+           Dados: myStandaloneExpenses / standaloneExpenses no JSON v10 e nas fotografias.
+           Acesso: createStandaloneAccess; histórico: renderStandaloneHistory.
+           Formulário: o mesmo dos envelopes; somente origem, destino e persistência diferem.
+           Painel e projeção continuam exclusivos dos envelopes. Consolidado/gráfico geral
+           incluem avulsos nas variáveis. Edições de períodos encerrados são somente leitura,
+           como no histórico individual dos envelopes. Não há reinício: a data separa os meses. */
+        let standaloneHistoryPeriod = null;
+
+        const createStandaloneAccess = () => {
+            const count = getStandaloneExpensesForPeriod().length;
+            const access = document.createElement('div');
+            access.className = 'standalone-access';
+            access.innerHTML = `
+                <button type="button" class="standalone-access-main" onclick="openStandaloneHistory()" aria-label="Consultar gastos avulsos">
+                    <span class="envelope-icon-wrap" aria-hidden="true">${standaloneExpenseIcon}</span>
+                    <span class="standalone-access-copy"><strong>Gastos avulsos</strong><small>${count ? `${formatCurrency(getStandaloneSpent())} neste mês` : 'Nenhum gasto neste mês'}</small></span>
+                    <svg class="standalone-access-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg>
+                </button>
+                <button type="button" class="standalone-add" onclick="openStandaloneExpenseModal()" aria-label="Registrar gasto avulso" title="Registrar gasto avulso">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+                </button>`;
+            return access;
+        };
+
+        // O histórico próprio também reconhece fotografias importadas sem a coleção ativa.
+        // Identidades locais prevalecem; a união não altera os dados nem o orçamento.
+        const standaloneHistoryEntries = (periodKey) => {
+            const byId = new Map();
+            if (periodKey !== getMonthKey()) {
+                const snapshot = monthlySnapshots.find(item => item.periodKey === periodKey);
+                (snapshot?.standaloneExpenses || []).forEach(entry => byId.set(String(entry.id), entry));
+            }
+            getStandaloneExpensesForPeriod(periodKey).forEach(entry => byId.set(String(entry.id), entry));
+            return [...byId.values()].sort((a, b) => parseEntryDate(b.date) - parseEntryDate(a.date));
+        };
+
+        // Apresentação compartilhada: envelopes e avulsos usam as mesmas linhas e ações.
+        // Os callbacks mantêm separadas as coleções e as regras de persistência.
+        const renderExpenseHistoryRows = (list, targetExpenses, isCurrentPeriod, onEdit, onDelete) => {
+            list.innerHTML = '';
+            if(!targetExpenses || targetExpenses.length === 0) {
+                list.innerHTML = '<p style="text-align:center; color:var(--text-muted); margin-top:20px;">Nenhum gasto registrado neste período.</p>';
+            } else {
+                const sortedExpenses = [...targetExpenses].sort((a,b) => new Date(b.date) - new Date(a.date));
+                sortedExpenses.forEach(exp => {
+                    if (!exp) return;
+                    const item = document.createElement('div');
+                    item.className = 'history-item';
+                    
+                    const infoDiv = document.createElement('div');
+                    infoDiv.className = 'history-info';
+
+                    const innerTopDiv = document.createElement('div');
+                    innerTopDiv.style.display = 'flex';
+                    innerTopDiv.style.alignItems = 'center';
+
+                    const amtSpan = document.createElement('span');
+                    amtSpan.className = 'history-amount';
+                    amtSpan.textContent = formatCurrency(exp.amount);
+                    innerTopDiv.appendChild(amtSpan);
+
+                    if (exp.paymentMethod) {
+                        const badge = document.createElement('span');
+                        badge.className = 'payment-badge';
+                        badge.textContent = exp.paymentMethod;
+                        innerTopDiv.appendChild(badge);
+                    }
+
+                    infoDiv.appendChild(innerTopDiv);
+
+                    if (exp.desc) {
+                        const descSpan = document.createElement('span');
+                        descSpan.className = 'history-desc';
+                        descSpan.textContent = exp.desc;
+                        infoDiv.appendChild(descSpan);
+                    }
+
+                    const dateSpan = document.createElement('span');
+                    dateSpan.className = 'history-date';
+                    dateSpan.textContent = formatDate(exp.date);
+                    infoDiv.appendChild(dateSpan);
+
+                    item.appendChild(infoDiv);
+
+                    if (isCurrentPeriod) {
+                        const actionsDiv = document.createElement('div');
+                        actionsDiv.className = 'history-actions';
+
+                        const editBtn = document.createElement('button');
+                        editBtn.className = 'btn-hist-action btn-hist-edit';
+                        editBtn.title = 'Editar Gasto';
+                        editBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>';
+                        editBtn.onclick = () => onEdit(exp);
+
+                        const sep = document.createElement('div');
+                        sep.style.cssText = 'width: 1px; height: 16px; background-color: var(--action-divider); margin: 0 2px;';
+
+                        const delBtn = document.createElement('button');
+                        delBtn.className = 'btn-hist-action btn-hist-delete';
+                        delBtn.title = 'Excluir Gasto';
+                        delBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>';
+                        delBtn.onclick = () => onDelete(exp);
+
+                        actionsDiv.appendChild(editBtn);
+                        actionsDiv.appendChild(sep);
+                        actionsDiv.appendChild(delBtn);
+                        item.appendChild(actionsDiv);
+                    } else {
+                        const archSpan = document.createElement('span');
+                        archSpan.style.cssText = 'font-size: 0.75rem; color: var(--text-muted); background: var(--border-color); padding: 4px 8px; border-radius: 6px;';
+                        archSpan.textContent = 'Arquivado';
+                        item.appendChild(archSpan);
+                    }
+
+                    list.appendChild(item);
+                });
+            }
+        };
+
+        const renderStandaloneHistory = (periodKey = standaloneHistoryPeriod || getMonthKey()) => {
+            const currentKey = getMonthKey();
+            const periods = new Set([currentKey, ...standaloneExpenses.map(entry => getEntryPeriodKey(entry))]);
+            monthlySnapshots.filter(item => item.standaloneExpenses?.length).forEach(item => periods.add(item.periodKey));
+            const keys = [...periods].filter(key => isValidMonthKey(key) && key <= currentKey).sort().reverse();
+            standaloneHistoryPeriod = keys.includes(periodKey) ? periodKey : currentKey;
+            const select = document.getElementById('standalone-history-period');
+            select.innerHTML = keys.map(key => `<option value="${key}">${key === currentKey ? 'Mês Atual (Em andamento)' : formatMonthLabelKey(key)}</option>`).join('');
+            select.value = standaloneHistoryPeriod;
+            // Como nos envelopes, só exibe o seletor quando há períodos arquivados.
+            document.getElementById('standalone-history-period-container').style.display = keys.length > 1 ? 'block' : 'none';
+            document.getElementById('standalone-history-icon').innerHTML = standaloneExpenseIcon;
+            const entries = standaloneHistoryEntries(standaloneHistoryPeriod);
+            document.getElementById('standalone-history-total').textContent = formatCurrency(entries.reduce((sum, entry) => sum + entry.amount, 0));
+            const list = document.getElementById('standalone-history-list');
+            renderExpenseHistoryRows(list, entries, standaloneHistoryPeriod === currentKey,
+                openStandaloneExpenseModal, entry => deleteStandaloneExpense(entry.id));
+        };
+
+        const openStandaloneHistory = () => {
+            processInstallmentsAutoUpdate();
+            renderStandaloneHistory(getMonthKey());
+            openModal('modal-standalone-history');
+        };
+
+        // Avulsos fecham o mês observado antes de gravar, mas não consomem envelopes.
+        // Por isso não exigem reiniciar envelopes pendentes (inclusive quando não há nenhum).
+        const ensureStandaloneCycle = () => {
+            if (monthCycleState.lastObservedCycle === getMonthKey() && !monthlySnapshotSaveError
+                && !storageReadProblems.size && !storageRecoveryPending) return true;
+            if (processInstallmentsAutoUpdate(false)) return true;
+            alert('Não foi possível atualizar o registro mensal. Os dados anteriores foram mantidos; verifique o armazenamento e tente novamente.');
+            return false;
+        };
+
+        const openStandaloneExpenseModal = (expense = null) => {
+            if (!ensureStandaloneCycle()) return;
+            if (expense && (!standaloneExpenses.includes(expense) || getEntryPeriodKey(expense) !== getMonthKey())) return;
+            resetExpenseModal();
+            expenseEntryContext = 'standalone';
+            expenseBeingEdited = expense;
+            expenseDestinationId = null;
+            document.getElementById('expense-env-id').value = '';
+            document.getElementById('expense-envelope-name').hidden = true;
+            expenseEnvelopePicker.hidden = true;
+            expenseEnvelopePicker.open = false;
+            populateExpenseForm(expense);
+            document.getElementById('expense-modal-title').textContent = expense ? 'Editar Gasto Avulso' : 'Registrar Gasto Avulso';
+            openModal('modal-expense');
+            setTimeout(() => focusModalInput(document.getElementById('expense-amount')), 100);
+        };
+
+        // Coleção, ledger aberto e eventual lançamento retroativo são confirmados juntos.
+        // A inclusão retroativa altera só a parte avulsa de uma fotografia já existente;
+        // preserva os demais valores congelados e não inventa meses sem fotografia.
+        const persistStandaloneExpenses = (next, archivedExpense = null) => {
+            const previousOpen = openMonthlySnapshot;
+            const previousSnapshots = monthlySnapshots;
+            try {
+                withStorageTransaction(() => {
+                    writeStoredValue('myStandaloneExpenses', JSON.stringify(next));
+                    if (archivedExpense && getEntryPeriodKey(archivedExpense) !== getMonthKey()) {
+                        const key = getEntryPeriodKey(archivedExpense);
+                        const archived = monthlySnapshots.find(snapshot => snapshot.periodKey === key);
+                        if (archived) {
+                            const before = archived.standaloneExpenses || [];
+                            const after = before.filter(entry => String(entry.id) !== String(archivedExpense.id)).concat(archivedExpense);
+                            const delta = after.reduce((sum, entry) => sum + entry.amount, 0) - before.reduce((sum, entry) => sum + entry.amount, 0);
+                            const changed = { ...archived, standaloneExpenses: after, totals: { ...archived.totals,
+                                variable: archived.totals.variable + delta, grandTotal: archived.totals.grandTotal + delta } };
+                            if (!persistMonthlySnapshots(monthlySnapshots.map(snapshot => snapshot === archived ? changed : snapshot))) throw new Error('Não foi possível salvar o gasto retroativo.');
+                        }
+                    }
+                    if (!updateOpenMonthlySnapshot({ standaloneExpenses: next })) throw new Error('Não foi possível salvar o registro mensal.');
+                });
+                standaloneExpenses = next;
+                return true;
+            } catch (error) {
+                openMonthlySnapshot = previousOpen;
+                monthlySnapshots = previousSnapshots;
+                monthlySnapshotSaveError = true;
+                console.error('Gasto avulso não confirmado:', error);
+                alert(storageRecoveryPending
+                    ? 'A gravação falhou e a recuperação local ficou pendente. Faça um backup dos dados disponíveis e verifique o armazenamento.'
+                    : 'Não foi possível salvar o gasto avulso. Os dados anteriores foram mantidos. Verifique o armazenamento e tente novamente.');
+                return false;
+            }
+        };
+
+        const refreshStandaloneInterface = () => {
+            renderCurrentView();
+            updateStorageMonitor(true);
+        };
+
+        const saveStandaloneExpense = () => {
+            if (!ensureStandaloneCycle()) return;
+            const currentKey = getMonthKey();
+            if (expenseBeingEdited && (!standaloneExpenses.includes(expenseBeingEdited)
+                || monthCycleState.lastObservedCycle !== currentKey || getEntryPeriodKey(expenseBeingEdited) !== currentKey)) {
+                alert('Este gasto já não está disponível para edição no mês atual. Abra o histórico novamente.');
+                return;
+            }
+            const values = readExpenseForm(expenseBeingEdited, currentKey, true);
+            if (!values) return;
+            const { amount, paymentMethod, desc, expenseDate, expensePeriodKey } = values;
+            const updated = { ...expenseBeingEdited,
+                id: expenseBeingEdited ? expenseBeingEdited.id : createUniqueNumericId(getStandaloneBackupExpenses()),
+                amount, paymentMethod,
+                desc: expenseBeingEdited && desc === (expenseBeingEdited.desc || '') ? expenseBeingEdited.desc : desc.trim(),
+                date: expenseDate, periodKey: expensePeriodKey };
+            const next = expenseBeingEdited
+                ? standaloneExpenses.map(entry => entry === expenseBeingEdited ? updated : entry)
+                : [...standaloneExpenses, updated];
+            if (!persistStandaloneExpenses(next, expensePeriodKey !== currentKey ? updated : null)) return;
+            standaloneHistoryPeriod = expensePeriodKey;
+            closeModal('modal-expense');
+            refreshStandaloneInterface();
+        };
+
+        const deleteStandaloneExpense = (id) => {
+            showCustomConfirm('Excluir Lançamento', 'Deseja realmente excluir este gasto avulso?', () => {
+                if (!ensureStandaloneCycle()) return;
+                const entry = standaloneExpenses.find(item => String(item.id) === String(id));
+                if (!entry || getEntryPeriodKey(entry) !== getMonthKey()) {
+                    alert('Este gasto já não está disponível para exclusão no mês atual. Abra o histórico novamente.');
+                    return;
+                }
+                if (persistStandaloneExpenses(standaloneExpenses.filter(item => item !== entry))) refreshStandaloneInterface();
+            });
+        };
+
+        const saveExpense = () => {
+            if (!document.getElementById('modal-expense').classList.contains('active-modal')) return;
+            if (expenseEntryContext === 'standalone') { saveStandaloneExpense(); return; }
+            const envId = Number(document.getElementById('expense-env-id').value);
+            // Revalida no salvamento para cobrir modal aberto antes da virada do mês.
+            if (!expenseBeingEdited && !ensureCycleAllowsNewExpense()) return;
+            if (expenseBeingEdited && monthCycleState.lastObservedCycle !== getMonthKey()) checkMonthCycleBoundary();
+            const currentKey = getMonthKey();
+            const source = envelopes.find(env => env.id === envId);
+            const destination = envelopes.find(env => env.id === expenseDestinationId);
+            if (!source || !destination) {
+                alert('Um dos envelopes já não está disponível. Abra o formulário novamente.');
+                return;
+            }
+
+            // A referência do formulário distingue também gastos legados que vieram sem ID.
+            const expIndex = expenseBeingEdited ? source.expenses.indexOf(expenseBeingEdited) : -1;
+            const existingExp = expIndex === -1 ? null : source.expenses[expIndex];
+            if (expenseBeingEdited && (!existingExp || monthCycleState.lastObservedCycle !== currentKey || getEntryPeriodKey(existingExp, currentKey) !== currentKey)) {
+                alert('Este gasto já não está disponível para edição no mês atual. Abra o histórico novamente.');
+                return;
+            }
+
+            const values = readExpenseForm(existingExp, currentKey);
+            if (!values) return;
+            const { amount, paymentMethod, desc, expenseDate, expensePeriodKey } = values;
+
             const previousExpense = existingExp && JSON.stringify(existingExp);
             // Conserva a identidade original também para gastos que vieram de backups com IDs em texto.
             // Numera o legado no envelope inteiro para distinguir ocorrências idênticas ao reler o backup.
@@ -8266,7 +8715,6 @@
                 identifyEnvelopeExpenseIds(getEnvelopeExpenseLists(source, currentKey));
             }
 
-            const expensePeriodKey = dateUnchanged ? currentKey : getMonthKey(selectedDate);
             const updatedExpense = {
                 ...existingExp,
                 id: existingExp ? existingExp.id : Date.now(),
@@ -8330,8 +8778,6 @@
             const periodSelect = document.getElementById('history-period-select');
             const btnDeleteArchive = document.getElementById('btn-delete-archive');
             
-            list.innerHTML = '';
-
             if (Array.isArray(env.history) && env.history.length > 0) {
                 periodContainer.style.display = 'block';
                 // A ordem cronológica vale apenas no seletor. Preserva os IDs e os grupos do arquivo.
@@ -8360,83 +8806,8 @@
                 targetExpenses = (histItem && Array.isArray(histItem.expenses)) ? histItem.expenses : [];
             }
 
-            if(!targetExpenses || targetExpenses.length === 0) {
-                list.innerHTML = '<p style="text-align:center; color:var(--text-muted); margin-top:20px;">Nenhum gasto registrado neste período.</p>';
-            } else {
-                const sortedExpenses = [...targetExpenses].sort((a,b) => new Date(b.date) - new Date(a.date));
-                sortedExpenses.forEach(exp => {
-                    if (!exp) return;
-                    const item = document.createElement('div');
-                    item.className = 'history-item';
-                    
-                    const infoDiv = document.createElement('div');
-                    infoDiv.className = 'history-info';
-
-                    const innerTopDiv = document.createElement('div');
-                    innerTopDiv.style.display = 'flex';
-                    innerTopDiv.style.alignItems = 'center';
-
-                    const amtSpan = document.createElement('span');
-                    amtSpan.className = 'history-amount';
-                    amtSpan.textContent = formatCurrency(exp.amount);
-                    innerTopDiv.appendChild(amtSpan);
-
-                    if (exp.paymentMethod) {
-                        const badge = document.createElement('span');
-                        badge.className = 'payment-badge';
-                        badge.textContent = exp.paymentMethod;
-                        innerTopDiv.appendChild(badge);
-                    }
-
-                    infoDiv.appendChild(innerTopDiv);
-
-                    if (exp.desc) {
-                        const descSpan = document.createElement('span');
-                        descSpan.className = 'history-desc';
-                        descSpan.textContent = exp.desc;
-                        infoDiv.appendChild(descSpan);
-                    }
-
-                    const dateSpan = document.createElement('span');
-                    dateSpan.className = 'history-date';
-                    dateSpan.textContent = formatDate(exp.date);
-                    infoDiv.appendChild(dateSpan);
-
-                    item.appendChild(infoDiv);
-
-                    if (isCurrentPeriod) {
-                        const actionsDiv = document.createElement('div');
-                        actionsDiv.className = 'history-actions';
-
-                        const editBtn = document.createElement('button');
-                        editBtn.className = 'btn-hist-action btn-hist-edit';
-                        editBtn.title = 'Editar Gasto';
-                        editBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>';
-                        editBtn.onclick = () => openExpenseModal(env.id, exp);
-
-                        const sep = document.createElement('div');
-                        sep.style.cssText = 'width: 1px; height: 16px; background-color: var(--action-divider); margin: 0 2px;';
-
-                        const delBtn = document.createElement('button');
-                        delBtn.className = 'btn-hist-action btn-hist-delete';
-                        delBtn.title = 'Excluir Gasto';
-                        delBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>';
-                        delBtn.onclick = () => deleteExpense(env.id, exp);
-
-                        actionsDiv.appendChild(editBtn);
-                        actionsDiv.appendChild(sep);
-                        actionsDiv.appendChild(delBtn);
-                        item.appendChild(actionsDiv);
-                    } else {
-                        const archSpan = document.createElement('span');
-                        archSpan.style.cssText = 'font-size: 0.75rem; color: var(--text-muted); background: var(--border-color); padding: 4px 8px; border-radius: 6px;';
-                        archSpan.textContent = 'Arquivado';
-                        item.appendChild(archSpan);
-                    }
-
-                    list.appendChild(item);
-                });
-            }
+            renderExpenseHistoryRows(list, targetExpenses, isCurrentPeriod,
+                exp => openExpenseModal(env.id, exp), exp => deleteExpense(env.id, exp));
             openModal('modal-history');
         };
 
@@ -8706,6 +9077,17 @@
             });
         };
 
+        // Inclui o histórico avulso mesmo quando só as fotografias foram importadas.
+        // Não altera a coleção ativa; IDs locais prevalecem sobre as cópias mensais.
+        const getStandaloneBackupExpenses = () => {
+            const byId = new Map();
+            [...monthlySnapshots, openMonthlySnapshot].filter(Boolean).forEach(snapshot => {
+                (snapshot.standaloneExpenses || []).forEach(entry => byId.set(String(entry.id), entry));
+            });
+            standaloneExpenses.forEach(entry => byId.set(String(entry.id), entry));
+            return [...byId.values()];
+        };
+
         const updateExportFormatView = () => {
             const format = document.getElementById('export-format').value;
             const fixedContainer = document.getElementById('export-fixed-container');
@@ -8716,15 +9098,16 @@
             if (otherContainer) otherContainer.style.display = (format === 'txt') ? 'none' : 'flex';
             const historyContainer = document.getElementById('export-history-container');
             if (historyContainer) historyContainer.style.display = (format === 'txt') ? 'none' : 'flex';
-            document.getElementById('export-txt-history-option').style.display = format === 'txt' && envelopes.length ? 'flex' : 'none';
+            document.getElementById('export-txt-history-option').style.display = format === 'txt' && (envelopes.length || getStandaloneBackupExpenses().length) ? 'flex' : 'none';
         };
 
         const openExportModal = () => {
-            if (!envelopes.length && !fixedExpenses.length && !creditInstallments.length && !otherCommitments.length && !monthlySnapshots.length && !openMonthlySnapshot) {
+            if (!envelopes.length && !fixedExpenses.length && !creditInstallments.length && !otherCommitments.length && !standaloneExpenses.length && !monthlySnapshots.length && !openMonthlySnapshot) {
                 alert('Não há dados para exportar.');
                 return;
             }
             
+            const exportStandaloneEntries = getStandaloneBackupExpenses();
             let htmlList = '';
             if (fixedExpenses.length > 0) {
                 htmlList += `
@@ -8782,6 +9165,15 @@
                 `;
             }
 
+            if (exportStandaloneEntries.length > 0) {
+                htmlList += `<label class="checkbox-item" id="export-standalone-container" style="border-bottom:2px solid var(--border-color); background:var(--primary-light-bg);">
+                    <input type="checkbox" id="export-standalone-cb" checked>
+                    <div style="display:flex; align-items:center; gap:10px; min-width:0; flex:1;">
+                        <div class="envelope-icon-wrap" style="color:var(--primary);">${standaloneExpenseIcon}</div>
+                        <span class="checkbox-item-title" style="font-weight:700;">Gastos avulsos (${exportStandaloneEntries.length})</span>
+                    </div></label>`;
+            }
+
             envelopes.forEach(env => {
                 htmlList += `
                     <label class="checkbox-item">
@@ -8794,8 +9186,9 @@
                 `;
             });
             document.getElementById('export-list').innerHTML = htmlList;
+            document.getElementById('export-list').scrollTop = 0;
             document.getElementById('export-txt-history-cb').checked = true;
-            // Sem envelopes, o relatório TXT não consegue representar os dados de outras categorias; prioriza-se o backup JSON.
+            // Sem envelopes, continua priorizando o JSON; o TXT também pode incluir os avulsos selecionados.
             if (envelopes.length === 0) document.getElementById('export-format').value = 'json';
             updateExportFormatView();
             openModal('modal-export');
@@ -8820,6 +9213,9 @@
             const nowLocal = new Date();
             const todayStr = `${nowLocal.getFullYear()}-${String(nowLocal.getMonth() + 1).padStart(2, '0')}-${String(nowLocal.getDate()).padStart(2, '0')}`;
 
+            const exportStandalone = document.getElementById('export-standalone-cb')?.checked === true;
+            const standaloneBackupEntries = getStandaloneBackupExpenses();
+
             let fileContent = '';
             let fileName = '';
             let mimeType = '';
@@ -8837,7 +9233,7 @@
                 const exportOther = otherCb ? otherCb.checked : false;
                 const exportHistory = historyCb ? historyCb.checked : false;
 
-                if (selectedIds.length === 0 && !exportFixed && !exportCredit && !exportOther && !exportHistory) {
+                if (selectedIds.length === 0 && !exportFixed && !exportCredit && !exportOther && !exportHistory && !exportStandalone) {
                     alert('Selecione pelo menos um item para exportar.');
                     return;
                 }
@@ -8847,6 +9243,7 @@
                     (!fixedExpenses.length || exportFixed) &&
                     (!creditInstallments.length || exportCredit) &&
                     (!otherCommitments.length || exportOther) &&
+                    (!standaloneBackupEntries.length || exportStandalone) &&
                     (!(monthlySnapshots.length || openMonthlySnapshot) || exportHistory);
 
                 if (exportFixed && isFixedAutoSort) {
@@ -8855,12 +9252,13 @@
                 }
 
                 const dataToExport = {
-                    version: 9,
+                    version: 10,
                     envelopes: envelopes.filter(env => selectedIds.includes(env.id)),
                     fixedExpenses: exportFixed ? fixedExpenses : [],
                     fixedAutoSort: exportFixed ? isFixedAutoSort : null,
                     creditInstallments: exportCredit ? creditInstallments : [],
                     otherCommitments: exportOther ? otherCommitments : [],
+                    standaloneExpenses: exportStandalone ? standaloneBackupEntries : [],
                     otherAutoSort: exportOther ? isOtherAutoSort : null,
                     monthlySnapshots: exportHistory ? monthlySnapshots : [],
                     openMonthlySnapshot: exportHistory ? openMonthlySnapshot : null,
@@ -8876,8 +9274,8 @@
                 const checkboxes = document.querySelectorAll('.export-checkbox:checked');
                 const selectedIds = Array.from(checkboxes).map(cb => parseInt(cb.value));
 
-                if (selectedIds.length === 0) {
-                    alert('Selecione pelo menos um envelope para exportar o relatório.');
+                if (selectedIds.length === 0 && !exportStandalone) {
+                    alert('Selecione pelo menos um envelope ou Gastos avulsos para exportar o relatório.');
                     return;
                 }
 
@@ -8887,7 +9285,7 @@
                 mimeType = 'text/plain';
 
                 const dataAtual = new Date();
-                fileContent += `=== RELATÓRIO DOS ENVELOPES ===\n`;
+                fileContent += exportStandalone ? `=== RELATÓRIO DE GASTOS ===\n` : `=== RELATÓRIO DOS ENVELOPES ===\n`;
                 fileContent += `Gerado em: ${dataAtual.getDate().toString().padStart(2, '0')}/${(dataAtual.getMonth() + 1).toString().padStart(2, '0')}/${dataAtual.getFullYear()} às ${dataAtual.getHours().toString().padStart(2, '0')}:${dataAtual.getMinutes().toString().padStart(2, '0')}\n\n`;
 
                 dataToExport.forEach(env => {
@@ -8966,6 +9364,17 @@
                         });
                     }
                 });
+                if (exportStandalone) {
+                    const entries = includeHistory ? standaloneBackupEntries : standaloneBackupEntries.filter(entry => getEntryPeriodKey(entry) === getMonthKey());
+                    fileContent += `--------------------------------------------------\n[GASTOS AVULSOS]\n`;
+                    [...entries].sort((a, b) => parseEntryDate(b.date) - parseEntryDate(a.date)).forEach(entry => {
+                        fileContent += `  - ${formatDate(entry.date)} | ${formatCurrency(entry.amount)}`;
+                        if (entry.paymentMethod) fileContent += ` (${entry.paymentMethod})`;
+                        if (entry.desc) fileContent += ` | ${entry.desc}`;
+                        fileContent += `\n`;
+                    });
+                    fileContent += `Total avulso: ${formatCurrency(entries.reduce((sum, entry) => sum + entry.amount, 0))}\n`;
+                }
                 fileContent += `--------------------------------------------------\n`;
             }
 
@@ -9051,6 +9460,7 @@
                     let rawFixed = [];
                     let rawCredit = [];
                     let rawOther = [];
+                    let rawStandalone = [];
                     let rawSnapshots = [];
                     let rawOpenSnapshot = null;
                     let rawFixedAutoSort = null;
@@ -9065,6 +9475,7 @@
                         rawFixed = Array.isArray(imported.fixedExpenses) ? imported.fixedExpenses : [];
                         rawCredit = Array.isArray(imported.creditInstallments) ? imported.creditInstallments : [];
                         rawOther = Array.isArray(imported.otherCommitments) ? imported.otherCommitments : [];
+                        rawStandalone = Array.isArray(imported.standaloneExpenses) ? imported.standaloneExpenses : [];
                         rawSnapshots = Array.isArray(imported.monthlySnapshots) ? imported.monthlySnapshots : [];
                         rawOpenSnapshot = normalizeImportedSnapshot(imported.openMonthlySnapshot);
                         rawFixedAutoSort = typeof imported.fixedAutoSort === 'boolean' ? imported.fixedAutoSort : null;
@@ -9142,10 +9553,12 @@
                         });
                     ensureUniqueNumericIds(validOther, null, true);
 
+                    const validStandalone = normalizeStandaloneExpenses(rawStandalone);
+
                     const validSnapshots = uniqueMonthlySnapshotsByPeriod(rawSnapshots.map(normalizeImportedSnapshot).filter(Boolean));
                     const validOpenSnapshot = rawOpenSnapshot && rawOpenSnapshot.periodKey ? rawOpenSnapshot : null;
 
-                    if (validEnvelopes.length === 0 && validFixed.length === 0 && validCredit.length === 0 && validOther.length === 0 && validSnapshots.length === 0 && !validOpenSnapshot) {
+                    if (validEnvelopes.length === 0 && validFixed.length === 0 && validCredit.length === 0 && validOther.length === 0 && validStandalone.length === 0 && validSnapshots.length === 0 && !validOpenSnapshot) {
                         alert('O arquivo não contém dados válidos para importação.');
                         return;
                     }
@@ -9155,6 +9568,7 @@
                         fixedExpenses: validFixed,
                         creditInstallments: validCredit,
                         otherCommitments: validOther,
+                        standaloneExpenses: validStandalone,
                         monthlySnapshots: validSnapshots,
                         openMonthlySnapshot: validOpenSnapshot,
                         fixedAutoSort: rawFixedAutoSort,
@@ -9165,6 +9579,23 @@
                     
                     const importListEl = document.getElementById('import-list');
                     importListEl.innerHTML = '';
+
+                    if (validStandalone.length > 0) {
+                        const label = document.createElement('label');
+                        label.className = 'checkbox-item';
+                        const checkbox = document.createElement('input');
+                        checkbox.type = 'checkbox';
+                        checkbox.id = 'import-standalone-cb';
+                        checkbox.checked = true;
+                        const caption = document.createElement('span');
+                        caption.className = 'checkbox-item-title';
+                        caption.textContent = `Gastos avulsos (${validStandalone.length})`;
+                        const icon = document.createElement('span');
+                        icon.className = 'envelope-icon-wrap';
+                        icon.innerHTML = standaloneExpenseIcon;
+                        label.append(checkbox, icon, caption);
+                        importListEl.appendChild(label);
+                    }
 
                     if (validFixed.length > 0) {
                         const fixedLabel = document.createElement('label');
@@ -9264,7 +9695,7 @@
                     updateImportRestoreView();
                     openModal('modal-import');
                 } catch (err) {
-                    pendingImportData = { envelopes: [], fixedExpenses: [], creditInstallments: [], otherCommitments: [], monthlySnapshots: [], openMonthlySnapshot: null, fixedAutoSort: null, otherAutoSort: null, completeBackup: false, cycleState: null };
+                    pendingImportData = { envelopes: [], fixedExpenses: [], creditInstallments: [], otherCommitments: [], standaloneExpenses: [], monthlySnapshots: [], openMonthlySnapshot: null, fixedAutoSort: null, otherAutoSort: null, completeBackup: false, cycleState: null };
                     closeModal('modal-import');
                     alert(`Importação não iniciada. ${err.message || 'Verifique se o arquivo é um JSON válido gerado pelo aplicativo.'}`);
                 }
@@ -9420,10 +9851,11 @@
             const importCredit = creditCb ? creditCb.checked : false;
             const importOther = otherCb ? otherCb.checked : false;
             const importHistory = historyCb ? historyCb.checked : false;
+            const importStandalone = document.getElementById('import-standalone-cb')?.checked === true;
             const restoreComplete = document.getElementById('import-restore-cb').checked && pendingImportData.completeBackup;
             if (restoreComplete && !confirm('Restaurar este backup substituirá todos os dados atuais, incluindo o histórico mensal. Deseja continuar?')) return;
 
-            if (selectedIndices.length === 0 && !importFixed && !importCredit && !importOther && !importHistory) {
+            if (selectedIndices.length === 0 && !importFixed && !importCredit && !importOther && !importHistory && !importStandalone) {
                 alert('Selecione pelo menos um item para importar.');
                 return;
             }
@@ -9436,6 +9868,7 @@
             // O estado em memória é restaurado se a transação inteira não puder ser confirmada.
             const importStateBefore = {
                 envelopes: JSON.parse(JSON.stringify(envelopes)),
+                standaloneExpenses: JSON.parse(JSON.stringify(standaloneExpenses)),
                 fixedExpenses: JSON.parse(JSON.stringify(fixedExpenses)),
                 creditInstallments: JSON.parse(JSON.stringify(creditInstallments)),
                 otherCommitments: JSON.parse(JSON.stringify(otherCommitments)),
@@ -9456,6 +9889,7 @@
             if (restoreComplete) {
                 // Prepara a substituição integral; só confirma depois de validar o fechamento e o ledger.
                 envelopes = JSON.parse(JSON.stringify(pendingImportData.envelopes));
+                standaloneExpenses = JSON.parse(JSON.stringify(pendingImportData.standaloneExpenses));
                 fixedExpenses = JSON.parse(JSON.stringify(pendingImportData.fixedExpenses));
                 creditInstallments = JSON.parse(JSON.stringify(pendingImportData.creditInstallments));
                 otherCommitments = JSON.parse(JSON.stringify(pendingImportData.otherCommitments));
@@ -9475,6 +9909,7 @@
                 monthlySnapshotSaveError = false;
                 [
                     ['myEnvelopes', envelopes],
+                    ['myStandaloneExpenses', standaloneExpenses],
                     ['myFixedExpenses', fixedExpenses],
                     ['myCreditInstallments', creditInstallments],
                     ['myOtherCommitments', otherCommitments],
@@ -9497,7 +9932,7 @@
                 allowUnreadableReplacement = false;
                 closeModal('modal-import');
                 alert('Backup integral restaurado com sucesso.');
-                pendingImportData = { envelopes: [], fixedExpenses: [], creditInstallments: [], otherCommitments: [], monthlySnapshots: [], openMonthlySnapshot: null, fixedAutoSort: null, otherAutoSort: null, completeBackup: false, cycleState: null };
+                pendingImportData = { envelopes: [], fixedExpenses: [], creditInstallments: [], otherCommitments: [], standaloneExpenses: [], monthlySnapshots: [], openMonthlySnapshot: null, fixedAutoSort: null, otherAutoSort: null, completeBackup: false, cycleState: null };
                 updateStorageMonitor(true);
                 return;
             }
@@ -9560,6 +9995,15 @@
                 writeStoredValue('myOtherCommitments', JSON.stringify(otherCommitments));
             }
 
+            let addedStandaloneCount = 0;
+            if (importStandalone) {
+                const existingIds = new Set(standaloneExpenses.map(entry => String(entry.id)));
+                const missing = pendingImportData.standaloneExpenses.filter(entry => !existingIds.has(String(entry.id)));
+                standaloneExpenses = [...standaloneExpenses, ...missing.map(entry => ({ ...entry }))];
+                addedStandaloneCount = missing.length;
+                writeStoredValue('myStandaloneExpenses', JSON.stringify(standaloneExpenses));
+            }
+
             // Novos registros importados também recebem referência de mês antes da próxima renderização.
             // Ajusta a competência dos novos parcelamentos já vencidos sem tocar fotografias fechadas.
             processInstallmentsAutoUpdate();
@@ -9571,15 +10015,16 @@
             commitStoredChanges(importTransaction);
             clearEnvelopeUndo();
             closeModal('modal-import');
-            alert(`Importação concluída! Recuperados: ${addedEnvelopesCount} envelope(s), ${recoveredExpensesCount} gasto(s), ${addedFixedCount} despesa(s) fixa(s), ${addedCreditCount} parcelamento(s), ${addedOtherCount} outro(s) compromisso(s) e ${addedSnapshotsCount} mês(es) encerrado(s).`);
+            alert(`Importação concluída! Recuperados: ${addedEnvelopesCount} envelope(s), ${recoveredExpensesCount} gasto(s), ${addedFixedCount} despesa(s) fixa(s), ${addedCreditCount} parcelamento(s), ${addedOtherCount} outro(s) compromisso(s), ${addedStandaloneCount} gasto(s) avulso(s) e ${addedSnapshotsCount} mês(es) encerrado(s).`);
             // Consulta o volume somente após a importação concluída; não interfere no rollback.
             setTimeout(() => updateStorageMonitor(true), 0);
-            pendingImportData = { envelopes: [], fixedExpenses: [], creditInstallments: [], otherCommitments: [], monthlySnapshots: [], openMonthlySnapshot: null, fixedAutoSort: null, otherAutoSort: null, completeBackup: false, cycleState: null };
+            pendingImportData = { envelopes: [], fixedExpenses: [], creditInstallments: [], otherCommitments: [], standaloneExpenses: [], monthlySnapshots: [], openMonthlySnapshot: null, fixedAutoSort: null, otherAutoSort: null, completeBackup: false, cycleState: null };
             } catch (error) {
                 activeStorageTransaction = null;
                 allowUnreadableReplacement = false;
                 console.error('Importação cancelada; restaurando os dados anteriores:', error);
                 envelopes = importStateBefore.envelopes;
+                standaloneExpenses = importStateBefore.standaloneExpenses;
                 fixedExpenses = importStateBefore.fixedExpenses;
                 creditInstallments = importStateBefore.creditInstallments;
                 otherCommitments = importStateBefore.otherCommitments;
@@ -9680,6 +10125,10 @@
                 targetContainer = document.getElementById('view-fixed-expenses');
             } else if (currentView === 'parcelamentos') {
                 targetContainer = document.getElementById('view-credit-installments');
+            } else if (currentView === 'outros-compromissos') {
+                targetContainer = document.getElementById('view-other-commitments');
+            } else if (currentView === 'graficos') {
+                targetContainer = document.getElementById('view-graficos');
             } else if (currentView === 'relatorio') {
                 targetContainer = document.getElementById('view-financial-report');
             } else if (currentView === 'historico-mensal') {
