@@ -1,5 +1,5 @@
-// v47: Inclusao de despesas variavéis sem orçamento.
-const CACHE_NAME = 'envelopes-cache-v47';
+// v48: Refinamentos e implementos menores
+const CACHE_NAME = 'envelopes-cache-v48';
 
 const ASSETS_TO_CACHE = [
   './',
