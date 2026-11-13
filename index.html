@@ -1788,6 +1788,8 @@
         /* No par gasto/orçamento, cada valor fica inteiro e o nome conserva espaço em telas estreitas. */
         .monthly-snapshot-row-value.monthly-snapshot-pair { max-width: calc(100% - 3rem); text-align: right; white-space: normal; }
         .monthly-snapshot-pair > span { display: inline-block; white-space: nowrap; }
+        /* Destaca só o gasto total do resumo; orçamento e lançamentos mantêm 0.85rem. */
+        .monthly-snapshot-pair > span:first-child { font-size: 0.90rem; }
         .monthly-history-empty { padding: 22px 12px; color: var(--text-muted); text-align: center; font-size: 0.85rem; line-height: 1.5; }
         @media (max-width: 360px) {
             .cycle-notice { gap: 5px; padding-left: 10px; padding-right: 10px; font-size: 0.73rem; }
@@ -2045,7 +2047,7 @@
             grid-column: 1 / -1;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 16px; /* Recuo de 6px na seta; mantém o botão de adicionar com 44px. */
             width: 100%;
             padding: 8px 0;
             margin-top: 2px;
@@ -2092,7 +2094,6 @@
         .standalone-modal-heading h2 { flex: 1; min-width: 0; margin: 0; }
         .standalone-modal-heading .envelope-icon-wrap { color: var(--primary); flex-shrink: 0; }
         .standalone-modal-heading .card-btn { min-width: 44px; min-height: 44px; display: flex; align-items: center; justify-content: center; }
-        .standalone-history-total { display: block; margin-bottom: 12px; color: var(--text-main); font-weight: 700; font-size: 1rem; white-space: nowrap; }
 
     </style>
 </head>
@@ -2533,7 +2534,7 @@
                 </div>
             </div>
             <!-- Cobrança única usa 1/1. Ao solicitar parcelamento, os campos padrão abrem vazios. -->
-            <button type="button" class="toggle-desc" id="other-installment-toggle" aria-expanded="false" aria-controls="other-installment-fields" onclick="setOtherInstallmentFieldsVisible(this.getAttribute('aria-expanded') !== 'true', true)">+ Informar parcelamento</button>
+            <button type="button" class="toggle-desc" id="other-installment-toggle" aria-expanded="false" aria-controls="other-installment-fields" onclick="setOtherInstallmentFieldsVisible(true, true)">+ Informar parcelamento</button>
             <div id="other-installment-fields" style="display: none; gap: 8px;" hidden>
                 <div class="form-group" style="flex: 1; min-width: 0;">
                     <label for="other-item-current">Parcela Atual</label>
@@ -2740,7 +2741,7 @@
                     <p>Use o aplicativo em uma aba por vez para evitar conflitos nas alterações.</p>
 
                     <div style="border-top: 1px solid var(--border-color); padding-top: 10px; margin-top: 4px; font-size: 0.85rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 4px;">
-                        <span><strong>Versão:</strong> 6.0.2</span>
+                        <span><strong>Versão:</strong> 7.1.4</span>
                         <span><strong>Desenvolvedor:</strong> Ricardo Soares</span>
                         <span>© 2026 | Todos os direitos reservados.</span>
                     </div>
@@ -2862,7 +2863,8 @@
         </div>
 
 
-        <!-- Gastos avulsos reutilizam o formulário de gasto; esta janela só consulta o histórico.
+        <!-- Gastos avulsos reutilizam o formulário de gasto; esta janela consulta o histórico
+             e oferece limpeza em lote somente do mês atual, sempre com confirmação.
              Não há atalho redundante para o consolidado, que mantém seu acesso no menu. -->
         <div id="modal-standalone-history" class="modal-overlay">
             <div class="modal-content">
@@ -2877,10 +2879,10 @@
                     <label for="standalone-history-period" style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Período:</label>
                     <select id="standalone-history-period" onchange="renderStandaloneHistory(this.value)" style="width: 100%; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--input-border); font-size: 16px; background: var(--card-bg); color: var(--text-main);"></select>
                 </div>
-                <strong id="standalone-history-total" class="standalone-history-total"></strong>
                 <div id="standalone-history-list"></div>
                 <div class="modal-buttons" style="margin-top: 10px;">
                     <button type="button" class="btn btn-cancel" onclick="closeModal('modal-standalone-history')">Fechar</button>
+                    <button type="button" id="standalone-history-clear" class="btn btn-cancel" style="color: var(--danger); display: none;" onclick="clearStandaloneMonth()" title="Limpar gastos avulsos do mês atual" hidden>Limpar mês</button>
                 </div>
             </div>
         </div>
@@ -6673,13 +6675,9 @@
                 [current, total].forEach(field => { field.value = ''; field.dataset.lastValidNumeric = ''; });
             }
             const fields = document.getElementById('other-installment-fields');
-            // O mesmo acionador permite voltar à cobrança única, sem apagar o restante do rascunho.
-            if (!visible && focusField) {
-                [current, total].forEach(field => { field.value = '1'; field.dataset.lastValidNumeric = '1'; });
-            }
-            trigger.hidden = false;
-            trigger.style.display = 'inline-block';
-            trigger.textContent = visible ? 'Não parcelar' : '+ Informar parcelamento';
+            // Abertura única, como os demais campos opcionais; ambos vazios salvam como 1/1.
+            trigger.hidden = visible;
+            trigger.style.display = visible ? 'none' : 'inline-block';
             trigger.setAttribute('aria-expanded', String(visible));
             fields.hidden = !visible;
             fields.style.display = visible ? 'flex' : 'none';
@@ -6956,8 +6954,19 @@
             const name = document.getElementById('other-item-name').value.trim();
             const amount = parseBrNumber(document.getElementById('other-item-amount').value.trim());
             const dueDateDay = readValidWholeNumber('other-item-dueday', 31);
-            const currentInstallment = readValidWholeNumber('other-item-current', 1001);
-            const totalInstallments = readValidWholeNumber('other-item-total', 1000);
+            const currentField = document.getElementById('other-item-current');
+            const totalField = document.getElementById('other-item-total');
+            const currentText = currentField.value.trim();
+            const totalText = totalField.value.trim();
+            // Não transforma um parcelamento incompleto em cobrança única silenciosamente.
+            if (!!currentText !== !!totalText) {
+                alert('Informe a parcela atual e o total de parcelas, ou deixe os dois campos vazios para uma cobrança única.');
+                (currentText ? totalField : currentField).focus();
+                return;
+            }
+            const singlePayment = !currentText && !totalText;
+            const currentInstallment = singlePayment ? 1 : readValidWholeNumber('other-item-current', 1001);
+            const totalInstallments = singlePayment ? 1 : readValidWholeNumber('other-item-total', 1000);
             const firstDueMonth = parseFirstDueMonthInput(document.getElementById('other-item-first-month').value);
 
             if (!name || !Number.isFinite(amount) || amount <= 0 || dueDateDay === null || currentInstallment === null || totalInstallments === null || currentInstallment > totalInstallments + 1 || firstDueMonth === undefined) {
@@ -8436,7 +8445,8 @@
            Formulário: o mesmo dos envelopes; somente origem, destino e persistência diferem.
            Painel e projeção continuam exclusivos dos envelopes. Consolidado/gráfico geral
            incluem avulsos nas variáveis. Edições de períodos encerrados são somente leitura,
-           como no histórico individual dos envelopes. Não há reinício: a data separa os meses. */
+           como no histórico individual dos envelopes. A data separa os meses automaticamente;
+           clearStandaloneMonth exclui em lote somente os gastos atuais confirmados pelo usuário. */
         let standaloneHistoryPeriod = null;
 
         const createStandaloneAccess = () => {
@@ -8563,7 +8573,14 @@
             document.getElementById('standalone-history-period-container').style.display = keys.length > 1 ? 'block' : 'none';
             document.getElementById('standalone-history-icon').innerHTML = standaloneExpenseIcon;
             const entries = standaloneHistoryEntries(standaloneHistoryPeriod);
-            document.getElementById('standalone-history-total').textContent = formatCurrency(entries.reduce((sum, entry) => sum + entry.amount, 0));
+            const clearButton = document.getElementById('standalone-history-clear');
+            const canClear = standaloneHistoryPeriod === currentKey && entries.length > 0;
+            // Se o botão vai desaparecer, devolve o foco ao título da camada ativa.
+            if (!canClear && document.activeElement === clearButton && getTopModal()?.id === 'modal-standalone-history') {
+                focusModalTitle(getTopModal());
+            }
+            clearButton.hidden = !canClear;
+            clearButton.style.display = canClear ? '' : 'none';
             const list = document.getElementById('standalone-history-list');
             renderExpenseHistoryRows(list, entries, standaloneHistoryPeriod === currentKey,
                 openStandaloneExpenseModal, entry => deleteStandaloneExpense(entry.id));
@@ -8667,6 +8684,32 @@
             standaloneHistoryPeriod = expensePeriodKey;
             closeModal('modal-expense');
             refreshStandaloneInterface();
+        };
+
+        // Limpeza é exclusão em lote do mês atual, não reinício de orçamento ou arquivo.
+        // Captura os IDs exibidos na confirmação; novos lançamentos não entram nessa seleção.
+        // Reutiliza a transação dos avulsos, preservando meses anteriores e as outras categorias.
+        const clearStandaloneMonth = () => {
+            if (!ensureStandaloneCycle()) return;
+            const periodKey = getMonthKey();
+            if (standaloneHistoryPeriod !== periodKey) {
+                renderStandaloneHistory();
+                return;
+            }
+            const selectedIds = new Set(getStandaloneExpensesForPeriod(periodKey).map(entry => String(entry.id)));
+            if (!selectedIds.size) return;
+            showCustomConfirm('Limpar gastos do mês',
+                `Excluir ${selectedIds.size} ${selectedIds.size === 1 ? 'gasto avulso' : 'gastos avulsos'} de ${formatMonthLabelKey(periodKey)}? Esta ação não pode ser desfeita. Os meses anteriores serão preservados.`, () => {
+                    if (!ensureStandaloneCycle()) return;
+                    // Uma confirmação aberta antes da virada não pode apagar o mês já encerrado.
+                    if (getMonthKey() !== periodKey) {
+                        refreshStandaloneInterface();
+                        alert('O mês mudou. Nenhum gasto foi apagado. Selecione o mês atual para limpar seus lançamentos.');
+                        return;
+                    }
+                    const next = standaloneExpenses.filter(entry => getEntryPeriodKey(entry) !== periodKey || !selectedIds.has(String(entry.id)));
+                    if (persistStandaloneExpenses(next)) refreshStandaloneInterface();
+                }, 'Limpar');
         };
 
         const deleteStandaloneExpense = (id) => {
