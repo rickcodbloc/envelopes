@@ -1,5 +1,5 @@
-// v48: Refinamentos e implementos menores
-const CACHE_NAME = 'envelopes-cache-v48';
+// v49: Refinamentos e implementos menores
+const CACHE_NAME = 'envelopes-cache-v49';
 
 const ASSETS_TO_CACHE = [
   './',

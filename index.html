@@ -2114,6 +2114,52 @@
         .standalone-modal-heading .envelope-icon-wrap { color: var(--primary); flex-shrink: 0; }
         .standalone-modal-heading .card-btn { min-width: 44px; min-height: 44px; display: flex; align-items: center; justify-content: center; }
 
+        /* Separação discreta somente no modo claro. */
+        body[data-color-mode="light"] {
+            --home-panel-border: rgba(0, 0, 0, 0.10);
+            --home-standalone-value: #414141;
+            --home-backup-border: rgba(0, 0, 0, 0.10);
+        }
+
+        @media (prefers-color-scheme: light) {
+            body:not([data-color-mode="dark"]) {
+                --home-panel-border: rgba(0, 0, 0, 0.10);
+                --home-standalone-value: #414141;
+                --home-backup-border: rgba(0, 0, 0, 0.10);
+            }
+        }
+
+        /* Separação inferior nítida, sem desfoque. */
+        #dashboard {
+            box-shadow: none;
+            border-bottom-color: var(--home-panel-border, var(--border-color));
+        }
+
+        .backup-actions {
+            border-color: var(--home-backup-border, var(--border-color));
+        }
+
+        /* Destaque exclusivo do valor dos gastos avulsos. */
+        .standalone-access-copy .standalone-access-value {
+        font-size: 0.90rem;
+        font-weight: 600;
+        color: var(--home-standalone-value, var(--text-main));
+        }
+
+        /* Orientação e espaçamento somente na tela sem envelopes. */
+        .home-empty-message {
+            grid-column: 1 / -1;
+            text-align: center;
+            color: var(--text-muted);
+            margin: 10px 0 8px;
+        }
+
+        .home-empty-backup-hint {
+            margin-top: 16px;
+            font-size: 0.82rem;
+            line-height: 1.45;
+        }
+
     </style>
 </head>
 <body data-theme="purple">
@@ -3774,8 +3820,8 @@
             }
         };
 
-        // Preferência de acessibilidade: zoom começa habilitado; uma escolha já salva é respeitada.
-        let savedZoomPref = readStoredValue('myAllowZoom') !== 'false';
+        // Preferência do projeto: zoom começa desabilitado; uma escolha já salva é respeitada.
+        let savedZoomPref = readStoredValue('myAllowZoom') === 'true';
         applyZoomSetting(savedZoomPref);
 
         const toggleZoomSetting = (checkbox) => {
@@ -3954,7 +4000,7 @@
             if (storageDetails) storageDetails.open = false;
             const toggleInput = document.getElementById('zoom-toggle-input');
             if (toggleInput) {
-                toggleInput.checked = readStoredValue('myAllowZoom') !== 'false';
+                toggleInput.checked = readStoredValue('myAllowZoom') === 'true';
             }
             // Indica o modo aplicado nesta janela, mesmo se outra alterar a preferência salva.
             const currentMode = document.body.getAttribute('data-color-mode') || 'auto';
@@ -7984,7 +8030,12 @@
                             </div>
                         </div>
                     </div>
-                    <p style="text-align:center; color:var(--text-muted); margin-top:10px; grid-column: 1 / -1;">Você ainda não tem envelopes.<br>Clique no + para criar.</p>
+                    <div class="home-empty-message">
+                    <p>Você ainda não tem envelopes.<br>Clique no + para criar.</p>
+                    <p class="home-empty-backup-hint">
+                        Já tem um backup? Use <strong>Importar</strong> abaixo.
+                    </p>
+                    </div>
                 `;
             } else {
                 dashboard.style.display = 'flex';
@@ -8585,7 +8636,10 @@
             access.innerHTML = `
                 <button type="button" class="standalone-access-main" onclick="openStandaloneHistory()" aria-label="Consultar gastos avulsos">
                     <span class="envelope-icon-wrap" aria-hidden="true">${standaloneExpenseIcon}</span>
-                    <span class="standalone-access-copy"><strong>Gastos avulsos</strong><small>${count ? `${formatCurrency(getStandaloneSpent())} neste mês` : 'Nenhum gasto neste mês'}</small></span>
+                    <span class="standalone-access-copy">
+                    <strong>Gastos avulsos</strong>
+                    <small>${count ? `<span class="standalone-access-value">${formatCurrency(getStandaloneSpent())}</span> neste mês` : 'Nenhum gasto neste mês'}</small>
+                </span>
                     <svg class="standalone-access-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg>
                 </button>
                 <button type="button" class="standalone-add" onclick="openStandaloneExpenseModal()" aria-label="Registrar gasto avulso" title="Registrar gasto avulso">
