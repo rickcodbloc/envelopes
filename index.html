@@ -2420,7 +2420,7 @@
                     </div>
                     <p id="monthly-projection-status" class="monthly-history-intro" role="status" hidden></p>
                     <div id="monthly-projection-body"></div>
-                    <button type="button" id="monthly-projection-more" class="projection-action projection-more" aria-controls="monthly-projection-body" aria-expanded="false" onclick="toggleProjectionHorizon()">Ver mais 3 meses</button>
+                    <button type="button" id="monthly-projection-more" class="projection-action projection-more" aria-controls="monthly-projection-body" aria-expanded="false" onclick="toggleProjectionHorizon()">Ver mais 6 meses</button>
                 </div>
             </div>
         </div>
@@ -7244,8 +7244,8 @@
 
         // Visão mensal — altere aqui o horizonte inicial e o máximo da projeção.
         // A janela começa no próximo mês. O cenário é recriado a cada entrada pelo Consolidado.
-        const PROJECTION_INITIAL_MONTHS = 3;
-        const PROJECTION_MAX_MONTHS = 6;
+        const PROJECTION_INITIAL_MONTHS = 6;
+        const PROJECTION_MAX_MONTHS = 12;
         let projectionMonthCount = PROJECTION_INITIAL_MONTHS;
         let projectionScenario;
         const createProjectionScenario = () => ({
@@ -9809,24 +9809,7 @@
                     const importListEl = document.getElementById('import-list');
                     importListEl.innerHTML = '';
 
-                    if (validStandalone.length > 0) {
-                        const label = document.createElement('label');
-                        label.className = 'checkbox-item';
-                        const checkbox = document.createElement('input');
-                        checkbox.type = 'checkbox';
-                        checkbox.id = 'import-standalone-cb';
-                        checkbox.checked = true;
-                        const caption = document.createElement('span');
-                        caption.className = 'checkbox-item-title';
-                        caption.textContent = `Gastos avulsos (${validStandalone.length})`;
-                        const icon = document.createElement('span');
-                        icon.className = 'envelope-icon-wrap';
-                        icon.innerHTML = standaloneExpenseIcon;
-                        label.append(checkbox, icon, caption);
-                        importListEl.appendChild(label);
-                    }
-
-                    if (validFixed.length > 0) {
+                        if (validFixed.length > 0) {
                         const fixedLabel = document.createElement('label');
                         fixedLabel.className = 'checkbox-item';
                         fixedLabel.style.cssText = 'border-bottom: 2px solid var(--border-color); background: var(--primary-light-bg);';
@@ -9892,6 +9875,23 @@
                         historyLabel.appendChild(cb);
                         historyLabel.appendChild(div);
                         importListEl.appendChild(historyLabel);
+                    }
+
+                      if (validStandalone.length > 0) {
+                        const label = document.createElement('label');
+                        label.className = 'checkbox-item';
+                        const checkbox = document.createElement('input');
+                        checkbox.type = 'checkbox';
+                        checkbox.id = 'import-standalone-cb';
+                        checkbox.checked = true;
+                        const caption = document.createElement('span');
+                        caption.className = 'checkbox-item-title';
+                        caption.textContent = `Gastos avulsos (${validStandalone.length})`;
+                        const icon = document.createElement('span');
+                        icon.className = 'envelope-icon-wrap';
+                        icon.innerHTML = standaloneExpenseIcon;
+                        label.append(checkbox, icon, caption);
+                        importListEl.appendChild(label);
                     }
 
                     pendingImportData.envelopes.forEach((env, index) => {
