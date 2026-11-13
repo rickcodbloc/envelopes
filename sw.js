@@ -1,5 +1,5 @@
-// v44: 4 novos refinos/implementos + Refino botão Exportar/Importar + Refino textos Consolidado e Projeção + Layout + animações novas de envelope e barra
-const CACHE_NAME = 'envelopes-cache-v44';
+// v45: Inclusao de despesas variavéis sem orçamento.
+const CACHE_NAME = 'envelopes-cache-v45';
 
 const ASSETS_TO_CACHE = [
   './',
