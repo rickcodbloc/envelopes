@@ -1,5 +1,5 @@
-// v50: Refinamentos e implementos menores
-const CACHE_NAME = 'envelopes-cache-v50';
+// v51: Refinamentos e implementos menores + refina na tela inicial antes de cadastrar envelopes + desfazer exclusão em gurpo 
+const CACHE_NAME = 'envelopes-cache-v51';
 
 const ASSETS_TO_CACHE = [
   './',

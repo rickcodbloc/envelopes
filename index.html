@@ -226,9 +226,11 @@
         text-size-adjust: 100%;
         }
 
-        ::-webkit-scrollbar {
-            display: none;
-        }
+                /*
+         * Rolagem nativa: a exibição e a espessura das barras seguem
+         * as preferências do navegador e do sistema operacional.
+         * As áreas roláveis continuam definidas pelas regras de overflow.
+         */
 
         html, body {
         height: 100%;
@@ -2074,6 +2076,15 @@
             border-bottom: 1px solid var(--border-color);
             box-shadow: 0 1px 0 var(--card-bg);
         }
+
+        /* Sem envelopes: centraliza os avulsos na largura útil do texto introdutório.
+           O bloco introdutório tem 360px, com 12px de espaço interno em cada lado. */
+        #envelope-list > .home-empty-message ~ .standalone-access {
+            width: calc(100% - 24px);
+            max-width: 336px;
+            justify-self: center;
+        }
+
         .standalone-access-main {
             display: flex;
             align-items: center;
@@ -2338,7 +2349,7 @@
                         </button>
                     </div>
                 </div>
-                <p class="modal-subtitle">Financiamentos, consórcios, empréstimos e outros compromissos de longo prazo.</p>
+                <p class="modal-subtitle">Pagamentos únicos ou parcelados, como financiamentos, empréstimos e consórcios.</p>
                 
                 <div class="section-total">
                     <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">Total Mês (<span id="other-active-count">0</span> ativos):</span>
@@ -6931,9 +6942,11 @@
                 // Mantém o aviso completo quando não existe nenhum compromisso cadastrado.
                 // Distingue ausência de cadastro de itens concluídos.
                 const title = (completedItems.length > 0 || scheduledItems.length > 0) ? 'Nenhum compromisso ativo no momento.' : 'Nenhum compromisso cadastrado!';
-                const description = scheduledItems.length > 0 ? 'Os compromissos futuros aparecem na seção Agendados abaixo.' : completedItems.length > 0
-                    ? 'Os compromissos concluídos continuam disponíveis no histórico abaixo.'
-                    : 'Local ideal para adicionar financiamentos, empréstimos, consignados, consórcios e afins.';
+                const description = scheduledItems.length > 0
+                ? 'Os compromissos futuros aparecem na seção Agendados abaixo.'
+                : completedItems.length > 0
+                ? 'Os compromissos concluídos continuam disponíveis no histórico abaixo.'
+                : 'Defina o valor e quando começa o pagamento.';
                 list.innerHTML = `
                     <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:40px 16px; color:var(--text-muted); min-height:140px; gap:10px;">
                         <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.4;"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
@@ -8031,7 +8044,7 @@
                         </div>
                     </div>
                     <div class="home-empty-message">
-                    <p>Você ainda não tem envelopes.<br>Clique no + para criar.</p>
+                    <p>Você ainda não tem envelopes.<br>Use o + no topo da tela para criar.</p>
                     <p class="home-empty-backup-hint">
                         Já tem um backup? Use <strong>Importar</strong> abaixo.
                     </p>
@@ -9212,7 +9225,8 @@
             }
         };
 
-                // Só a última exclusão confirmada pode ser desfeita nesta sessão.
+        // Exclusões confirmadas dentro do prazo formam um único grupo recuperável.
+        // Cada nova exclusão salva e reinicia os 20 segundos para todo o grupo.
         const ENVELOPE_UNDO_MS = 20000;
         const envelopeUndoBar = document.getElementById('envelope-undo');
         const envelopeUndoText = document.getElementById('envelope-undo-text');
@@ -9253,16 +9267,27 @@
             envelopes = envelopes.filter(envelope => !selected.has(envelope.id));
             if (!updateApp()) return false;
 
+            // Só incorpora a nova exclusão depois de confirmar sua gravação.
+            const previousUndo = getActiveEnvelopeUndo();
+            const batches = [...(previousUndo?.batches || []), deleted];
+            const count = batches.reduce((total, batch) => total + batch.length, 0);
+
             clearEnvelopeUndo();
-            pendingEnvelopeUndo = {
-                deleted,
+            const undo = {
+                batches,
                 periodKey,
                 expiresAt: Date.now() + ENVELOPE_UNDO_MS,
-                timer: setTimeout(clearEnvelopeUndo, ENVELOPE_UNDO_MS)
+                timer: null
             };
-            const message = deleted.length === 1
+            pendingEnvelopeUndo = undo;
+            undo.timer = setTimeout(() => {
+                // Um temporizador antigo nunca pode encerrar um grupo mais recente.
+                if (pendingEnvelopeUndo === undo) clearEnvelopeUndo();
+            }, ENVELOPE_UNDO_MS);
+
+            const message = count === 1
                 ? `${deleted[0].envelope.name} excluído`
-                : `${deleted.length} envelopes excluídos`;
+                : `${count} envelopes excluídos`;
             envelopeUndoText.textContent = message;
             envelopeUndoBar.hidden = false;
             envelopeUndoStatus.textContent = `${message}. Desfazer disponível por 20 segundos.`;
@@ -9272,15 +9297,20 @@
         const undoEnvelopeDeletion = () => {
             const undo = getActiveEnvelopeUndo();
             if (!undo) return;
-            if (undo.deleted.some(({ envelope }) => envelopes.some(item => item.id === envelope.id))) {
+            const deleted = undo.batches.flat();
+            if (deleted.some(({ envelope }) => envelopes.some(item => item.id === envelope.id))) {
                 clearEnvelopeUndo();
                 return;
             }
 
             const retainedRows = [];
-            for (const { envelope, index, retainedExpenses } of undo.deleted) {
-                envelopes.splice(index, 0, envelope);
-                if (retainedExpenses.length) retainedRows.push({ id: envelope.id, retainedExpenses });
+            // Reverte as operações da mais recente à mais antiga. Dentro de cada
+            // operação, os índices seguem a ordem da lista anterior à exclusão.
+            for (let i = undo.batches.length - 1; i >= 0; i--) {
+                for (const { envelope, index, retainedExpenses } of undo.batches[i]) {
+                    envelopes.splice(index, 0, envelope);
+                    if (retainedExpenses.length) retainedRows.push({ id: envelope.id, retainedExpenses });
+                }
             }
             // Devolve ao mês aberto os gastos preservados apenas no Histórico mensal.
             if (retainedRows.length) {
@@ -9294,7 +9324,7 @@
 
             if (updateApp()) {
                 clearEnvelopeUndo();
-                envelopeUndoStatus.textContent = 'Exclusão desfeita.';
+                envelopeUndoStatus.textContent = deleted.length === 1 ? 'Exclusão desfeita.' : 'Exclusões desfeitas.';
             }
         };
 
