@@ -226,11 +226,20 @@
         text-size-adjust: 100%;
         }
 
-                /*
-         * Rolagem nativa: a exibição e a espessura das barras seguem
-         * as preferências do navegador e do sistema operacional.
-         * As áreas roláveis continuam definidas pelas regras de overflow.
+         /*
+         * Barras de rolagem: a classe hide-scrollbars controla apenas os indicadores.
+         * Sem essa classe, o navegador usa suas barras nativas.
+         * Os limites de altura, a rolagem e a grade mantêm suas regras existentes.
          */
+        html.hide-scrollbars,
+        html.hide-scrollbars * {
+            scrollbar-width: none;
+        }
+        /* Compatibilidade com navegadores que usam o pseudo-elemento WebKit. */
+        html.hide-scrollbars::-webkit-scrollbar,
+        html.hide-scrollbars *::-webkit-scrollbar {
+            display: none;
+        }
 
         html, body {
         height: 100%;
@@ -1471,6 +1480,22 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+        }
+
+        /* Preferência de rolagem: uma linha com toda a área do rótulo acionável. */
+        .settings-scrollbar-row {
+            margin-top: 8px;
+            min-height: 44px;
+            gap: 12px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-main);
+            cursor: pointer;
+        }
+        .settings-scrollbar-row .switch { flex-shrink: 0; }
+        .settings-scrollbar-row input:focus-visible + .slider {
+            outline: 2px solid var(--primary);
+            outline-offset: 3px;
         }
 
         /* Seletor compacto de cores: três opções proporcionais, legíveis inclusive no iPhone. */
@@ -2731,6 +2756,14 @@
                             <span class="slider"></span>
                         </label>
                     </div>
+                    <!-- A preferência manual é salva apenas neste navegador/instalação. -->
+                    <label class="settings-label-group settings-scrollbar-row">
+                        <span>Exibir barras de rolagem</span>
+                        <span class="switch">
+                            <input type="checkbox" id="scrollbar-toggle-input" onchange="toggleScrollbarSetting(this)">
+                            <span class="slider" aria-hidden="true"></span>
+                        </span>
+                    </label>
                 </div>
 
                 <div class="settings-section">
@@ -3841,6 +3874,45 @@
             applyZoomSetting(allowZoom);
         };
 
+        // Barras de rolagem: sem preferência salva, oculta no uso por toque.
+        // Uma escolha manual é local e prevalece sobre mudanças do apontador.
+        const SCROLLBAR_PREF_KEY = 'myShowScrollbars';
+        const scrollbarTouchQuery = window.matchMedia('(pointer: coarse)');
+
+        const applyScrollbarSetting = () => {
+            const preference = readStoredValue(SCROLLBAR_PREF_KEY);
+            const show = preference === 'true'
+                || (preference !== 'false' && !scrollbarTouchQuery.matches);
+            document.documentElement.classList.toggle('hide-scrollbars', !show);
+            const checkbox = document.getElementById('scrollbar-toggle-input');
+            if (checkbox) checkbox.checked = show;
+        };
+
+        const toggleScrollbarSetting = (checkbox) => {
+            try {
+                writeStoredValue(SCROLLBAR_PREF_KEY, String(checkbox.checked));
+            } catch (error) {
+                console.error('Não foi possível salvar a preferência das barras de rolagem:', error);
+                applyScrollbarSetting();
+                alert('Não foi possível salvar essa preferência. A configuração anterior foi mantida.');
+                return;
+            }
+            applyScrollbarSetting();
+            updateStorageMonitor();
+        };
+
+        // Atualiza o padrão automático; preferências manuais continuam prevalecendo.
+        if (typeof scrollbarTouchQuery.addEventListener === 'function') {
+            scrollbarTouchQuery.addEventListener('change', applyScrollbarSetting);
+        } else if (typeof scrollbarTouchQuery.addListener === 'function') {
+            scrollbarTouchQuery.addListener(applyScrollbarSetting);
+        }
+        // Mantém a preferência coerente entre janelas que compartilham o armazenamento.
+        window.addEventListener('storage', (event) => {
+            if (event.key === SCROLLBAR_PREF_KEY || event.key === null) applyScrollbarSetting();
+        });
+        applyScrollbarSetting();
+
         // Indica o tema selecionado visualmente e para leitores de tela.
         const updateThemeColorButtonsUI = (theme) => {
             document.querySelectorAll('.settings-color-option').forEach(btn => {
@@ -3855,7 +3927,7 @@
             'myEnvelopes', 'myFixedExpenses', 'myFixedAutoSort',
             'myCreditInstallments', 'myOtherCommitments', 'myOtherAutoSort', 'myStandaloneExpenses',
             'myMonthlySnapshots', 'myOpenMonthlySnapshot', 'myCycleState',
-            'myAppTheme', 'myColorMode', 'myAllowZoom',
+            'myAppTheme', 'myColorMode', 'myAllowZoom', SCROLLBAR_PREF_KEY,
             'myBackupReminderStart', 'myBackupLastRequestedAt', 'myBackupReminderDismissedAt', FINANCIAL_RECOVERY_KEY
         ];
         let storageWarningShownThisSession = false;
@@ -4013,6 +4085,7 @@
             if (toggleInput) {
                 toggleInput.checked = readStoredValue('myAllowZoom') === 'true';
             }
+            applyScrollbarSetting();
             // Indica o modo aplicado nesta janela, mesmo se outra alterar a preferência salva.
             const currentMode = document.body.getAttribute('data-color-mode') || 'auto';
             updateThemeModeButtonsUI(currentMode);
