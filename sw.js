@@ -1,12 +1,65 @@
-// v52: Refinamentos e implementos menores + refina na tela inicial antes de cadastrar envelopes + desfazer exclusão em gurpo + barra de rolagem inteligente e opc em config.
-const CACHE_NAME = 'envelopes-cache-v52';
+// v53: Retenção de 12 meses em envelopes/avulsos, legenda, abertura leve e retorno por gesto.
+const CACHE_NAME = 'envelopes-cache-v53';
 
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './manifest.json',
   './apple-touch-icon.png',
-  './icon-192.png'
+  './icon-192.png',
+  // Imagens estáticas de abertura do iPhone, disponíveis também sem rede após preparar o cache.
+  "./startup/iphone-320x568-2x-portrait-light.png",
+  "./startup/iphone-320x568-2x-portrait-dark.png",
+  "./startup/iphone-320x568-2x-landscape-light.png",
+  "./startup/iphone-320x568-2x-landscape-dark.png",
+  "./startup/iphone-375x667-2x-portrait-light.png",
+  "./startup/iphone-375x667-2x-portrait-dark.png",
+  "./startup/iphone-375x667-2x-landscape-light.png",
+  "./startup/iphone-375x667-2x-landscape-dark.png",
+  "./startup/iphone-414x736-3x-portrait-light.png",
+  "./startup/iphone-414x736-3x-portrait-dark.png",
+  "./startup/iphone-414x736-3x-landscape-light.png",
+  "./startup/iphone-414x736-3x-landscape-dark.png",
+  "./startup/iphone-375x812-3x-portrait-light.png",
+  "./startup/iphone-375x812-3x-portrait-dark.png",
+  "./startup/iphone-375x812-3x-landscape-light.png",
+  "./startup/iphone-375x812-3x-landscape-dark.png",
+  "./startup/iphone-390x844-3x-portrait-light.png",
+  "./startup/iphone-390x844-3x-portrait-dark.png",
+  "./startup/iphone-390x844-3x-landscape-light.png",
+  "./startup/iphone-390x844-3x-landscape-dark.png",
+  "./startup/iphone-393x852-3x-portrait-light.png",
+  "./startup/iphone-393x852-3x-portrait-dark.png",
+  "./startup/iphone-393x852-3x-landscape-light.png",
+  "./startup/iphone-393x852-3x-landscape-dark.png",
+  "./startup/iphone-402x874-3x-portrait-light.png",
+  "./startup/iphone-402x874-3x-portrait-dark.png",
+  "./startup/iphone-402x874-3x-landscape-light.png",
+  "./startup/iphone-402x874-3x-landscape-dark.png",
+  "./startup/iphone-414x896-2x-portrait-light.png",
+  "./startup/iphone-414x896-2x-portrait-dark.png",
+  "./startup/iphone-414x896-2x-landscape-light.png",
+  "./startup/iphone-414x896-2x-landscape-dark.png",
+  "./startup/iphone-414x896-3x-portrait-light.png",
+  "./startup/iphone-414x896-3x-portrait-dark.png",
+  "./startup/iphone-414x896-3x-landscape-light.png",
+  "./startup/iphone-414x896-3x-landscape-dark.png",
+  "./startup/iphone-428x926-3x-portrait-light.png",
+  "./startup/iphone-428x926-3x-portrait-dark.png",
+  "./startup/iphone-428x926-3x-landscape-light.png",
+  "./startup/iphone-428x926-3x-landscape-dark.png",
+  "./startup/iphone-430x932-3x-portrait-light.png",
+  "./startup/iphone-430x932-3x-portrait-dark.png",
+  "./startup/iphone-430x932-3x-landscape-light.png",
+  "./startup/iphone-430x932-3x-landscape-dark.png",
+  "./startup/iphone-440x956-3x-portrait-light.png",
+  "./startup/iphone-440x956-3x-portrait-dark.png",
+  "./startup/iphone-440x956-3x-landscape-light.png",
+  "./startup/iphone-440x956-3x-landscape-dark.png",
+  "./startup/iphone-420x912-3x-portrait-light.png",
+  "./startup/iphone-420x912-3x-portrait-dark.png",
+  "./startup/iphone-420x912-3x-landscape-light.png",
+  "./startup/iphone-420x912-3x-landscape-dark.png"
 ];
 
 // Instalação: armazena os recursos essenciais do aplicativo.
