@@ -1,7 +1,8 @@
+// v57: Busca local nos históricos de envelopes e avulsos, com períodos e ações preservados.
 // v56: Organização de parcelamentos por banco e despesas, com rascunho e controles compartilhados.
 // v55: Refinamentos visuais do Histórico mensal, seletor de envelope e nomes da Projeção.
 // v54: Mantém retenção de 12 meses e legenda refinada; restaura a abertura e a navegação originais.
-const CACHE_NAME = 'envelopes-cache-v56';
+const CACHE_NAME = 'envelopes-cache-v57';
 
 const ASSETS_TO_CACHE = [
   './',
