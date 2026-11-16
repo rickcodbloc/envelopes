@@ -1218,6 +1218,14 @@
             margin-top: 8px;
             font-weight: 600;
         }
+
+        /* Fixas: frequência e referência usam um único bloco recolhível. */
+        .fixed-recurrence-options { margin-top: 2px; }
+        .fixed-recurrence-options > summary { display: flex; align-items: center; gap: 8px; min-height: 44px; list-style: none; cursor: pointer; font-size: 0.85rem; color: var(--primary); }
+        .fixed-recurrence-options > summary > span:first-child { flex: 1; }
+        #fixed-recurrence-label { color: var(--text-muted); font-weight: 500; }
+        .fixed-recurrence-fields { padding-top: 8px; }
+        .fixed-recurrence-fields > .form-group:last-child { margin-bottom: 0; }
         
         #desc-container, #date-container {
             display: none;
@@ -2048,6 +2056,7 @@
         }
         .projection-name-toggle[aria-expanded="true"] { white-space: normal; }
         .projection-name-row > .monthly-snapshot-row-value { padding-top: 3px; }
+        .projection-fixed-name > .projection-name-toggle { width: 100%; }
 
         /* O diálogo nativo mantém o foco no cenário e retorna ao acionador ao fechar. */
         .projection-dialog {
@@ -2644,12 +2653,35 @@
                         <input type="text" id="fixed-item-dueday" inputmode="numeric" pattern="[0-9]*" maxlength="2" oninput="limitIntegerInput(this, 31, 2)" placeholder="1">
                     </div>
                 </div>
-                <!-- Competência inicial opcional: vazio mantém a contabilização imediata. -->
-                <div class="form-group">
-                    <label for="fixed-item-first-month">Início da despesa (opcional)</label>
-                    <input type="text" id="fixed-item-first-month" inputmode="numeric" maxlength="7" placeholder="MM/AAAA" oninput="limitMonthYearInput(this)" autocomplete="off">
-                    <span style="display:block; margin-top:4px; font-size:0.74rem; color:var(--text-muted);">Mês/ano da primeira cobrança. Em branco: mês atual.</span>
-                </div>
+                <details id="fixed-recurrence-options" class="report-details fixed-recurrence-options">
+                    <summary><span>Recorrência</span><span id="fixed-recurrence-label">Mensal</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="report-chevron" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></summary>
+                    <div class="fixed-recurrence-fields">
+                        <div class="form-group">
+                            <label for="fixed-item-interval">Repetir</label>
+                            <select id="fixed-item-interval" onchange="updateFixedRecurrenceFields()">
+                                <option value="1">Mensal</option>
+                                <option value="2">A cada 2 meses</option>
+                                <option value="3">A cada 3 meses</option>
+                                <option value="4">A cada 4 meses</option>
+                                <option value="5">A cada 5 meses</option>
+                                <option value="6">A cada 6 meses</option>
+                                <option value="7">A cada 7 meses</option>
+                                <option value="8">A cada 8 meses</option>
+                                <option value="9">A cada 9 meses</option>
+                                <option value="10">A cada 10 meses</option>
+                                <option value="11">A cada 11 meses</option>
+                                <option value="12">A cada 12 meses</option>
+                            </select>
+                        </div>
+                        <!-- Competência inicial opcional: vazio mantém a contabilização imediata. -->
+                        <!-- Nos intervalos maiores que um mês, a referência explícita é obrigatória. -->
+                        <div class="form-group">
+                            <label id="fixed-first-month-label" for="fixed-item-first-month">Início da despesa (opcional)</label>
+                            <input type="text" id="fixed-item-first-month" inputmode="numeric" maxlength="7" placeholder="MM/AAAA" oninput="limitMonthYearInput(this)" autocomplete="off" aria-describedby="fixed-first-month-hint">
+                            <span id="fixed-first-month-hint" style="display:block; margin-top:4px; font-size:0.74rem; color:var(--text-muted);">Mês/ano da primeira cobrança. Em branco: mês atual.</span>
+                        </div>
+                    </div>
+                </details>
                 <div class="modal-buttons">
                     <button class="btn btn-cancel" onclick="closeModal('modal-fixed-expense')">Cancelar</button>
                     <button class="btn btn-confirm" id="fixed-submit-btn" onclick="saveFixedExpense()">Adicionar</button>
@@ -3744,12 +3776,41 @@
         const defaultInstallmentReferenceMonth = (item, currentKey) =>
             isScheduledForLater(item, currentKey) ? item.firstDueMonth : currentKey;
 
+        /* Recorrência exclusiva das fixas. Ausência de intervalo mantém o contrato mensal.
+           A referência não avança ao abrir o app: os meses de cobrança vêm do calendário. */
+        const getFixedIntervalMonths = item => item.intervalMonths ?? 1;
+        const fixedRecurrenceFields = item => getFixedIntervalMonths(item) === 1 ? {} : { intervalMonths: getFixedIntervalMonths(item) };
+        const fixedRecurrenceLabel = item => getFixedIntervalMonths(item) === 1 ? 'Mensal' : `A cada ${getFixedIntervalMonths(item)} meses`;
+        const isFixedExpenseDueInPeriod = (item, periodKey) => {
+            const interval = getFixedIntervalMonths(item);
+            if (!Number.isInteger(interval) || interval < 1 || interval > 12) return false;
+            if (interval === 1) return isRecurringDueInPeriod(item, periodKey);
+            const first = normalizeFirstDueMonth(item.firstDueMonth);
+            if (!first || !normalizeFirstDueMonth(periodKey)) return false;
+            const difference = monthOrdinalForProjection(periodKey) - monthOrdinalForProjection(first);
+            return difference >= 0 && difference % interval === 0;
+        };
+        const nextFixedDueMonth = (item, periodKey = getMonthKey()) => {
+            const interval = getFixedIntervalMonths(item);
+            const first = normalizeFirstDueMonth(item.firstDueMonth);
+            if (!Number.isInteger(interval) || interval < 1 || interval > 12 || !normalizeFirstDueMonth(periodKey)) return null;
+            if (interval === 1) return first && first > periodKey ? first : periodKey;
+            if (!first) return null;
+            const difference = monthOrdinalForProjection(periodKey) - monthOrdinalForProjection(first);
+            return difference <= 0 ? first : shiftMonthKey(first, Math.ceil(difference / interval) * interval);
+        };
+
         // Validação conservadora: informa dados inválidos sem descartar linhas silenciosamente.
         // Zero é aceito em registros legados; os formulários continuam exigindo valores positivos.
         const validateDataCollections = (data) => {
             const money = value => typeof value === 'number' && Number.isFinite(value) && value >= 0;
             const optionalText = value => value == null || typeof value === 'string';
             const require = (condition, message) => { if (!condition) throw new Error(message); };
+            const fixedRecurrence = item => {
+                const interval = getFixedIntervalMonths(item);
+                require(Number.isInteger(interval) && interval >= 1 && interval <= 12, 'Intervalo da despesa fixa inválido: use de 1 a 12 meses.');
+                require(interval === 1 || !!normalizeFirstDueMonth(item.firstDueMonth), 'Despesa fixa não mensal sem mês inicial válido.');
+            };
             const entries = (items, label) => {
                 require(items == null || Array.isArray(items), `${label}: lista inválida.`);
                 const ids = new Set();
@@ -3796,6 +3857,7 @@
                 require(item && typeof item.name === 'string' && item.name.trim() && money(item.amount), 'Compromisso com nome ou valor inválido.');
                 require(optionalText(item.cardName), 'Nome do banco inválido.');
             }));
+            (data.fixedExpenses || []).forEach(fixedRecurrence);
             const snapshots = [...(data.monthlySnapshots || []), ...(data.openMonthlySnapshot == null ? [] : [data.openMonthlySnapshot])];
             if (data.cycleState != null) {
                 require(typeof data.cycleState === 'object' && typeof data.cycleState.lastObservedCycle === 'string'
@@ -3816,6 +3878,7 @@
                 ['fixedExpenses', 'creditInstallments', 'otherCommitments'].forEach(key => (snapshot[key] || []).forEach(item => {
                     require(item && typeof item.name === 'string' && money(item.amount) && optionalText(item.cardName), 'Compromisso inválido no registro mensal.');
                 }));
+                (snapshot.fixedExpenses || []).forEach(fixedRecurrence);
             });
         };
 
@@ -3878,7 +3941,8 @@
                         name: item.name.trim(),
                         amount: item.amount,
                         dueDateDay: normalizeFixedDueDay(item.dueDateDay),
-                        firstDueMonth: normalizeFirstDueMonth(item.firstDueMonth)
+                        firstDueMonth: normalizeFirstDueMonth(item.firstDueMonth),
+                        ...fixedRecurrenceFields(item)
                     }));
                 // Mantém IDs de despesas fixas válidos e corrige somente os inconsistentes.
                 fixedExpenses = ensureUniqueNumericIds(fixedExpenses, normalized => {
@@ -4455,7 +4519,7 @@
                 }));
             const normalizeFixedItems = (Array.isArray(snapshot.fixedExpenses) ? snapshot.fixedExpenses : [])
                 .filter(item => item && typeof item.name === 'string' && finiteMoney(item.amount))
-                .map(item => ({ id: Number(item.id) || 0, name: item.name.trim().slice(0, 100), amount: Number(item.amount), dueDateDay: normalizeFixedDueDay(item.dueDateDay), firstDueMonth: normalizeFirstDueMonth(item.firstDueMonth) }));
+                .map(item => ({ id: Number(item.id) || 0, name: item.name.trim().slice(0, 100), amount: Number(item.amount), dueDateDay: normalizeFixedDueDay(item.dueDateDay), firstDueMonth: normalizeFirstDueMonth(item.firstDueMonth), ...fixedRecurrenceFields(item) }));
             const totals = {};
             ['variable', 'fixed', 'credit', 'other', 'grandTotal', 'budget'].forEach(key => {
                 totals[key] = finiteMoney(snapshot.totals[key]) ? snapshot.totals[key] : 0;
@@ -4699,7 +4763,7 @@
                     retainedExpenses
                 };
             });
-            const fixedRows = state.fixedExpenses.filter(item => isRecurringDueInPeriod(item, periodKey)).map(item => ({ id: Number(item.id) || 0, name: item.name, amount: item.amount, dueDateDay: normalizeFixedDueDay(item.dueDateDay), firstDueMonth: normalizeFirstDueMonth(item.firstDueMonth) }));
+            const fixedRows = state.fixedExpenses.filter(item => isFixedExpenseDueInPeriod(item, periodKey)).map(item => ({ id: Number(item.id) || 0, name: item.name, amount: item.amount, dueDateDay: normalizeFixedDueDay(item.dueDateDay), firstDueMonth: normalizeFirstDueMonth(item.firstDueMonth), ...fixedRecurrenceFields(item) }));
             const creditRows = state.creditInstallments.filter(item => isInstallmentDueInPeriod(item, periodKey))
                 .map(item => ({ ...item, currentInstallment: installmentNumberForPeriod(item, periodKey) }));
             const otherRows = state.otherCommitments.filter(item => isInstallmentDueInPeriod(item, periodKey))
@@ -5441,7 +5505,7 @@
             if (currentChartTab === 'general') {
                 let totalSpentCurrent = getStandaloneSpent();
                 envelopes.forEach(env => { totalSpentCurrent += getEnvSpent(env); });
-                let totalFixed = fixedExpenses.filter(i => isRecurringDueInPeriod(i, getMonthKey())).reduce((acc, curr) => acc + curr.amount, 0);
+                let totalFixed = fixedExpenses.filter(i => isFixedExpenseDueInPeriod(i, getMonthKey())).reduce((acc, curr) => acc + curr.amount, 0);
                 let activeCreditTotal = creditInstallments
                     .filter(i => isInstallmentDueInPeriod(i, getMonthKey()))
                     .reduce((acc, curr) => acc + curr.amount, 0);
@@ -6258,6 +6322,21 @@
             renderFixedExpensesList();
         };
 
+        // Preenche a referência só ao escolher um intervalo não mensal sem início informado.
+        // Ao editar, o mês já salvo é preservado e nunca avança com o relógio do aparelho.
+        const updateFixedRecurrenceFields = (prefill = true) => {
+            const interval = Number(document.getElementById('fixed-item-interval').value);
+            if (!Number.isInteger(interval) || interval < 1 || interval > 12) return;
+            const start = document.getElementById('fixed-item-first-month');
+            document.getElementById('fixed-recurrence-label').textContent = fixedRecurrenceLabel({ intervalMonths: interval });
+            document.getElementById('fixed-first-month-label').textContent = interval === 1 ? 'Início da despesa (opcional)' : 'Primeira cobrança';
+            document.getElementById('fixed-first-month-hint').textContent = interval === 1
+                ? 'Mês/ano da primeira cobrança. Em branco: mês atual.'
+                : 'Define os meses em que a despesa será contabilizada.';
+            start.required = interval > 1;
+            if (interval > 1 && prefill && !start.value.trim()) start.value = displayFirstDueMonth(getMonthKey());
+        };
+
         const openFixedExpenseModal = (id = null) => {
             const titleEl = document.getElementById('fixed-modal-title');
             const btnEl = document.getElementById('fixed-submit-btn');
@@ -6266,6 +6345,7 @@
             const amountField = document.getElementById('fixed-item-amount');
             const dueDayField = document.getElementById('fixed-item-dueday');
             const startField = document.getElementById('fixed-item-first-month');
+            const intervalField = document.getElementById('fixed-item-interval');
 
             if (id) {
                 const item = fixedExpenses.find(i => i.id === id);
@@ -6278,6 +6358,7 @@
                 const dueDay = normalizeFixedDueDay(item.dueDateDay);
                 dueDayField.value = dueDay === null ? '' : String(dueDay);
                 startField.value = displayFirstDueMonth(item.firstDueMonth);
+                intervalField.value = String(getFixedIntervalMonths(item));
             } else {
                 titleEl.innerText = 'Adicionar Despesa Fixa';
                 btnEl.innerText = 'Adicionar';
@@ -6286,7 +6367,11 @@
                 amountField.value = '';
                 dueDayField.value = '';
                 startField.value = '';
+                intervalField.value = '1';
             }
+
+            document.getElementById('fixed-recurrence-options').open = false;
+            updateFixedRecurrenceFields(false);
 
             // Reinicia o valor permitido após cada abertura do modal (inclusive em edições).
             document.querySelectorAll('#modal-fixed-expense input[oninput^="limitIntegerInput"]').forEach(field => { field.dataset.lastValidNumeric = field.value; });
@@ -6303,9 +6388,11 @@
             list.innerHTML = '';
 
             // Agrupa somente a apresentação; o cálculo mensal existente permanece igual.
+            // Cadastros mensais conservam esse cálculo; nos demais, entram só cobranças devidas.
             const scheduledItems = fixedExpenses.filter(item =>
-                isScheduledForLater(item, currentKey)
+                !isFixedExpenseDueInPeriod(item, currentKey)
             );
+            const hasIntervalGap = scheduledItems.some(item => !isScheduledForLater(item, currentKey));
 
             let scheduledSection = null;
 
@@ -6315,7 +6402,7 @@
 
                 const summary = document.createElement('summary');
                 summary.style.cssText = 'display:flex; justify-content:space-between; align-items:center; gap:8px; padding:4px 8px; list-style:none; cursor:pointer; color:var(--text-main); font-size:0.88rem; font-weight:600;';
-                summary.innerHTML = `<span>Despesas agendadas (${scheduledItems.length})</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="report-chevron" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
+                summary.innerHTML = `<span>${hasIntervalGap ? 'Próximas cobranças' : 'Despesas agendadas'} (${scheduledItems.length})</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="report-chevron" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
                 scheduledSection.appendChild(summary);
 
             }
@@ -6325,8 +6412,9 @@
                 list.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding:24px;">Nenhuma despesa fixa cadastrada.</p>';
             } else {
                 fixedExpenses.forEach((item) => {
-                    const scheduledPeriod = isScheduledForLater(item, currentKey) ? item.firstDueMonth : null;
-                    if (!scheduledPeriod) total += item.amount;
+                    const dueThisMonth = isFixedExpenseDueInPeriod(item, currentKey);
+                    const scheduledPeriod = dueThisMonth ? null : nextFixedDueMonth(item, currentKey);
+                    if (dueThisMonth) total += item.amount;
                     const div = document.createElement('div');
                     div.className = 'history-item';
                     div.style.padding = '10px 8px';
@@ -6358,10 +6446,12 @@
                         amountRow.appendChild(dueSpan);
                     }
                     infoDiv.appendChild(amountRow);
-                    if (scheduledPeriod) {
+                    if (!dueThisMonth || getFixedIntervalMonths(item) > 1) {
                         const scheduled = document.createElement('span');
                         scheduled.className = 'history-date';
-                        scheduled.textContent = `Agendada para ${displayFirstDueMonth(scheduledPeriod)}`;
+                        scheduled.textContent = getFixedIntervalMonths(item) > 1
+                            ? `${fixedRecurrenceLabel(item)}${scheduledPeriod ? ` · Próxima cobrança ${displayFirstDueMonth(scheduledPeriod)}` : ''}`
+                            : `Agendada para ${displayFirstDueMonth(scheduledPeriod)}`;
                         infoDiv.appendChild(scheduled);
                     }
 
@@ -6391,7 +6481,7 @@
                     div.appendChild(infoDiv);
                     div.appendChild(actionsDiv);
                     // Reaproveita a mesma linha e os mesmos botões nos dois grupos.
-                    if (scheduledPeriod) {
+                    if (!dueThisMonth) {
                         scheduledSection.appendChild(div);
                     } else {
                         list.appendChild(div);
@@ -6410,7 +6500,7 @@
 
                 // Aviso ao final da lista, visível também com os agendamentos recolhidos.
                 const note = document.createElement('p');
-                note.textContent = 'Agendadas fora do total.';
+                note.textContent = hasIntervalGap ? 'Próximas cobranças fora do total.' : 'Agendadas fora do total.';
                 note.style.cssText = 'margin:12px 8px 0; font-size:0.82rem; line-height:1.4; color:var(--text-muted);';
                 list.appendChild(note);
                 }
@@ -6451,7 +6541,25 @@
             const amount = parseBrNumber(amountStr);
             const dueDayInput = document.getElementById('fixed-item-dueday').value.trim();
             const firstDueMonth = parseFirstDueMonthInput(document.getElementById('fixed-item-first-month').value);
-            if (firstDueMonth === undefined) { alert('Informe o mês inicial no formato MM/AAAA.'); return; }
+            if (firstDueMonth === undefined) {
+                document.getElementById('fixed-recurrence-options').open = true;
+                alert('Informe o mês inicial no formato MM/AAAA.');
+                document.getElementById('fixed-item-first-month').focus();
+                return;
+            }
+            const intervalMonths = Number(document.getElementById('fixed-item-interval').value);
+            if (!Number.isInteger(intervalMonths) || intervalMonths < 1 || intervalMonths > 12) {
+                document.getElementById('fixed-recurrence-options').open = true;
+                alert('Selecione uma recorrência de 1 a 12 meses.');
+                document.getElementById('fixed-item-interval').focus();
+                return;
+            }
+            if (intervalMonths > 1 && !firstDueMonth) {
+                document.getElementById('fixed-recurrence-options').open = true;
+                alert('Informe o mês/ano da primeira cobrança para essa recorrência.');
+                document.getElementById('fixed-item-first-month').focus();
+                return;
+            }
             let dueDateDay = null;
 
             if (dueDayInput !== '') {
@@ -6468,6 +6576,8 @@
                 return;
             }
 
+            // Fecha o período anterior com a regra antiga antes de aplicar a edição no atual.
+            if (!prepareInstallmentSave()) return;
             const nextFixedExpenses = fixedExpenses.map(item => ({ ...item }));
             if (editId) {
                 const index = nextFixedExpenses.findIndex(i => i.id == editId);
@@ -6476,6 +6586,8 @@
                     nextFixedExpenses[index].amount = amount;
                     nextFixedExpenses[index].dueDateDay = dueDateDay;
                     nextFixedExpenses[index].firstDueMonth = firstDueMonth;
+                    if (intervalMonths > 1) nextFixedExpenses[index].intervalMonths = intervalMonths;
+                    else delete nextFixedExpenses[index].intervalMonths;
                 }
             } else {
                 nextFixedExpenses.push({
@@ -6483,7 +6595,8 @@
                     name: name,
                     amount: amount,
                     dueDateDay: dueDateDay,
-                    firstDueMonth
+                    firstDueMonth,
+                    ...fixedRecurrenceFields({ intervalMonths })
                 });
             }
 
@@ -7647,7 +7760,7 @@
         const buildProjectionGroups = (periodKey, currentKey, variableRows) => {
             const fixedRows = fixedExpenses.filter(item => {
                 const lastMonth = projectionScenario.fixedLastMonths.get(item.id);
-                return isRecurringDueInPeriod(item, periodKey)
+                return isFixedExpenseDueInPeriod(item, periodKey)
                     && (lastMonth === undefined || (lastMonth !== null && periodKey <= lastMonth));
             });
             return [
@@ -7663,12 +7776,15 @@
             button.setAttribute('aria-expanded', String(button.getAttribute('aria-expanded') !== 'true'));
         };
 
-        const renderProjectionRows = (rows, truncateNames = false) => rows.map(item => `<div class="monthly-snapshot-row${truncateNames ? ' projection-name-row' : ''}">
+        const renderProjectionRows = (rows, truncateNames = false) => rows.map(item => {
+            const name = truncateNames ? `<button type="button" class="monthly-snapshot-row-name projection-name-toggle" aria-expanded="false" title="${sanitizeHtml(item.name)}" onclick="toggleProjectionName(this)">${sanitizeHtml(item.name)}</button>` : '';
+            return `<div class="monthly-snapshot-row${truncateNames ? ' projection-name-row' : ''}">
             ${truncateNames
-                ? `<button type="button" class="monthly-snapshot-row-name projection-name-toggle" aria-expanded="false" title="${sanitizeHtml(item.name)}" onclick="toggleProjectionName(this)">${sanitizeHtml(item.name)}</button>`
+                ? (getFixedIntervalMonths(item) > 1 ? `<span class="monthly-snapshot-row-name projection-fixed-name">${name}<span class="monthly-snapshot-caption">${fixedRecurrenceLabel(item)}</span></span>` : name)
                 : `<span class="monthly-snapshot-row-name">${sanitizeHtml(item.name)}${item.note ? ` · ${item.note}` : ''}</span>`}
             <span class="monthly-snapshot-row-value">${formatCurrency(item.amount)}</span>
-        </div>`).join('');
+        </div>`;
+        }).join('');
 
         // Mesma regra de bancos das telas de Parcelamentos e Consolidado: agrupa sem ordenar
         // os cadastros. O filtro mensal já foi aplicado; cada grupo preserva sua ordem relativa.
@@ -7758,14 +7874,15 @@
                 <strong class="monthly-snapshot-row-value">${formatCurrency(item.total)}</strong>
             </label>`).join('');
             const fixedRows = fixedExpenses.map(item => {
-                const eligiblePeriods = periods.filter(period => isRecurringDueInPeriod(item, period));
+                const eligiblePeriods = periods.filter(period => isFixedExpenseDueInPeriod(item, period));
                 if (!eligiblePeriods.length) return '';
                 const lastMonth = projectionScenario.fixedLastMonths.get(item.id);
-                const outside = lastMonth === null || (lastMonth && lastMonth < periods[0]);
+                const lastEligible = typeof lastMonth === 'string' ? eligiblePeriods.filter(period => period <= lastMonth).pop() : null;
+                const outside = lastMonth === null || (lastMonth && !lastEligible);
                 const options = eligiblePeriods.filter(period => period < lastProjectionPeriod).map(period =>
-                    `<option value="${period}"${period === lastMonth ? ' selected' : ''}>Até ${formatMonthLabelKey(period)}</option>`).join('');
+                    `<option value="${period}"${period === lastEligible ? ' selected' : ''}>Até ${formatMonthLabelKey(period)}</option>`).join('');
                 return `<label class="checkbox-item projection-fixed-filter">
-                    <span class="projection-filter-name">${sanitizeHtml(item.name)}<span class="monthly-snapshot-caption">${formatCurrency(item.amount)}/mês</span></span>
+                    <span class="projection-filter-name">${sanitizeHtml(item.name)}<span class="monthly-snapshot-caption">${formatCurrency(item.amount)}${getFixedIntervalMonths(item) === 1 ? '/mês' : `/cobrança · ${fixedRecurrenceLabel(item)}`}</span></span>
                     <select name="projection-fixed" data-id="${item.id}">
                         <option value="">Manter</option>
                         <option value="exclude"${outside ? ' selected' : ''}>Não incluir</option>
@@ -7979,7 +8096,7 @@
             // mas não integram as quantidades exibidas no relatório.
 
             // 2. Despesas Fixas
-            const totalFixedCount = fixedExpenses.filter(i => isRecurringDueInPeriod(i, getMonthKey())).length;
+            const totalFixedCount = fixedExpenses.filter(i => isFixedExpenseDueInPeriod(i, getMonthKey())).length;
 
             // 3. Parcelamentos
             const totalCreditCount = creditInstallments.filter(i => isInstallmentDueInPeriod(i, getMonthKey())).length;
@@ -8015,7 +8132,7 @@
                 if (Object.prototype.hasOwnProperty.call(paymentTotals, exp.paymentMethod)) paymentTotals[exp.paymentMethod] += exp.amount;
             });
 
-            let totalFixed = fixedExpenses.filter(i => isRecurringDueInPeriod(i, getMonthKey())).reduce((acc, curr) => acc + curr.amount, 0);
+            let totalFixed = fixedExpenses.filter(i => isFixedExpenseDueInPeriod(i, getMonthKey())).reduce((acc, curr) => acc + curr.amount, 0);
             let activeCreditTotal = creditInstallments
                 .filter(i => isInstallmentDueInPeriod(i, getMonthKey()))
                 .reduce((acc, curr) => acc + curr.amount, 0);
@@ -8126,7 +8243,7 @@
             }
 
             let fixedBreakdownHtml = '';
-            const activeFixedExpenses = fixedExpenses.filter(item => isRecurringDueInPeriod(item, getMonthKey()));
+            const activeFixedExpenses = fixedExpenses.filter(item => isFixedExpenseDueInPeriod(item, getMonthKey()));
             if (activeFixedExpenses.length > 0) {
                 activeFixedExpenses.forEach(item => {
                     fixedBreakdownHtml += `
@@ -9043,7 +9160,7 @@
         };
         const resetHistorySearch = kind => {
             const config = historySearchConfig[kind];
-            Object.assign(historySearchViews[kind], { period: kind === 'envelope' ? 'current' : null, rows: [], monthKey: null, canEdit: false, onEdit: null, onDelete: null, periodLabels: null, allowBulk: false });
+            Object.assign(historySearchViews[kind], { period: kind === 'envelope' ? 'current' : null, periodBeforeSearch: null, rows: [], monthKey: null, canEdit: false, onEdit: null, onDelete: null, periodLabels: null, allowBulk: false });
             document.getElementById(config.prefix + '-input').value = '';
             document.getElementById(config.prefix + '-panel').hidden = true;
             document.getElementById(config.prefix + '-toggle').setAttribute('aria-expanded', 'false');
@@ -9054,18 +9171,31 @@
         };
         const toggleHistorySearch = kind => {
             const config = historySearchConfig[kind];
+            const view = historySearchViews[kind];
             const panel = document.getElementById(config.prefix + '-panel');
             const toggle = document.getElementById(config.prefix + '-toggle');
+            const input = document.getElementById(config.prefix + '-input');
+
             if (panel.hidden) {
+                // Amplia a busca e mantém o seletor sincronizado, sem gravar dados.
+                view.periodBeforeSearch = view.period;
                 panel.hidden = false;
                 toggle.setAttribute('aria-expanded', 'true');
-                document.getElementById(config.prefix + '-input').focus({ preventScroll: true });
+                if (kind === 'envelope') renderEnvelopeHistory(currentHistoryEnvId, '');
+                else renderStandaloneHistory('');
+                document.getElementById(config.list).scrollTop = 0;
+                input.focus({ preventScroll: true });
             } else {
                 toggle.focus({ preventScroll: true });
-                document.getElementById(config.prefix + '-input').value = '';
+                input.value = '';
                 panel.hidden = true;
                 toggle.setAttribute('aria-expanded', 'false');
-                applyHistorySearch(kind, true);
+                // O operador ?? preserva '' quando a consulta anterior já era Todos.
+                const previousPeriod = view.periodBeforeSearch ?? (kind === 'envelope' ? 'current' : getMonthKey());
+                view.periodBeforeSearch = null;
+                if (kind === 'envelope') renderEnvelopeHistory(currentHistoryEnvId, previousPeriod);
+                else renderStandaloneHistory(previousPeriod);
+                document.getElementById(config.list).scrollTop = 0;
             }
         };
         const clearHistorySearch = kind => {
@@ -9989,7 +10119,7 @@
                 }
 
                 const dataToExport = {
-                    version: 10,
+                    version: 11,
                     envelopes: envelopes.filter(env => selectedIds.includes(env.id)),
                     fixedExpenses: exportFixed ? fixedExpenses : [],
                     fixedAutoSort: exportFixed ? isFixedAutoSort : null,
@@ -10192,6 +10322,7 @@
                 try {
                     const imported = JSON.parse(e.target.result);
                     if (!imported || typeof imported !== 'object') throw new Error('Formato inválido.');
+                    if (!Array.isArray(imported) && Number(imported.version) > 11) throw new Error('Este backup exige uma versão mais recente do aplicativo.');
                     validateDataCollections(Array.isArray(imported) ? { envelopes: imported } : imported);
                     let rawEnvelopes = [];
                     let rawFixed = [];
@@ -10249,7 +10380,8 @@
                             name: item.name.trim(),
                             amount: item.amount,
                             dueDateDay: normalizeFixedDueDay(item.dueDateDay),
-                            firstDueMonth: normalizeFirstDueMonth(item.firstDueMonth)
+                            firstDueMonth: normalizeFirstDueMonth(item.firstDueMonth),
+                            ...fixedRecurrenceFields(item)
                         }));
                     ensureUniqueNumericIds(validFixed, null, true);
 
