@@ -1331,6 +1331,40 @@
             transition: none;
         }
 
+        /* Parcelamentos: cada banco é um bloco, com uma lista independente de despesas.
+           Durante o movimento do banco, só o bloco externo recebe a translação. */
+        .credit-reorder-bank {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 4px 8px;
+            padding: 4px 0 8px;
+            border-bottom: 1px solid var(--border-color);
+            min-width: 0;
+        }
+        .credit-reorder-bank:last-child { border-bottom: 0; }
+        .credit-reorder-heading {
+            display: flex;
+            align-items: center;
+            min-width: 0;
+            min-height: 44px;
+            padding: 6px 10px;
+            border-radius: 6px;
+            background: var(--primary-light-bg);
+            color: var(--primary);
+            font-size: 0.85rem;
+            font-weight: 700;
+            overflow-wrap: anywhere;
+        }
+        .credit-reorder-bank > .reorder-grip { align-self: center; }
+        .credit-reorder-bank > .reorder-options,
+        .credit-reorder-items { grid-column: 1 / -1; }
+        .credit-reorder-items { min-width: 0; padding-left: 8px; }
+        .credit-reorder-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+        .credit-reorder-info > .checkbox-item-title { display: block; flex: initial; }
+        .credit-reorder-meta { display: flex; flex-wrap: wrap; gap: 2px 5px; color: var(--text-muted); font-size: 0.82rem; line-height: 1.35; }
+        .credit-reorder-meta > span { width: max-content; max-width: 100%; overflow-wrap: anywhere; }
+        #credit-reorder-list.is-dragging .credit-reorder-items .reorder-row { transform: none; transition: none; }
+
         @media (prefers-reduced-motion: reduce) {
             .reorder-list.is-dragging .reorder-row {
                 transition: none;
@@ -1390,6 +1424,7 @@
             position: relative;
             z-index: 1;
             flex-shrink: 0;
+            min-width: 0;
             margin-bottom: 12px;
         }
         #expense-envelope-picker[open] ~ * { pointer-events: none; }
@@ -1403,6 +1438,15 @@
             color: var(--primary);
             font-weight: bold;
             cursor: pointer;
+        }
+        /* Transferência: o resumo cabe em uma linha; os destinos preservam o nome completo. */
+        #expense-envelope-selection {
+            display: block;
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
         #expense-envelope-options {
             position: absolute;
@@ -1424,6 +1468,13 @@
         .expense-envelope-option[aria-pressed="true"] {
             background: var(--primary-light-bg);
             border-radius: 6px;
+        }
+        .expense-envelope-option > .checkbox-item-title {
+            display: block;
+            overflow: visible;
+            text-overflow: clip;
+            white-space: normal;
+            overflow-wrap: anywhere;
         }
 
         /* Relatório Financeiro: elimina a borda inferior da última despesa
@@ -1788,6 +1839,45 @@
         .monthly-snapshot-change.up { color: var(--danger); }
         .monthly-snapshot-change.down { color: var(--success); }
         .monthly-snapshot-change.neutral { color: var(--text-muted); }
+        /* Histórico: o total e o mês compartilham o topo; a comparação não comprime a legenda.
+           No celular, legenda e comparação usam linhas próprias. Altura livre preserva zoom e valores. */
+        #monthly-history-body .monthly-history-summary {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 3px 10px;
+        }
+        .monthly-history-heading {
+            grid-column: 1 / -1;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+            gap: 4px 10px;
+            min-width: 0;
+        }
+        .monthly-history-heading > .monthly-snapshot-period { flex: 1 1 8rem; min-width: 0; }
+        .monthly-history-heading > .monthly-snapshot-total {
+            flex: 0 1 auto;
+            min-width: 0;
+            max-width: 100%;
+            margin-left: auto;
+            white-space: normal;
+            overflow-wrap: anywhere;
+        }
+        .monthly-history-summary > .monthly-snapshot-caption,
+        .monthly-history-summary > .monthly-snapshot-change { min-width: 0; margin-top: 0; }
+        .monthly-history-summary > .monthly-snapshot-change { white-space: normal; text-align: right; }
+        .monthly-history-variable,
+        .monthly-history-amount,
+        .monthly-history-reference {
+            display: inline-block;
+            width: max-content;
+            max-width: 100%;
+            vertical-align: top;
+            overflow-wrap: anywhere;
+        }
+        @media (max-width: 600px) {
+            #monthly-history-body .monthly-history-summary { grid-template-columns: minmax(0, 1fr); }
+        }
         .monthly-snapshot-metrics {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1922,6 +2012,28 @@
         .projection-month .monthly-snapshot-section h3 > span { min-width: 0; overflow-wrap: anywhere; }
         .projection-month .monthly-snapshot-section h3 > strong { font-size: 0.92rem; font-weight: 700; }
         .projection-card-heading { margin: 9px 0 3px; color: var(--text-main); font-size: 0.78rem; font-weight: 600; overflow-wrap: anywhere; }
+
+        /* Só envelopes e fixas usam nomes recolhidos. O botão nativo permite toque, Enter e Espaço;
+           a expansão é visual e temporária, sem gravar dados nem ocultar informações de parcelas. */
+        .projection-name-row { padding: 2px 0; }
+        .projection-name-toggle {
+            display: block;
+            min-height: 24px;
+            padding: 3px 0;
+            border: 0;
+            border-radius: 3px;
+            background: transparent;
+            color: inherit;
+            font: inherit;
+            line-height: inherit;
+            text-align: left;
+            cursor: pointer;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .projection-name-toggle[aria-expanded="true"] { white-space: normal; }
+        .projection-name-row > .monthly-snapshot-row-value { padding-top: 3px; }
 
         /* O diálogo nativo mantém o foco no cenário e retorna ao acionador ao fechar. */
         .projection-dialog {
@@ -2618,7 +2730,7 @@
                     <div style="width:20px; height:20px; display:flex; align-items:center; justify-content:center; color:var(--primary);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div>
                     <h2 style="margin:0;">Reordenar Parcelamentos</h2>
                 </div>
-                <p class="modal-subtitle">Ajuste a ordem dos seus parcelamentos:</p>
+                <p class="modal-subtitle">Mova os bancos ou organize as despesas dentro deles.</p>
                 <div id="credit-reorder-list" class="checkbox-list" style="padding: 8px;"></div>
                 <div class="modal-buttons">
                     <button class="btn btn-cancel" onclick="closeModal('modal-credit-reorder')">Cancelar</button>
@@ -5628,9 +5740,9 @@
         };
 
         // Rola a lista na borda. Em um modal muito baixo, acompanha também a rolagem externa do modal.
-        const scrollReorderList = (list, y, elapsed) => {
-            const bounds = list.getBoundingClientRect();
-            const content = list.parentElement;
+        const scrollReorderList = (list, y, elapsed, scrollList = list) => {
+            const bounds = scrollList.getBoundingClientRect();
+            const content = scrollList.parentElement;
             const clip = content.getBoundingClientRect();
             const top = Math.max(bounds.top, clip.top + content.clientTop);
             const bottom = Math.min(bounds.bottom, clip.top + content.clientTop + content.clientHeight);
@@ -5639,14 +5751,20 @@
 
             const distance = y < top + edge ? y - top - edge : Math.max(0, y - bottom + edge);
             if (distance === 0) return;
+            // Uma sublista rola o contêiner externo somente enquanto tiver conteúdo oculto
+            // nessa direção; a despesa continua limitada ao próprio banco.
+            if (scrollList !== list) {
+                const inner = list.getBoundingClientRect();
+                if ((distance < 0 && inner.top >= top) || (distance > 0 && inner.bottom <= bottom)) return;
+            }
             const strength = Math.min(1, Math.abs(distance) / edge);
             const step = Math.sign(distance) * Math.max(1, strength * elapsed * 0.75);
-            const previous = list.scrollTop;
-            list.scrollTop += step;
-            if (list.scrollTop === previous) content.scrollTop += step;
+            const previous = scrollList.scrollTop;
+            scrollList.scrollTop += step;
+            if (scrollList.scrollTop === previous) content.scrollTop += step;
         };
 
-        const startReorderGesture = (event, list, row, items, index, render) => {
+        const startReorderGesture = (event, list, row, items, index, render, scrollList = list) => {
             if (!event.isPrimary || event.button !== 0 || cancelReorderGesture) return;
             const grip = event.currentTarget;
             delete grip.dataset.dragged;
@@ -5707,7 +5825,7 @@
                 }
                 const elapsed = lastTime === null ? 16 : Math.min(32, time - lastTime);
                 lastTime = time;
-                scrollReorderList(list, pointerY, elapsed);
+                scrollReorderList(list, pointerY, elapsed, scrollList);
                 draw();
                 frame = requestAnimationFrame(tick);
             };
@@ -5729,7 +5847,7 @@
                     return;
                 }
 
-                closeReorderActions(list);
+                closeReorderActions(scrollList);
                 const rows = Array.from(list.children);
                 const last = rows[rows.length - 1];
                 layout = {
@@ -5775,7 +5893,7 @@
             listeners.forEach(([node, type, handler]) => node.addEventListener(type, handler));
         };
 
-        const appendReorderGrip = (list, row, items, index, render) => {
+        const appendReorderGrip = (list, row, items, index, render, scrollList = list) => {
             if (items.length < 2) return;
             row.classList.add('reorder-row');
             const name = items[index].name;
@@ -5803,10 +5921,10 @@
             grip.onclick = (click) => {
                 if (cancelReorderGesture || (click.detail && grip.dataset.dragged)) return;
                 const open = actions.hidden;
-                closeReorderActions(list);
+                closeReorderActions(scrollList);
                 if (open) setReorderActions(grip, true);
             };
-            grip.addEventListener('pointerdown', (e) => startReorderGesture(e, list, row, items, index, render));
+            grip.addEventListener('pointerdown', (e) => startReorderGesture(e, list, row, items, index, render, scrollList));
             row.addEventListener('keydown', (e) => {
                 if (e.key !== 'Escape' || actions.hidden) return;
                 e.preventDefault();
@@ -6568,6 +6686,30 @@
             setTimeout(() => focusModalInput(nameField), 100);
         };
 
+        // A ordem dos bancos vem da primeira ocorrência na coleção; Map também preserva
+        // nomes numéricos e não trata nomes livres como propriedades de um objeto.
+        const creditBankKey = (item) => ((item.cardName || 'Outros').trim() || 'Outros').toLowerCase();
+        const groupCreditInstallments = (items) => {
+            const groups = new Map();
+            items.forEach(item => {
+                const key = creditBankKey(item);
+                if (!groups.has(key)) groups.set(key, { name: (item.cardName || 'Outros').trim() || 'Outros', items: [] });
+                groups.get(key).items.push(item);
+            });
+            return [...groups.values()];
+        };
+
+        // Atua somente na coleção candidata do formulário. Uma compra nova ou transferida
+        // entra ao final do seu banco; um banco novo entra ao final da coleção.
+        const insertCreditInstallmentInGroup = (items, item) => {
+            const key = creditBankKey(item);
+            let position = items.length;
+            for (let i = items.length - 1; i >= 0; i--) {
+                if (creditBankKey(items[i]) === key) { position = i + 1; break; }
+            }
+            items.splice(position, 0, item);
+        };
+
         const renderCreditInstallmentsList = () => {
             // O rótulo compacto de vencimento vale para ativos, agendados e concluídos.
             updateOpenMonthlySnapshot();
@@ -6595,17 +6737,7 @@
                 activeCount++;
             });
 
-            const groupedActive = Object.create(null);
-            activeItems.forEach(item => {
-                const rawCard = (item.cardName || 'Outros').trim();
-                const cardKey = rawCard.toLowerCase();
-                if (!groupedActive[cardKey]) {
-                    groupedActive[cardKey] = { displayName: rawCard, items: [] };
-                }
-                groupedActive[cardKey].items.push(item);
-            });
-
-               Object.values(groupedActive).forEach(group => {
+            groupCreditInstallments(activeItems).forEach(group => {
                 // O próximo cabeçalho de banco já separa os grupos.
                 // Remove apenas a borda inferior do último lançamento do banco anterior.
                 const previousRow = list.lastElementChild;
@@ -6615,7 +6747,7 @@
 
                 const groupHeader = document.createElement('div');
                 groupHeader.className = 'credit-group-header';
-                groupHeader.textContent = `💳 ${group.displayName} (${group.items.length})`;
+                groupHeader.textContent = `💳 ${group.name} (${group.items.length})`;
                 list.appendChild(groupHeader);
 
                 group.items.forEach(item => {
@@ -6863,6 +6995,7 @@
                 const index = nextCreditInstallments.findIndex(i => i.id == editId);
                 if (index !== -1) {
                     const item = nextCreditInstallments[index];
+                    const previousBank = creditBankKey(item);
                     item.name = name;
                     item.amount = amount;
                     item.dueDateDay = dueDateDay;
@@ -6878,9 +7011,13 @@
                     item.totalInstallments = totalInstallments;
                     item.firstDueMonth = firstDueMonth;
                     item.cardName = cardName;
+                    if (creditBankKey(item) !== previousBank) {
+                        nextCreditInstallments.splice(index, 1);
+                        insertCreditInstallmentInGroup(nextCreditInstallments, item);
+                    }
                 }
             } else {
-                nextCreditInstallments.push({
+                insertCreditInstallmentInGroup(nextCreditInstallments, {
                     id: Date.now(),
                     name: name,
                     amount: amount,
@@ -6923,20 +7060,65 @@
                 return;
             }
 
-            tempCreditInstallments.forEach((item, index) => {
+            const groups = groupCreditInstallments(tempCreditInstallments);
+            const syncDraft = () => { tempCreditInstallments = groups.flatMap(group => group.items); };
+            // Normaliza somente o rascunho para refletir os blocos que o usuário está vendo.
+            syncDraft();
+            groups.forEach((group, index) => {
+                const block = document.createElement('div');
+                block.className = 'credit-reorder-bank';
+                block.setAttribute('role', 'group');
+                block.setAttribute('aria-label', `Banco: ${group.name}`);
+                const heading = document.createElement('div');
+                heading.className = 'credit-reorder-heading';
+                heading.textContent = `💳 ${group.name} (${group.items.length})`;
+                block.appendChild(heading);
+                appendReorderGrip(list, block, groups, index, () => {
+                    syncDraft();
+                    renderCreditReorderList();
+                });
+
+                const itemList = document.createElement('div');
+                itemList.className = 'reorder-list credit-reorder-items';
+                block.appendChild(itemList);
+                list.appendChild(block);
+                renderCreditReorderItems(itemList, group, syncDraft, list);
+            });
+        };
+
+        // A sublista mantém seu elemento ao redesenhar: foco, rolagem e índices do gesto
+        // continuam válidos. A lista de bancos e seus controles não são recriados aqui.
+        const renderCreditReorderItems = (list, group, syncDraft, scrollList) => {
+            list.innerHTML = '';
+            group.items.forEach((item, index) => {
                 const el = document.createElement('div');
                 el.className = 'checkbox-item';
 
                 const leftDiv = document.createElement('div');
-                leftDiv.style.cssText = 'display:flex; align-items:center; gap:10px; min-width:0; flex:1;';
+                leftDiv.className = 'credit-reorder-info';
 
                 const titleSpan = document.createElement('span');
                 titleSpan.className = 'checkbox-item-title';
-                titleSpan.textContent = `${item.name} (${formatCurrency(item.amount)} - ${item.currentInstallment}/${item.totalInstallments})`;
+                titleSpan.textContent = item.name;
+                titleSpan.title = item.name;
                 leftDiv.appendChild(titleSpan);
 
+                const details = document.createElement('span');
+                details.className = 'credit-reorder-meta';
+                const amount = document.createElement('span');
+                amount.textContent = formatCurrency(item.amount);
+                const installment = document.createElement('span');
+                installment.textContent = `· ${item.currentInstallment}/${item.totalInstallments}`;
+                details.append(amount, installment);
+                leftDiv.appendChild(details);
+
                 el.appendChild(leftDiv);
-                appendReorderGrip(list, el, tempCreditInstallments, index, renderCreditReorderList);
+                appendReorderGrip(list, el, group.items, index, () => {
+                    const scrollTop = scrollList.scrollTop;
+                    syncDraft();
+                    renderCreditReorderItems(list, group, syncDraft, scrollList);
+                    scrollList.scrollTop = scrollTop;
+                }, scrollList);
                 list.appendChild(el);
             });
         };
@@ -6950,7 +7132,10 @@
         };
 
         const saveCreditReorderModal = () => {
-            const nextCreditInstallments = applyReorderDraft(creditInstallments, tempCreditInstallments);
+            // Usa os registros atuais por ID: não restaura itens excluídos nem parcelas antigas.
+            // Inclusões ocorridas com o modal aberto permanecem no banco correspondente.
+            const nextCreditInstallments = groupCreditInstallments(applyReorderDraft(creditInstallments, tempCreditInstallments))
+                .flatMap(group => group.items);
             if (!persistFinancialChanges([['myCreditInstallments', JSON.stringify(nextCreditInstallments)]])) return;
             creditInstallments = nextCreditInstallments;
             closeModal('modal-credit-reorder');
@@ -7431,37 +7616,37 @@
                     && (lastMonth === undefined || (lastMonth !== null && periodKey <= lastMonth));
             });
             return [
-                { label: 'Orçamento dos envelopes', rows: variableRows },
-                { label: 'Despesas fixas', rows: fixedRows },
+                { label: 'Orçamento dos envelopes', rows: variableRows, truncateNames: true },
+                { label: 'Despesas fixas', rows: fixedRows, truncateNames: true },
                 { label: 'Parcelamentos', rows: projectionInstallmentRows(creditInstallments, periodKey, currentKey), groupByCard: true },
                 { label: 'Outros compromissos', rows: projectionInstallmentRows(otherCommitments, periodKey, currentKey) }
             ].map(group => ({ ...group, total: group.rows.reduce((sum, item) => sum + item.amount, 0) }));
         };
 
-        const renderProjectionRows = (rows) => rows.map(item => `<div class="monthly-snapshot-row">
-            <span class="monthly-snapshot-row-name">${sanitizeHtml(item.name)}${item.note ? ` · ${item.note}` : ''}</span>
+        // Estado apenas do nome consultado; o botão nativo já oferece ativação por teclado e toque.
+        const toggleProjectionName = (button) => {
+            button.setAttribute('aria-expanded', String(button.getAttribute('aria-expanded') !== 'true'));
+        };
+
+        const renderProjectionRows = (rows, truncateNames = false) => rows.map(item => `<div class="monthly-snapshot-row${truncateNames ? ' projection-name-row' : ''}">
+            ${truncateNames
+                ? `<button type="button" class="monthly-snapshot-row-name projection-name-toggle" aria-expanded="false" title="${sanitizeHtml(item.name)}" onclick="toggleProjectionName(this)">${sanitizeHtml(item.name)}</button>`
+                : `<span class="monthly-snapshot-row-name">${sanitizeHtml(item.name)}${item.note ? ` · ${item.note}` : ''}</span>`}
             <span class="monthly-snapshot-row-value">${formatCurrency(item.amount)}</span>
         </div>`).join('');
 
         // Mesma regra de bancos das telas de Parcelamentos e Consolidado: agrupa sem ordenar
         // os cadastros. O filtro mensal já foi aplicado; cada grupo preserva sua ordem relativa.
         const renderProjectionCardRows = (rows) => {
-            const grouped = Object.create(null);
-            rows.forEach(item => {
-                const displayName = (item.cardName || 'Outros').trim();
-                const key = displayName.toLowerCase();
-                if (!grouped[key]) grouped[key] = { displayName, items: [] };
-                grouped[key].items.push(item);
-            });
-            return Object.values(grouped).map(group => `
-                <h4 class="projection-card-heading">💳 ${sanitizeHtml(group.displayName)} (${group.items.length})</h4>
+            return groupCreditInstallments(rows).map(group => `
+                <h4 class="projection-card-heading">💳 ${sanitizeHtml(group.name)} (${group.items.length})</h4>
                 ${renderProjectionRows(group.items)}`).join('');
         };
 
         const renderProjectionDetails = (groups) => groups.filter(group => group.rows.length).map(group => `
             <div class="monthly-snapshot-section">
                 <h3><span>${group.label}</span><strong class="monthly-snapshot-row-value">${formatCurrency(group.total)}</strong></h3>
-                ${group.groupByCard ? renderProjectionCardRows(group.rows) : renderProjectionRows(group.rows)}
+                ${group.groupByCard ? renderProjectionCardRows(group.rows) : renderProjectionRows(group.rows, group.truncateNames)}
             </div>`).join('') || '<p class="monthly-snapshot-caption">Nenhuma despesa prevista neste mês.</p>';
 
         const renderMonthlyProjection = () => {
@@ -7636,13 +7821,7 @@
         // Usa somente a fotografia consultada; reorganizar os cadastros atuais não altera meses encerrados.
         // Fixas e Outros já conservam na fotografia sua ordem manual ou automática por vencimento.
         const orderHistoricalInstallments = (items) => {
-            const groups = Object.create(null);
-            (items || []).forEach(item => {
-                const key = (item.cardName || 'Outros').trim().toLowerCase();
-                if (!groups[key]) groups[key] = [];
-                groups[key].push(item);
-            });
-            return Object.values(groups).flat();
+            return groupCreditInstallments(items || []).flatMap(group => group.items);
         };
 
         // Renderiza o mês corrente (dinâmico) e até 12 fotografias salvas de períodos encerrados.
@@ -7678,9 +7857,12 @@
                 if (previous) {
                     const difference = moneyDifference(total, previous.totals.grandTotal);
                     const percent = previous.totals.grandTotal > 0 ? Math.round(Math.abs(difference / previous.totals.grandTotal) * 100) : null;
+                    // Fragmentos de apresentação mantêm quantia e referência juntas quando houver espaço.
+                    const comparisonAmount = `<span class="monthly-history-amount">${percent === null ? (difference > 0 ? '+' : '−') : ''}${formatCurrency(Math.abs(difference))}</span>`;
+                    const comparisonPeriod = `<span class="monthly-history-reference">vs. ${sanitizeHtml(previous.label)}</span>`;
                     const comparisonText = difference === 0
-                        ? `Sem variação vs. ${sanitizeHtml(previous.label)}`
-                        : `${difference > 0 ? '+' : '−'}${percent === null ? '' : `${percent}% · `}${formatCurrency(Math.abs(difference))} vs. ${sanitizeHtml(previous.label)}`;
+                        ? `Sem variação ${comparisonPeriod}`
+                        : `${percent === null ? '' : `${difference > 0 ? '+' : '−'}${percent}% · `}${comparisonAmount} ${comparisonPeriod}`;
                     const comparisonClass = difference > 0 ? 'up' : (difference < 0 ? 'down' : 'neutral');
                     changeHtml = `<span class="monthly-snapshot-change ${comparisonClass}">${comparisonText}</span>`;
                 } else {
@@ -7701,15 +7883,13 @@
                 return `
                     <!-- Os cartões começam recolhidos para manter a lista dos meses compacta; toque para ver os detalhes. -->
                     <details class="monthly-snapshot-card">
-                        <summary>
-                            <div class="monthly-snapshot-main">
+                        <summary class="monthly-history-summary">
+                            <div class="monthly-history-heading">
                                 <span class="monthly-snapshot-period">${sanitizeHtml(snapshot.label)}${isCurrent ? ' · Atual' : ''}</span>
-                                <span class="monthly-snapshot-caption">${caption} · Variáveis ${formatCurrency(snapshot.totals.variable)}</span>
-                            </div>
-                            <div>
                                 <div class="monthly-snapshot-total">${formatCurrency(total)}</div>
-                                ${changeHtml}
                             </div>
+                            <span class="monthly-snapshot-caption">${caption} · <span class="monthly-history-variable">Variáveis <span class="monthly-history-amount">${formatCurrency(snapshot.totals.variable)}</span></span></span>
+                            ${changeHtml}
                         </summary>
                         <div class="monthly-snapshot-metrics">
                             <div class="monthly-snapshot-metric"><span>Variáveis</span><strong>${formatCurrency(snapshot.totals.variable)}</strong></div>
@@ -7929,20 +8109,10 @@
             // As categorias parceladas do Consolidado usam o mesmo rótulo compacto das listas.
             let activeInstallmentsList = creditInstallments.filter(i => isInstallmentDueInPeriod(i, getMonthKey()));
             if (activeInstallmentsList.length > 0) {
-                const groupedActive = Object.create(null);
-                activeInstallmentsList.forEach(item => {
-                    const rawCard = (item.cardName || 'Outros').trim();
-                    const cardKey = rawCard.toLowerCase();
-                    if (!groupedActive[cardKey]) {
-                        groupedActive[cardKey] = { displayName: rawCard, items: [] };
-                    }
-                    groupedActive[cardKey].items.push(item);
-                });
-
-                Object.values(groupedActive).forEach(group => {
+                groupCreditInstallments(activeInstallmentsList).forEach(group => {
                     creditBreakdownHtml += `
                         <div style="font-size: 0.85rem; font-weight: 700; color: var(--text-main); background: var(--border-color); padding: 6px 10px; border-radius: 6px; margin-top: 8px; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center;">
-                            <span>💳 ${sanitizeHtml(group.displayName)} (${group.items.length})</span>
+                            <span>💳 ${sanitizeHtml(group.name)} (${group.items.length})</span>
                         </div>
                     `;
                     // O último lançamento de cada banco dispensa a linha inferior.
