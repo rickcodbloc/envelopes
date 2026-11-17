@@ -593,6 +593,34 @@
             min-width: 0;
         }
 
+        /* Reflexo temporário após salvar: a máscara restringe o brilho ao contorno de 1px. */
+        .envelope-save-feedback {
+            position: absolute;
+            inset: -1px;
+            z-index: 1;
+            border-radius: inherit;
+            padding: 1px;
+            overflow: hidden;
+            pointer-events: none;
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+        }
+
+        .envelope-save-sheen {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        transform: translateX(-70%);
+        background: linear-gradient(110deg,
+            transparent 30%,
+            color-mix(in srgb, var(--primary) 65%, transparent) 44%,
+            color-mix(in srgb, var(--primary) 15%, white) 50%,
+            color-mix(in srgb, var(--primary) 65%, transparent) 56%,
+            transparent 70%);
+        }
+
         .envelope-header {
             display: flex;
             align-items: center;
@@ -9082,8 +9110,8 @@
 
         // Realça apenas o envelope visível após salvar um gasto do mês atual.
         // Aguarda 350ms para permitir a saída do modal e separar o início do destaque da atualização da barra.
-        // O destaque dura 1600ms, sem atrasar a gravação nem bloquear a interação.
-        // O anel de 1px usa a cor do tema; a borda e a sombra originais ficam preservadas.
+        // Uma passagem da esquerda para a direita em 1600ms, sem atrasar a gravação nem bloquear a interação.
+        // O reflexo fica no contorno de 1px; a borda e a sombra originais ficam preservadas.
         const highlightSavedEnvelope = (envelopeId) => {
             if (currentView !== 'home' || getTopModal() || uiMotionPreference.matches) return;
             const list = document.getElementById('envelope-list');
@@ -9098,17 +9126,53 @@
                 const viewport = list.getBoundingClientRect();
                 if (bounds.width <= 0 || bounds.height <= 0 || bounds.bottom <= viewport.top
                     || bounds.top >= viewport.bottom || bounds.right <= viewport.left || bounds.left >= viewport.right) return;
-                const style = getComputedStyle(card);
-                const shadow = style.boxShadow === 'none' ? '' : `${style.boxShadow}, `;
-                const themeColor = style.getPropertyValue('--primary').trim();
-                const resting = `${shadow}0 0 0 1px transparent`;
-                const highlighted = `${shadow}0 0 0 1px color-mix(in srgb, ${themeColor} 55%, transparent)`;
-                // Uma única passagem de 1600ms; nenhum estilo permanece após a conclusão.
-                playLocalFeedback(card, [
-                    { boxShadow: resting },
-                    { boxShadow: highlighted, offset: 0.2 },
-                    { boxShadow: resting }
-                ], { duration: 1600, easing: 'ease-out' });
+
+                // Sem suporte à máscara, mantém o destaque anterior, sem cobrir o conteúdo.
+                const supportsBorderMask = typeof CSS !== 'undefined'
+                    && (CSS.supports('mask-composite', 'exclude') || CSS.supports('-webkit-mask-composite', 'xor'));
+                if (!supportsBorderMask) {
+                    const style = getComputedStyle(card);
+                    const shadow = style.boxShadow === 'none' ? '' : `${style.boxShadow}, `;
+                    const themeColor = style.getPropertyValue('--primary').trim();
+                    const resting = `${shadow}0 0 0 1px transparent`;
+                    const highlighted = `${shadow}0 0 0 1px color-mix(in srgb, ${themeColor} 55%, transparent)`;
+                    playLocalFeedback(card, [
+                        { boxShadow: resting },
+                        { boxShadow: highlighted, offset: 0.2 },
+                        { boxShadow: resting }
+                    ], { duration: 1600, easing: 'ease-out' });
+                    return;
+                }
+
+                // Reinicia somente o reflexo deste envelope, sem acumular camadas.
+                const previous = card.querySelector('.envelope-save-feedback');
+                if (previous) {
+                    stopLocalFeedback(previous.firstElementChild);
+                    previous.remove();
+                }
+                const feedback = document.createElement('div');
+                feedback.className = 'envelope-save-feedback';
+                feedback.setAttribute('aria-hidden', 'true');
+                const sheen = document.createElement('div');
+                sheen.className = 'envelope-save-sheen';
+                feedback.appendChild(sheen);
+                card.appendChild(feedback);
+
+                // A máscara permanece fixa; apenas o reflexo se desloca e desaparece.
+                playLocalFeedback(sheen, [
+                    { transform: 'translateX(-70%)', opacity: 0 },
+                    { opacity: 1, offset: 0.15 },
+                    { opacity: 1, offset: 0.85 },
+                    { transform: 'translateX(70%)', opacity: 0 }
+                ], { duration: 1600, easing: 'ease-in-out' });
+                const animation = localFeedbackAnimations.get(sheen);
+                if (animation) {
+                    const cleanup = () => feedback.remove();
+                    animation.addEventListener('finish', cleanup, { once: true });
+                    animation.addEventListener('cancel', cleanup, { once: true });
+                } else {
+                    feedback.remove();
+                }
             }, 350);
         };
 
