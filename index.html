@@ -535,6 +535,8 @@
 
         /* Container de Telas de Visualização Cheia (SPA) */
         .full-view-container {
+            /* v61: dimensão exclusiva das ações superiores internas; não altera o cabeçalho inicial. */
+            --section-control-size: 44px;
             display: none;
             flex: 1;
             overflow-y: auto;
@@ -666,6 +668,34 @@
 
         /* Botões superiores das categorias e telas auxiliares:
         mesma área de toque, preservando todos os ícones originais. */
+        /* v61: a coluna do título pode encolher e quebrar por palavras; as ações ficam juntas. */
+        .module-heading {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 4px;
+        }
+
+        .module-title-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 0;
+        }
+
+        .module-heading h2 {
+            margin: 0;
+            min-width: 0;
+            font-size: 1.25rem;
+            line-height: 1.25;
+            overflow-wrap: anywhere;
+        }
+
+        .module-title-text { min-width: 0; }
+        .module-title-group > svg,
+        .module-heading-icon { flex: 0 0 20px; }
+
         .section-header-actions {
             display: flex;
             align-items: center;
@@ -675,9 +705,9 @@
 
         .section-header-actions .card-btn,
         .section-action-button {
-            width: 38px;
-            height: 38px;
-            flex: 0 0 38px;
+            width: var(--section-control-size);
+            height: var(--section-control-size);
+            flex: 0 0 var(--section-control-size);
             padding: 0 !important;
         }
 
@@ -709,13 +739,10 @@
 
         /* Proteção responsiva para telas estreitas, como iPhones compactos. */
         @media (max-width: 360px) {
+            .module-heading { gap: 6px; }
+            .module-title-group { gap: 4px; }
+            .module-heading h2 { font-size: 1.1rem; }
             .section-header-actions { gap: 8px; }
-            .section-header-actions .card-btn, .section-action-button { width: 34px; height: 34px; flex-basis: 34px; }
-
-            #view-other-commitments .full-view-content > div:first-child > h2 {
-                font-size: 1.02rem !important;
-                gap: 5px !important;
-            }
 
             .section-total { padding: 10px 9px; gap: 6px; }
             .section-total > strong { font-size: 0.9rem !important; }
@@ -1428,10 +1455,10 @@
            das demais telas/modais e o contorno do Histórico mensal. O resumo distingue
            registros de gastos, compromissos mensais e orçamento exclusivo dos envelopes.
            is-wide é reservado a quantias acima de 16 caracteres já formatados em BRL. */
-        #view-financial-report > .full-view-content { background: transparent; border-color: transparent; box-shadow: none; }
-        #view-financial-report .financial-report-heading { flex-wrap: wrap; gap: 12px; }
-        #view-financial-report .financial-report-heading > div:first-child { min-width: 0; max-width: 100%; }
-        #view-financial-report .financial-report-heading .card-btn { min-width: 44px; min-height: 44px; }
+        /* v61: conserva a composição aberta no celular; acima de 600px herda a moldura das telas internas. */
+        @media (max-width: 600px) {
+            #view-financial-report > .full-view-content { background: transparent; border-color: transparent; box-shadow: none; }
+        }
         #view-financial-report .financial-title-copy { min-width: 0; }
         #view-financial-report .financial-title-copy h2 { overflow-wrap: anywhere; }
         #view-financial-report .financial-period { margin-top: 3px; color: var(--text-muted); font-size: 0.82rem; }
@@ -1445,13 +1472,13 @@
         #view-financial-report .financial-metric-label { position: relative; min-width: 0; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         #view-financial-report .financial-label-short { display: none; }
         #view-financial-report .financial-money { min-width: 0; max-width: 100%; overflow-wrap: anywhere; text-align: right; font-variant-numeric: tabular-nums; }
-        #view-financial-report .financial-budget { display: grid; gap: 10px; border-color: var(--border-color); }
+        #view-financial-report .financial-budget { display: grid; gap: 10px; }
         #view-financial-report .financial-budget h3 { margin: 0 0 2px; font-size: 0.95rem; font-weight: 600; }
         #view-financial-report .financial-budget-remaining { padding-top: 10px; border-top: 1px solid var(--border-color); }
         #view-financial-report .financial-budget-over .financial-money { color: var(--danger); }
         #view-financial-report .financial-notice { margin: 0; padding: 10px 12px; border-left: 3px solid var(--primary); border-radius: 4px; color: var(--text-main); background: var(--primary-light-bg); font-size: 0.85rem; line-height: 1.45; }
         #view-financial-report .financial-notice-over { border-left-color: var(--danger); }
-        #view-financial-report .financial-section { min-width: 0; padding: 12px 14px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px; }
+        #view-financial-report .financial-section { min-width: 0; padding: 12px 14px; background: var(--card-bg); border: 1px solid var(--input-border); border-radius: 10px; }
         #view-financial-report .financial-section > summary { min-height: 44px; gap: 6px; }
         #view-financial-report .financial-section .report-summary-row { gap: 10px; }
         #view-financial-report .financial-section .report-summary-count { font-size: 0.8rem; }
@@ -1486,7 +1513,7 @@
 
         /* Mesmo contorno nas categorias do Consolidado e nos cartões do Histórico mensal. */
         #financial-report-body > .report-details,
-        .monthly-snapshot-card { border: 2px solid var(--border-color); }
+        .monthly-snapshot-card { border: 1px solid var(--input-border); }
 
         .report-details summary::-webkit-details-marker { display: none; }
         
@@ -2027,7 +2054,7 @@
         /* Visão mensal: a faixa usa a altura da seta existente. As duas colunas
            laterais iguais mantêm o seletor centralizado mesmo com ícones de tamanhos diferentes. */
         .monthly-view-header {
-            --monthly-header-edge: 38px;
+            --monthly-header-edge: var(--section-control-size);
             display: grid;
             grid-template-columns: var(--monthly-header-edge) minmax(0, 1fr) var(--monthly-header-edge);
             align-items: center;
@@ -2035,7 +2062,7 @@
             margin-bottom: 8px;
         }
         @media (max-width: 360px) {
-            .monthly-view-header { --monthly-header-edge: 34px; }
+            .monthly-view-header { gap: 8px; }
         }
         .monthly-view-tabs {
             display: grid;
@@ -2188,7 +2215,7 @@
             max-width: 320px;
             padding: 8px 12px;
             background: var(--card-bg);
-            border: 1px solid var(--border-color);
+            border: 1px solid var(--input-border);
             border-radius: 10px;
         }
         .donut-legend-label {
@@ -2511,10 +2538,10 @@
         <!-- 1. Tela de Despesas Fixas -->
         <div id="view-fixed-expenses" class="full-view-container">
             <div class="full-view-content">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                    <div style="display:flex; align-items:center; gap:8px;">
-                        <div style="width:20px; height:20px; display:flex; align-items:center; justify-content:center; color:var(--primary);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg></div>
-                        <h2 style="margin: 0; font-size: 1.25rem;">Despesas fixas</h2>
+                <div class="module-heading">
+                    <div class="module-title-group">
+                        <div class="module-heading-icon" style="width:20px; height:20px; display:flex; align-items:center; justify-content:center; color:var(--primary);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg></div>
+                        <h2>Despesas fixas</h2>
                     </div>
                     <div class="section-header-actions">
                         <button class="card-btn" onclick="openFixedExpenseModal()" title="Adicionar Despesa Fixa" style="background: var(--primary-light-bg); padding: 7px; border-radius: 8px; color: var(--primary); display: flex; align-items: center; justify-content: center;">
@@ -2539,10 +2566,10 @@
         <!-- 2. Tela de Parcelamentos -->
         <div id="view-credit-installments" class="full-view-container">
             <div class="full-view-content">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                    <h2 style="margin: 0; font-size: 1.25rem; display: flex; align-items: center; gap: 8px;">
+                <div class="module-heading">
+                    <h2 class="module-title-group">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-                        Parcelamentos
+                        <span class="module-title-text">Parcelamentos</span>
                     </h2>
                     <div class="section-header-actions">
                         <button class="card-btn" onclick="openCreditInstallmentModal()" title="Adicionar Compra Parcelada" style="background: var(--primary-light-bg); padding: 7px; border-radius: 8px; color: var(--primary); display: flex; align-items: center; justify-content: center;">
@@ -2565,10 +2592,10 @@
         </div>
         <div id="view-other-commitments" class="full-view-container">
             <div class="full-view-content">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                    <h2 style="margin: 0; font-size: 1.25rem; display: flex; align-items: center; gap: 8px;">
+                <div class="module-heading">
+                    <h2 class="module-title-group">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
-                        Outros compromissos
+                        <span class="module-title-text">Outros compromissos</span>
                     </h2>
                     <div class="section-header-actions">
                         <button class="card-btn" onclick="openOtherCommitmentModal()" title="Adicionar Compromisso" style="background: var(--primary-light-bg); padding: 7px; border-radius: 8px; color: var(--primary); display: flex; align-items: center; justify-content: center;">
@@ -2592,10 +2619,10 @@
         <!-- 3. Tela de Relatório Financeiro -->
         <div id="view-financial-report" class="full-view-container">
             <div class="full-view-content">
-                <div class="financial-report-heading" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                    <div style="display:flex; align-items:center; gap:8px;">
-                        <div style="width:20px; height:20px; display:flex; align-items:center; justify-content:center; color:var(--primary);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg></div>
-                        <div class="financial-title-copy"><h2 style="margin:0; font-size: 1.25rem;">Consolidado</h2><p id="financial-report-period" class="financial-period"></p></div>
+                <div class="module-heading financial-report-heading">
+                    <div class="module-title-group">
+                        <div class="module-heading-icon" style="width:20px; height:20px; display:flex; align-items:center; justify-content:center; color:var(--primary);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg></div>
+                        <div class="financial-title-copy"><h2>Consolidado</h2><p id="financial-report-period" class="financial-period"></p></div>
                     </div>
                     <div class="section-header-actions">
                         <button class="card-btn" onclick="showFullView('graficos')" title="Análise Visual (Gráficos)" aria-label="Análise Visual (Gráficos)" style="background: var(--primary-light-bg); padding: 7px; border-radius: 8px; color: var(--primary); display: flex; align-items: center; justify-content: center;">
@@ -2615,10 +2642,10 @@
         <div id="view-graficos" class="full-view-container">
             <div class="full-view-content">
                 <!-- Permite acomodar o título e a opção de histórico em telas pequenas. -->
-                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 12px;">
-                    <div style="display:flex; align-items:center; gap:8px;">
-                        <div style="width:20px; height:20px; display:flex; align-items:center; justify-content:center; color:var(--primary);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path><path d="M22 12A10 10 0 0 0 12 2v10z"></path></svg></div>
-                        <h2 style="margin:0; font-size: 1.25rem;">Análise Visual</h2>
+                <div class="module-heading">
+                    <div class="module-title-group">
+                        <div class="module-heading-icon" style="width:20px; height:20px; display:flex; align-items:center; justify-content:center; color:var(--primary);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path><path d="M22 12A10 10 0 0 0 12 2v10z"></path></svg></div>
+                        <h2>Análise Visual</h2>
                     </div>
                     <button class="card-btn section-action-button" onclick="showFullView('relatorio')" title="Voltar ao modo de dados" aria-label="Voltar ao modo de dados" style="background: var(--primary-light-bg); padding: 7px; border-radius: 8px; color: var(--primary); display: flex; align-items: center; justify-content: center;">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
