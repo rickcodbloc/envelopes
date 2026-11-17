@@ -1511,9 +1511,10 @@
             #view-financial-report .financial-budget { padding: 14px; }
         }
 
-        /* Mesmo contorno nas categorias do Consolidado e nos cartões do Histórico mensal. */
-        #financial-report-body > .report-details,
-        .monthly-snapshot-card { border: 1px solid var(--input-border); }
+        /* v62: contornos por contexto. O Consolidado mantém seus blocos delimitados;
+           os cartões mensais do Histórico/Projeção retomam o contorno mais claro anterior. */
+        #financial-report-body > .report-details { border: 1px solid var(--input-border); }
+        .monthly-snapshot-card { border: 2px solid var(--border-color); }
 
         .report-details summary::-webkit-details-marker { display: none; }
         
@@ -1605,6 +1606,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            min-width: 0;
+            overflow-wrap: anywhere;
         }
 
         .switch {
@@ -2040,6 +2043,9 @@
         .monthly-snapshot-row:last-child { border-bottom: 0; }
         .monthly-snapshot-row-name { flex: 1; min-width: 0; overflow-wrap: anywhere; }
         .monthly-snapshot-row-value { flex-shrink: 0; color: var(--text-main); font-weight: 600; white-space: nowrap; }
+        /* v62: identificação discreta dentro do mês expandido, sem reproduzir as faixas do módulo. */
+        .monthly-snapshot-bank-heading { margin: 10px 0 3px; color: var(--text-muted); font-size: 0.8rem; font-weight: 600; line-height: 1.4; overflow-wrap: anywhere; }
+        .monthly-snapshot-installment { display: block; margin-top: 2px; }
         /* No par gasto/orçamento, cada valor fica inteiro e o nome conserva espaço em telas estreitas. */
         .monthly-snapshot-row-value.monthly-snapshot-pair { max-width: calc(100% - 3rem); text-align: right; white-space: normal; }
         .monthly-snapshot-pair > span { display: inline-block; white-space: nowrap; }
@@ -2055,6 +2061,8 @@
            laterais iguais mantêm o seletor centralizado mesmo com ícones de tamanhos diferentes. */
         .monthly-view-header {
             --monthly-header-edge: var(--section-control-size);
+            /* v62: a espessura da pílula é independente da área de toque do retorno. */
+            --monthly-tabs-height: 38px;
             display: grid;
             grid-template-columns: var(--monthly-header-edge) minmax(0, 1fr) var(--monthly-header-edge);
             align-items: center;
@@ -2062,14 +2070,14 @@
             margin-bottom: 8px;
         }
         @media (max-width: 360px) {
-            .monthly-view-header { gap: 8px; }
+            .monthly-view-header { --monthly-tabs-height: 34px; gap: 8px; }
         }
         .monthly-view-tabs {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
             justify-self: center;
             width: min(100%, 208px);
-            height: var(--monthly-header-edge);
+            height: var(--monthly-tabs-height);
             gap: 2px;
             padding: 2px;
             border-radius: 9px;
@@ -2215,16 +2223,17 @@
             max-width: 320px;
             padding: 8px 12px;
             background: var(--card-bg);
-            border: 1px solid var(--input-border);
+            border: 1px solid var(--border-color);
             border-radius: 10px;
         }
         .donut-legend-label {
             font-size: 0.88rem;
             font-weight: 500;
             color: var(--text-main) !important;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+            /* v62: nomes completos legíveis, com quebra apenas quando a largura exigir. */
+            min-width: 0;
+            white-space: normal;
+            overflow-wrap: anywhere;
         }
         .donut-legend-value {
             font-size: 0.88rem;
@@ -2971,7 +2980,7 @@
                 <p class="modal-subtitle" style="color: var(--danger); font-weight: 600;">Atenção: Esta ação apagará envelopes, gastos, despesas fixas, parcelamentos, outros compromissos e históricos, além de redefinir o tema e as ordenações.</p>
                 <div class="modal-buttons">
                     <button class="btn btn-cancel" onclick="closeModal('modal-restore')">Cancelar</button>
-                    <button class="btn btn-danger" onclick="confirmRestoreApp()">Restaurar</button>
+                    <button class="btn btn-danger" onclick="confirmRestoreApp()">Redefinir</button>
                 </div>
             </div>
         </div>
@@ -7001,7 +7010,8 @@
                     descSpan.textContent = item.name;
 
                     const detailsDiv = document.createElement('div');
-                    detailsDiv.style.cssText = 'display: flex; align-items: center; gap: 8px; margin-top: 3px;';
+                    // v62: valor e indicador conservam o conteúdo e podem ocupar linhas separadas.
+                    detailsDiv.style.cssText = 'display: flex; align-items: center; gap: 8px; margin-top: 3px; flex-wrap: wrap;';
 
                     const amtSpan = document.createElement('span');
                     amtSpan.className = 'history-amount';
@@ -8056,7 +8066,7 @@
             selectMonthlyView('history', true);
         };
 
-        // Histórico: reproduz a sequência dos grupos do módulo de Parcelamentos, sem seus títulos.
+        // Ordenação do Histórico: reproduz a sequência dos grupos do módulo de Parcelamentos.
         // Usa somente a fotografia consultada; reorganizar os cadastros atuais não altera meses encerrados.
         // Fixas e Outros já conservam na fotografia sua ordem manual ou automática por vencimento.
         const orderHistoricalInstallments = (items) => {
@@ -8081,9 +8091,17 @@
             const byPeriod = new Map(archived.map(item => [item.periodKey, item]));
             const previousCurrent = byPeriod.get(shiftMonthKey(currentKey, -1)) || null;
 
-            const renderRows = (items, emptyLabel) => {
+            const renderRows = (items, emptyLabel, showInstallment = false) => {
                 if (!items || items.length === 0) return `<div class="monthly-snapshot-caption">${emptyLabel}</div>`;
-                return items.map(item => `<div class="monthly-snapshot-row"><span class="monthly-snapshot-row-name">${sanitizeHtml(item.name)}</span><span class="monthly-snapshot-row-value">${formatCurrency(item.amount)}</span></div>`).join('');
+                return items.map(item => {
+                    // v62: usa somente a referência preservada no registro; não recalcula parcelas passadas.
+                    const current = Number(item.currentInstallment);
+                    const total = Number(item.totalInstallments);
+                    const installment = showInstallment && Number.isInteger(current) && Number.isInteger(total)
+                        && total > 1 && current >= 1 && current <= total
+                        ? `<span class="monthly-snapshot-caption monthly-snapshot-installment">Parc. ${current}/${total}</span>` : '';
+                    return `<div class="monthly-snapshot-row"><span class="monthly-snapshot-row-name">${sanitizeHtml(item.name)}${installment}</span><span class="monthly-snapshot-row-value">${formatCurrency(item.amount)}</span></div>`;
+                }).join('');
             };
             // Data real dos lançamentos pertence somente a envelopes/avulsos; vencimento não é pagamento.
             const renderExpenseRows = (items) => [...(items || [])].sort(compareExpenseDatesNewestFirst).map(entry => {
@@ -8116,8 +8134,12 @@
                 const standaloneTotal = (snapshot.standaloneExpenses || []).reduce((sum, entry) => sum + entry.amount, 0);
                 const standaloneSection = standaloneRows ? `<div class="monthly-snapshot-expense-group"><div class="monthly-snapshot-row"><span class="monthly-snapshot-row-name">${standaloneExpenseIcon} Gastos avulsos</span><span class="monthly-snapshot-row-value monthly-snapshot-pair"><span>${formatCurrency(standaloneTotal)}</span></span></div><div style="padding-left:12px;">${standaloneRows}</div></div>` : '';
                 const fixedRows = renderRows(snapshot.fixedExpenses, 'Nenhuma despesa fixa contabilizada neste mês.');
-                const creditRows = renderRows(orderHistoricalInstallments(snapshot.creditInstallments), 'Nenhum parcelamento ativo.');
-                const otherRows = renderRows(snapshot.otherCommitments, 'Nenhum outro compromisso ativo.');
+                // v62: os títulos pertencem à fotografia consultada; a sequência histórica anterior é mantida.
+                const creditItems = orderHistoricalInstallments(snapshot.creditInstallments);
+                const creditRows = creditItems.length ? groupCreditInstallments(creditItems).map(group =>
+                    `<h4 class="monthly-snapshot-bank-heading">${sanitizeHtml(group.name)}</h4>${renderRows(group.items, '', true)}`
+                ).join('') : renderRows(creditItems, 'Nenhum parcelamento ativo.');
+                const otherRows = renderRows(snapshot.otherCommitments, 'Nenhum outro compromisso ativo.', true);
                 const caption = isCurrent ? 'Em andamento' : 'Encerrado';
                 return `
                     <!-- Os cartões começam recolhidos para manter a lista dos meses compacta; toque para ver os detalhes. -->

@@ -1,3 +1,4 @@
+// v62: Refinamentos visuais por contexto e identificação dos parcelamentos no Histórico mensal.
 // v61: Harmonia visual das telas internas, com áreas de toque e moldura responsiva do Consolidado.
 // v60: Consolidado com resumo do mês, orçamento dos envelopes e análises contextualizadas.
 // v59: Lupa consulta todos os períodos; recolher a busca restaura o período anterior.
@@ -6,7 +7,7 @@
 // v56: Organização de parcelamentos por banco e despesas, com rascunho e controles compartilhados.
 // v55: Refinamentos visuais do Histórico mensal, seletor de envelope e nomes da Projeção.
 // v54: Mantém retenção de 12 meses e legenda refinada; restaura a abertura e a navegação originais.
-const CACHE_NAME = 'envelopes-cache-v61';
+const CACHE_NAME = 'envelopes-cache-v62';
 
 const ASSETS_TO_CACHE = [
   './',
