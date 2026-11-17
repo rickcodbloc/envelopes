@@ -593,13 +593,13 @@
             min-width: 0;
         }
 
-        /* Reflexo temporário após salvar: a máscara restringe o brilho ao contorno de 1px. */
+        /* Reflexo temporário após salvar: a máscara restringe o brilho ao contorno de 1.20px. */
         .envelope-save-feedback {
             position: absolute;
             inset: -1px;
             z-index: 1;
             border-radius: inherit;
-            padding: 1px;
+            padding: 1.20px;
             overflow: hidden;
             pointer-events: none;
             -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
@@ -9111,7 +9111,7 @@
         // Realça apenas o envelope visível após salvar um gasto do mês atual.
         // Aguarda 350ms para permitir a saída do modal e separar o início do destaque da atualização da barra.
         // Uma passagem da esquerda para a direita em 1600ms, sem atrasar a gravação nem bloquear a interação.
-        // O reflexo fica no contorno de 1px; a borda e a sombra originais ficam preservadas.
+        // O reflexo fica no contorno de 1.20px; a borda e a sombra originais ficam preservadas.
         const highlightSavedEnvelope = (envelopeId) => {
             if (currentView !== 'home' || getTopModal() || uiMotionPreference.matches) return;
             const list = document.getElementById('envelope-list');
@@ -9164,7 +9164,7 @@
                     { opacity: 1, offset: 0.15 },
                     { opacity: 1, offset: 0.85 },
                     { transform: 'translateX(70%)', opacity: 0 }
-                ], { duration: 1600, easing: 'ease-in-out' });
+                ], { duration: 1800, easing: 'ease-in-out' });
                 const animation = localFeedbackAnimations.get(sheen);
                 if (animation) {
                     const cleanup = () => feedback.remove();
