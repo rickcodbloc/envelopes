@@ -8160,8 +8160,8 @@
                 const creditItems = orderHistoricalInstallments(snapshot.creditInstallments);
                 const creditRows = creditItems.length ? groupCreditInstallments(creditItems).map(group =>
                     `<h4 class="monthly-snapshot-bank-heading">${sanitizeHtml(group.name)}</h4>${renderRows(group.items, '', true)}`
-                ).join('') : renderRows(creditItems, 'Nenhum parcelamento ativo.');
-                const otherRows = renderRows(snapshot.otherCommitments, 'Nenhum outro compromisso ativo.', true);
+                ).join('') : renderRows(creditItems, 'Nenhum parcelamento neste mês.');
+                const otherRows = renderRows(snapshot.otherCommitments, 'Nenhum outro compromisso neste mês.', true);
                 const caption = isCurrent ? 'Em andamento' : 'Encerrado';
                 return `
                     <!-- Os cartões começam recolhidos para manter a lista dos meses compacta; toque para ver os detalhes. -->
@@ -8177,13 +8177,13 @@
                         <div class="monthly-snapshot-metrics">
                             <div class="monthly-snapshot-metric"><span>Variáveis</span><strong>${formatCurrency(snapshot.totals.variable)}</strong></div>
                             <div class="monthly-snapshot-metric"><span>Fixas cadastradas</span><strong>${formatCurrency(snapshot.totals.fixed)}</strong></div>
-                            <div class="monthly-snapshot-metric"><span>Parcelamentos ativos</span><strong>${formatCurrency(snapshot.totals.credit)}</strong></div>
+                            <div class="monthly-snapshot-metric"><span>Parcelamentos</span><strong>${formatCurrency(snapshot.totals.credit)}</strong></div>
                             <div class="monthly-snapshot-metric"><span>Outros compromissos</span><strong>${formatCurrency(snapshot.totals.other)}</strong></div>
                         </div>
                         <div class="monthly-snapshot-details">
                             <div class="monthly-snapshot-section"><h3>Envelopes e gastos</h3>${(envelopeSections + standaloneSection) || '<div class="monthly-snapshot-caption">Nenhum envelope registrado neste período.</div>'}</div>
                             <div class="monthly-snapshot-section"><h3>Despesas fixas cadastradas</h3>${fixedRows}</div>
-                            <div class="monthly-snapshot-section"><h3>Parcelamentos ativos</h3>${creditRows}</div>
+                            <div class="monthly-snapshot-section"><h3>Parcelamentos</h3>${creditRows}</div>
                             <div class="monthly-snapshot-section"><h3>Outros compromissos ativos</h3>${otherRows}</div>
                             <div class="monthly-snapshot-caption" style="margin-top:8px;">Total inclui gastos dos envelopes e avulsos, despesas fixas, parcelas e outros compromissos do mês. Não confirma o pagamento dos compromissos.</div>
                         </div>

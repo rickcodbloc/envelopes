@@ -1,3 +1,4 @@
+// v64: Rótulos temporais neutros no Histórico mensal.
 // v63: Mais respiro e quebra organizada das referências na Projeção móvel.
 // v62: Refinamentos visuais por contexto e identificação dos parcelamentos no Histórico mensal.
 // v61: Harmonia visual das telas internas, com áreas de toque e moldura responsiva do Consolidado.
@@ -8,7 +9,7 @@
 // v56: Organização de parcelamentos por banco e despesas, com rascunho e controles compartilhados.
 // v55: Refinamentos visuais do Histórico mensal, seletor de envelope e nomes da Projeção.
 // v54: Mantém retenção de 12 meses e legenda refinada; restaura a abertura e a navegação originais.
-const CACHE_NAME = 'envelopes-cache-v63';
+const CACHE_NAME = 'envelopes-cache-v64';
 
 const ASSETS_TO_CACHE = [
   './',
