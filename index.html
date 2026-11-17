@@ -302,14 +302,6 @@
         transition: background-color 0.2s ease;
     }
 
-        /* Transição suave e efeito de clique para as pílulas de gráficos */
-        .chart-tab-pill {
-            transition: background-color 0.25s ease, color 0.25s ease, transform 0.15s ease;
-        }
-        .chart-tab-pill:active {
-            transform: scale(0.97);
-        }
-
         .header-title {
         grid-column: 2; /* Força o título a ficar sempre na coluna central exata */
         font-size: 1.15rem;
@@ -2059,42 +2051,76 @@
             .monthly-snapshot-total { font-size: 0.86rem; }
         }
 
-        /* Visão mensal: a faixa usa a altura da seta existente. As duas colunas
-           laterais iguais mantêm o seletor centralizado mesmo com ícones de tamanhos diferentes. */
+        /* Colunas laterais iguais mantêm o seletor mensal centralizado entre os ícones. */
         .monthly-view-header {
-            --monthly-header-edge: var(--section-control-size);
-            /* v62: a espessura da pílula é independente da área de toque do retorno. */
-            --monthly-tabs-height: 38px;
             display: grid;
-            grid-template-columns: var(--monthly-header-edge) minmax(0, 1fr) var(--monthly-header-edge);
+            grid-template-columns: var(--section-control-size) minmax(0, 1fr) var(--section-control-size);
             align-items: center;
             gap: 10px;
             margin-bottom: 8px;
         }
         @media (max-width: 360px) {
-            .monthly-view-header { --monthly-tabs-height: 34px; gap: 8px; }
+            .monthly-view-header { gap: 8px; }
         }
-        .monthly-view-tabs {
+
+        /* Seletor textual compartilhado pela Análise Visual e pela Visão mensal.
+           A indicação é pequena; cada opção mantém uma área de toque de pelo menos 44 px de altura. */
+        .view-selector {
+            position: relative;
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
-            justify-self: center;
-            width: min(100%, 208px);
-            height: var(--monthly-tabs-height);
-            gap: 2px;
-            padding: 2px;
-            border-radius: 9px;
-            background: var(--border-color);
+            width: min(100%, 13rem);
+            margin-inline: auto;
         }
-        .monthly-view-tabs .btn {
+        #view-graficos .view-selector { margin-bottom: 10px; }
+        .view-selector > button {
+            appearance: none;
+            min-height: var(--section-control-size);
             min-width: 0;
-            padding: 0 4px;
-            border-radius: 7px;
-            font-size: 0.85rem;
-            color: var(--text-main);
+            padding: 8px 4px 11px;
+            border: 0;
+            border-radius: 5px;
             background: transparent;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            font-weight: 500;
+            line-height: 1.25;
+            overflow-wrap: anywhere;
+            cursor: pointer;
         }
-        .monthly-view-tabs [aria-selected="true"] { background: var(--primary-fill); color: white; }
-        .monthly-view-tabs .btn:focus-visible { outline: 2px solid var(--text-main); outline-offset: -2px; }
+        .view-selector > button:is([aria-selected="true"], [aria-pressed="true"]) { color: var(--primary); }
+        .view-selector > button:focus-visible { outline-offset: -2px; }
+        .view-selector-indicator {
+            position: absolute;
+            left: 0;
+            bottom: 4px;
+            width: 50%;
+            display: grid;
+            justify-items: center;
+            pointer-events: none;
+            transform: translateX(var(--view-selector-preview, var(--view-selector-offset, 0%)));
+            transition: transform 170ms ease-out;
+        }
+        .view-selector-indicator::before {
+            content: '';
+            width: min(24px, 100%);
+            border-top: 2px solid var(--primary);
+            border-radius: 2px;
+        }
+        /* O segundo botão precede o indicador, que segue o estado ARIA confirmado. */
+        .view-selector > button + button:is([aria-selected="true"], [aria-pressed="true"]) + .view-selector-indicator {
+            --view-selector-offset: 100%;
+        }
+        .view-selector.is-draggable {
+            touch-action: pan-y pinch-zoom;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        .view-selector.is-dragging > button { cursor: grabbing; }
+        .view-selector.is-dragging > .view-selector-indicator { transition: none; }
+        @media (prefers-reduced-motion: reduce) {
+            .view-selector-indicator { transition: none; }
+        }
 
         /* Projeção: reutiliza os cartões, subtotais e cores do Histórico. */
         .projection-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 6px; }
@@ -2677,10 +2703,10 @@
                 </div>
                 <p class="modal-subtitle">Acompanhe a distribuição dos seus gastos de forma intuitiva.</p>
 
-                <!-- Botões de Alternância (Pílula) -->
-                <div style="display: flex; background: var(--border-color); padding: 4px; border-radius: 10px; margin-bottom: 16px;">
-                    <button class="btn chart-tab-pill" id="chart-tab-general" aria-pressed="true" onclick="switchChartTab('general')" style="flex: 1; padding: 8px 4px; font-size: 0.85rem; white-space: nowrap; background: var(--primary-fill); color: white; border-radius: 8px;">Geral</button>
-                    <button class="btn chart-tab-pill" id="chart-tab-envelopes" aria-pressed="false" onclick="switchChartTab('envelopes')" style="flex: 1; padding: 8px 4px; font-size: 0.85rem; white-space: nowrap; background: transparent; color: var(--text-main); border-radius: 8px;">Envelopes</button>
+                <div class="view-selector" id="chart-view-selector" role="group" aria-label="Visão da Análise Visual">
+                    <button type="button" id="chart-tab-general" data-view-option="general" aria-pressed="true">Geral</button>
+                    <button type="button" id="chart-tab-envelopes" data-view-option="envelopes" aria-pressed="false">Envelopes</button>
+                    <span class="view-selector-indicator" aria-hidden="true"></span>
                 </div>
 
                 <!-- Container do Gráfico SVG e Legenda -->
@@ -2693,9 +2719,10 @@
             <div class="full-view-content">
                 <div class="monthly-view-header">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"></path><path d="m7 14 4-4 4 3 5-7"></path></svg>
-                    <div class="monthly-view-tabs" role="tablist" aria-label="Visão mensal" onkeydown="handleMonthlyViewKeys(event)">
-                        <button type="button" class="btn chart-tab-pill" id="monthly-tab-history" role="tab" aria-selected="true" aria-controls="monthly-history-panel" onclick="selectMonthlyView('history')">Histórico</button>
-                        <button type="button" class="btn chart-tab-pill" id="monthly-tab-projection" role="tab" aria-selected="false" aria-controls="monthly-projection-panel" tabindex="-1" onclick="selectMonthlyView('projection')">Projeção</button>
+                    <div class="view-selector" id="monthly-view-selector" role="tablist" aria-label="Visão mensal">
+                        <button type="button" id="monthly-tab-history" data-view-option="history" role="tab" aria-selected="true" aria-controls="monthly-history-panel">Histórico</button>
+                        <button type="button" id="monthly-tab-projection" data-view-option="projection" role="tab" aria-selected="false" aria-controls="monthly-projection-panel" tabindex="-1">Projeção</button>
+                        <span class="view-selector-indicator" aria-hidden="true"></span>
                     </div>
                     <button class="card-btn section-action-button" onclick="showFullView('relatorio')" title="Voltar ao relatório financeiro" aria-label="Voltar ao relatório financeiro" style="background:var(--primary-light-bg); padding:7px; color:var(--primary); display:flex; align-items:center; justify-content:center;">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
@@ -5584,26 +5611,136 @@
                 && !document.getElementById('header-options-btn').contains(event.target)) setOptionsDrawerOpen(false);
         });
 
+        // O indicador usa os atributos existentes: botões de gráfico e abas com painéis próprios.
+        const setViewSelectorSelection = (selected) => {
+            const isTabList = selected.hasAttribute('aria-selected');
+            const state = isTabList ? 'aria-selected' : 'aria-pressed';
+            for (const button of selected.parentElement.querySelectorAll('button')) {
+                const active = button === selected;
+                button.setAttribute(state, String(active));
+                if (isTabList) {
+                    button.tabIndex = active ? 0 : -1;
+                    document.getElementById(button.getAttribute('aria-controls')).hidden = !active;
+                }
+            }
+        };
+
+        const bindViewSelector = (selector, selectView) => {
+            const buttons = [...selector.querySelectorAll('button')];
+            const state = buttons[0].hasAttribute('aria-selected') ? 'aria-selected' : 'aria-pressed';
+            let gesture = null;
+            let ignorePointerClick = false;
+
+            const finishGesture = () => {
+                const previous = gesture;
+                gesture = null;
+                if (!previous?.bounds) return;
+                selector.style.removeProperty('--view-selector-preview');
+                selector.classList.remove('is-dragging');
+                if (selector.hasPointerCapture(previous.id)) selector.releasePointerCapture(previous.id);
+            };
+
+            const cancelGesture = () => {
+                ignorePointerClick = true;
+                finishGesture();
+            };
+
+            selector.addEventListener('click', event => {
+                // Um clique de teclado ou tecnologia assistiva continua disponível após o arraste.
+                if (ignorePointerClick && event.detail > 0) {
+                    ignorePointerClick = false;
+                    return;
+                }
+                const button = event.target.closest('button');
+                if (buttons.includes(button)) selectView(button.dataset.viewOption);
+            });
+
+            selector.addEventListener('keydown', event => {
+                if (event.key === 'Escape' && gesture) {
+                    event.preventDefault();
+                    cancelGesture();
+                    return;
+                }
+                if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+                const index = buttons.indexOf(event.target);
+                if (index === -1) return;
+                event.preventDefault();
+                const next = buttons[event.key === 'Home' ? 0 : event.key === 'End' ? 1 : 1 - index];
+                selectView(next.dataset.viewOption);
+                next.focus({ preventScroll: true });
+            });
+
+            // Sem suporte à captura, à rolagem vertical e ao gesto de pinça juntos,
+            // ficam disponíveis os botões normais por toque, clique e teclado.
+            if (!window.PointerEvent || typeof selector.setPointerCapture !== 'function'
+                || !window.CSS?.supports('touch-action', 'pan-y pinch-zoom')) return;
+            selector.classList.add('is-draggable');
+
+            const dragThreshold = 8;
+            selector.addEventListener('pointerdown', event => {
+                if (!event.isPrimary) {
+                    if (gesture) cancelGesture();
+                    return;
+                }
+                if (event.button !== 0) return;
+                finishGesture();
+                ignorePointerClick = false;
+                gesture = { id: event.pointerId, x: event.clientX, y: event.clientY, bounds: null };
+            });
+
+            selector.addEventListener('pointermove', event => {
+                if (gesture?.id !== event.pointerId) return;
+                if (!gesture.bounds) {
+                    const dx = Math.abs(event.clientX - gesture.x);
+                    const dy = Math.abs(event.clientY - gesture.y);
+                    if (dx <= dy * 1.25) {
+                        if (dy >= dragThreshold) cancelGesture();
+                        return;
+                    }
+                    if (dx < dragThreshold) return;
+                    gesture.bounds = selector.getBoundingClientRect();
+                    selector.setPointerCapture(event.pointerId);
+                    selector.classList.add('is-dragging');
+                }
+                // Só a posição do traço muda durante o arraste. O conteúdo é atualizado ao soltar.
+                const { left, width } = gesture.bounds;
+                const position = Math.max(0, Math.min(100, (2 * (event.clientX - left) / width - 0.5) * 100));
+                selector.style.setProperty('--view-selector-preview', `${position}%`);
+            });
+
+            selector.addEventListener('pointerup', event => {
+                if (gesture?.id !== event.pointerId) return;
+                const wasDragging = Boolean(gesture.bounds);
+                finishGesture();
+                if (!wasDragging) return;
+                ignorePointerClick = true;
+                const { left, width, top, bottom } = selector.getBoundingClientRect();
+                // Permite uma pequena folga vertical sem confirmar um arraste que saiu da área.
+                if (event.clientY < top - 24 || event.clientY > bottom + 24) return;
+                const next = buttons[event.clientX < left + width / 2 ? 0 : 1];
+                if (next.getAttribute(state) === 'true') return;
+                const hadFocus = selector.contains(document.activeElement);
+                selectView(next.dataset.viewOption);
+                if (hadFocus) next.focus({ preventScroll: true });
+            });
+
+            selector.addEventListener('pointercancel', event => {
+                if (gesture?.id === event.pointerId) cancelGesture();
+            });
+            selector.addEventListener('lostpointercapture', event => {
+                // Ao capturar no grupo, a captura implícita do botão pode ser perdida primeiro.
+                if (event.target === selector && gesture?.id === event.pointerId) cancelGesture();
+            });
+            selector.addEventListener('pointerleave', event => {
+                if (gesture?.id === event.pointerId && !gesture.bounds) finishGesture();
+            });
+        };
+
         let currentChartTab = 'general';
 
         const switchChartTab = (tab) => {
             currentChartTab = tab;
-            const btnGeneral = document.getElementById('chart-tab-general');
-            const btnEnvelopes = document.getElementById('chart-tab-envelopes');
-
-            if (tab === 'general') {
-                btnGeneral.style.background = 'var(--primary-fill)';
-                btnGeneral.style.color = 'white';
-                btnEnvelopes.style.background = 'transparent';
-                btnEnvelopes.style.color = 'var(--text-main)';
-            } else {
-                btnEnvelopes.style.background = 'var(--primary-fill)';
-                btnEnvelopes.style.color = 'white';
-                btnGeneral.style.background = 'transparent';
-                btnGeneral.style.color = 'var(--text-main)';
-            }
-            btnGeneral.setAttribute('aria-pressed', String(tab === 'general'));
-            btnEnvelopes.setAttribute('aria-pressed', String(tab === 'envelopes'));
+            setViewSelectorSelection(document.getElementById(`chart-tab-${tab}`));
             renderGraphicsView();
         };
 
@@ -8057,23 +8194,9 @@
         const selectMonthlyView = (name, entering = false) => {
             const selected = document.getElementById(`monthly-tab-${name}`);
             if (!entering && selected.getAttribute('aria-selected') === 'true') return;
-            document.querySelectorAll('.monthly-view-tabs [role="tab"]').forEach(tab => {
-                const active = tab === selected;
-                tab.setAttribute('aria-selected', String(active));
-                tab.tabIndex = active ? 0 : -1;
-                document.getElementById(tab.getAttribute('aria-controls')).hidden = !active;
-            });
+            setViewSelectorSelection(selected);
             document.getElementById('view-monthly-history').scrollTop = 0;
             renderMonthlyView();
-        };
-
-        const handleMonthlyViewKeys = (event) => {
-            if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
-            event.preventDefault();
-            const other = event.target.id === 'monthly-tab-history' ? 'projection' : 'history';
-            const name = event.key === 'Home' ? 'history' : (event.key === 'End' ? 'projection' : other);
-            selectMonthlyView(name);
-            document.getElementById(`monthly-tab-${name}`).focus();
         };
 
         const openMonthlyView = () => {
@@ -11086,6 +11209,9 @@
         if (storageReadProblems.size || storageRecoveryPending) {
             alert('Não foi possível ler ou recuperar todos os dados locais. O conteúdo original foi preservado e as gravações financeiras foram bloqueadas nesta sessão. Reabra o aplicativo após verificar o armazenamento. Os dados visíveis podem estar incompletos.');
         }
+
+        bindViewSelector(document.getElementById('chart-view-selector'), switchChartTab);
+        bindViewSelector(document.getElementById('monthly-view-selector'), selectMonthlyView);
 
         // Renderização inicial e registro do Service Worker
         // O mês aberto já foi atualizado no processamento inicial.

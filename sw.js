@@ -1,3 +1,4 @@
+// v70: Seletores de texto com indicador curto e arraste em Análise Visual e Visão mensal.
 // v69: Refinamento do destaque dos envelopes, com entrada suave, breve permanência e saída gradual.
 // v66: Raio compartilhado dos botões superiores quadrados de 44px.
 // v65: Alterada regra do respiro e quebra organizada das referências na Projeção para não restringir ao celular.
@@ -12,7 +13,7 @@
 // v56: Organização de parcelamentos por banco e despesas, com rascunho e controles compartilhados.
 // v55: Refinamentos visuais do Histórico mensal, seletor de envelope e nomes da Projeção.
 // v54: Mantém retenção de 12 meses e legenda refinada; restaura a abertura e a navegação originais.
-const CACHE_NAME = 'envelopes-cache-v69';
+const CACHE_NAME = 'envelopes-cache-v70';
 
 const ASSETS_TO_CACHE = [
   './',
