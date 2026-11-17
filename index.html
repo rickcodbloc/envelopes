@@ -2129,6 +2129,26 @@
         .projection-month .monthly-snapshot-section h3 > span { min-width: 0; overflow-wrap: anywhere; }
         .projection-month .monthly-snapshot-section h3 > strong { font-size: 0.92rem; font-weight: 700; }
         .projection-card-heading { margin: 9px 0 3px; color: var(--text-main); font-size: 0.78rem; font-weight: 600; overflow-wrap: anywhere; }
+        /* v63: respiro e quebra organizada das referências na Projeção móvel.
+         Preserva fontes, valores e a apresentação do computador. */
+        @media (max-width: 600px) {
+            #monthly-projection-body .projection-card-heading {
+                margin-top: 12px;
+                margin-bottom: 5px;
+            }
+
+            #monthly-projection-body .projection-installment-name {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: baseline;
+                gap: 2px 6px;
+            }
+
+            #monthly-projection-body .projection-installment-name > span {
+                min-width: 0;
+                max-width: 100%;
+            }
+        }
 
         /* Só envelopes e fixas usam nomes recolhidos. O botão nativo permite toque, Enter e Espaço;
            a expansão é visual e temporária, sem gravar dados nem ocultar informações de parcelas. */
@@ -7873,14 +7893,16 @@
             button.setAttribute('aria-expanded', String(button.getAttribute('aria-expanded') !== 'true'));
         };
 
+        // v63: separa nome e referência para a quebra responsiva da Projeção.
         const renderProjectionRows = (rows, truncateNames = false) => rows.map(item => {
             const name = truncateNames ? `<button type="button" class="monthly-snapshot-row-name projection-name-toggle" aria-expanded="false" title="${sanitizeHtml(item.name)}" onclick="toggleProjectionName(this)">${sanitizeHtml(item.name)}</button>` : '';
+
             return `<div class="monthly-snapshot-row${truncateNames ? ' projection-name-row' : ''}">
-            ${truncateNames
-                ? (getFixedIntervalMonths(item) > 1 ? `<span class="monthly-snapshot-row-name projection-fixed-name">${name}<span class="monthly-snapshot-caption">${fixedRecurrenceLabel(item)}</span></span>` : name)
-                : `<span class="monthly-snapshot-row-name">${sanitizeHtml(item.name)}${item.note ? ` · ${item.note}` : ''}</span>`}
-            <span class="monthly-snapshot-row-value">${formatCurrency(item.amount)}</span>
-        </div>`;
+                ${truncateNames
+                    ? (getFixedIntervalMonths(item) > 1 ? `<span class="monthly-snapshot-row-name projection-fixed-name">${name}<span class="monthly-snapshot-caption">${fixedRecurrenceLabel(item)}</span></span>` : name)
+                    : `<span class="monthly-snapshot-row-name projection-installment-name"><span>${sanitizeHtml(item.name)}</span>${item.note ? `<span class="projection-installment-note"><span class="projection-note-separator"> · </span>${item.note}</span>` : ''}</span>`}
+                <span class="monthly-snapshot-row-value">${formatCurrency(item.amount)}</span>
+            </div>`;
         }).join('');
 
         // Mesma regra de bancos das telas de Parcelamentos e Consolidado: agrupa sem ordenar
