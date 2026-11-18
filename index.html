@@ -2535,6 +2535,15 @@
             pointer-events: none;
         }
 
+        /* Fundo um pouco maior em telas estreitas. */
+        @media (max-width: 600px) {
+            .section-header-actions .card-btn::before,
+            .section-action-button::before,
+            .standalone-add::before {
+                width: 40px;
+                height: 40px;
+            }
+        }
         .standalone-add > svg {
             width: 18px;
             height: 18px;
