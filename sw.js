@@ -1,3 +1,4 @@
+// v75: Respiro nos detalhes da Projeção, título do cenário e referência de última parcela.
 // v74: O mês final do reembolso fica visível e habilita somente nas frequências recorrentes.
 // v73: Rótulos de início das fixas e refinamentos visuais em Ajustar cenário.
 // v72: Reembolsos e listas compactas em Ajustar cenário da Projeção.
@@ -16,7 +17,7 @@
 // v56: Organização de parcelamentos por banco e despesas, com rascunho e controles compartilhados.
 // v55: Refinamentos visuais do Histórico mensal, seletor de envelope e nomes da Projeção.
 // v54: Mantém retenção de 12 meses e legenda refinada; restaura a abertura e a navegação originais.
-const CACHE_NAME = 'envelopes-cache-v74';
+const CACHE_NAME = 'envelopes-cache-v75';
 
 const ASSETS_TO_CACHE = [
   './',

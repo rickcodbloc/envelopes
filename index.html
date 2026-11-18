@@ -2145,6 +2145,8 @@
         .projection-month .monthly-snapshot-change { white-space: normal; overflow-wrap: anywhere; text-align: right; }
         /* Hierarquia exclusiva da projeção: faixa da categoria, subtotal e grupos de cartões.
            Para refinar a densidade, altere estes espaços; os lançamentos mantêm a fonte original. */
+        .projection-month .monthly-snapshot-section + .monthly-snapshot-section { margin-top: 15px; }
+        .projection-month .monthly-snapshot-row { padding: 7px 0; line-height: 1.45; }
         .projection-month .monthly-snapshot-section h3 {
             display: flex;
             justify-content: space-between;
@@ -2163,7 +2165,7 @@
             display: flex;
             flex-wrap: wrap;
             align-items: baseline;
-            gap: 2px 6px;
+            gap: 3px 6px;
         }
 
         #monthly-projection-body .projection-installment-name > span {
@@ -2171,9 +2173,13 @@
             max-width: 100%;
         }
 
+        .projection-last-installment .projection-note-short,
+        .projection-last-installment.is-compact .projection-note-full { display: none; }
+        .projection-last-installment.is-compact .projection-note-short { display: inline; text-decoration: none; }
+
         /* Só envelopes e fixas usam nomes recolhidos. O botão nativo permite toque, Enter e Espaço;
            a expansão é visual e temporária, sem gravar dados nem ocultar informações de parcelas. */
-        .projection-name-row { padding: 2px 0; }
+        .projection-month .projection-name-row { padding: 4px 0; }
         .projection-name-toggle {
             display: block;
             min-height: 24px;
@@ -2229,8 +2235,9 @@
         }
         .projection-disclosure::-webkit-details-marker { display: none; }
         .projection-disclosure-text { min-width: 0; flex: 1; }
-        .projection-scenario-adjustments > summary { color: var(--text-main); font-weight: 500; }
+        .projection-scenario-adjustments > summary { color: var(--text-main); font-weight: 600; }
         .projection-adjustments-optional { color: var(--text-muted); font-weight: 400; }
+        .projection-scenario-adjustments > summary .report-chevron { color: var(--primary); }
         .projection-scenario-adjustments[open] > summary .report-chevron { transform: rotate(180deg); }
         .projection-adjustments-summary {
             display: block;
@@ -8127,11 +8134,10 @@
         if (number === null) return [];
 
         // Apenas apresentação: cobrança única dispensa a indicação redundante 1/1.
-        const note = item.totalInstallments === 1
-            ? 'Parcela única'
-            : `${number}/${item.totalInstallments}${number === item.totalInstallments ? ' · última parcela' : ''}`;
+        const note = item.totalInstallments === 1 ? 'Parcela única' : `${number}/${item.totalInstallments}`;
+        const lastInstallment = item.totalInstallments > 1 && number === item.totalInstallments;
 
-        return [{ name: item.name, amount: item.amount, note, cardName: item.cardName }];
+        return [{ name: item.name, amount: item.amount, note, lastInstallment, cardName: item.cardName }];
         });
 
         // A projeção lê os cadastros atuais, sem montar fotografias do Histórico.
@@ -8156,13 +8162,21 @@
         };
 
         // v63: separa nome e referência para a quebra responsiva da Projeção.
-        const renderProjectionRows = (rows, truncateNames = false) => rows.map(item => {
+        const renderProjectionRows = (rows, { truncateNames = false, fitLastInstallments = false } = {}) => rows.map(item => {
             const name = truncateNames ? `<button type="button" class="monthly-snapshot-row-name projection-name-toggle" aria-expanded="false" title="${sanitizeHtml(item.name)}" onclick="toggleProjectionName(this)">${sanitizeHtml(item.name)}</button>` : '';
+            const canShorten = fitLastInstallments && item.lastInstallment;
+            let note = item.note;
+            if (item.lastInstallment) {
+                const label = canShorten
+                    ? '<span class="projection-note-full">última parcela</span><abbr class="projection-note-short" title="última parcela">última parc.</abbr>'
+                    : 'última parcela';
+                note += ` · ${label}`;
+            }
 
             return `<div class="monthly-snapshot-row${truncateNames ? ' projection-name-row' : ''}">
                 ${truncateNames
                     ? (getFixedIntervalMonths(item) > 1 ? `<span class="monthly-snapshot-row-name projection-fixed-name">${name}<span class="monthly-snapshot-caption">${fixedRecurrenceLabel(item)}</span></span>` : name)
-                    : `<span class="monthly-snapshot-row-name projection-installment-name"><span>${sanitizeHtml(item.name)}</span>${item.note ? `<span class="projection-installment-note"><span class="projection-note-separator"> · </span>${item.note}</span>` : ''}</span>`}
+                    : `<span class="monthly-snapshot-row-name projection-installment-name"><span>${sanitizeHtml(item.name)}</span>${note ? `<span class="projection-installment-note${canShorten ? ' projection-last-installment' : ''}"><span class="projection-note-separator"> · </span>${note}</span>` : ''}</span>`}
                 <span class="monthly-snapshot-row-value">${formatCurrency(item.amount)}</span>
             </div>`;
         }).join('');
@@ -8172,14 +8186,14 @@
         const renderProjectionCardRows = (rows) => {
             return groupCreditInstallments(rows).map(group => `
                 <h4 class="projection-card-heading">💳 ${sanitizeHtml(group.name)} (${group.items.length})</h4>
-                ${renderProjectionRows(group.items)}`).join('');
+                ${renderProjectionRows(group.items, { fitLastInstallments: true })}`).join('');
         };
 
         const renderProjectionDetails = (groups, reimbursement) => {
             const expenses = groups.filter(group => group.rows.length).map(group => `
             <div class="monthly-snapshot-section">
                 <h3><span>${group.label}</span><strong class="monthly-snapshot-row-value">${formatCurrency(group.total)}</strong></h3>
-                ${group.groupByCard ? renderProjectionCardRows(group.rows) : renderProjectionRows(group.rows, group.truncateNames)}
+                ${group.groupByCard ? renderProjectionCardRows(group.rows) : renderProjectionRows(group.rows, { truncateNames: group.truncateNames })}
             </div>`).join('') || '<p class="monthly-snapshot-caption">Nenhuma despesa prevista neste mês.</p>';
             return expenses + (reimbursement > 0 ? `
                 <div class="monthly-snapshot-section monthly-snapshot-row">
@@ -8188,8 +8202,32 @@
                 </div>` : '');
         };
 
+        // Experimenta a abreviação só quando a referência completa cai para outra linha.
+        // Se nem a curta couber junto do nome, volta ao texto completo na linha seguinte.
+        const fitProjectionLastInstallments = (notes) => {
+            const wraps = note => note.getBoundingClientRect().top > note.previousElementSibling.getBoundingClientRect().top + 1;
+            notes.forEach(note => note.classList.remove('is-compact'));
+            const wrapped = Array.from(notes).filter(wraps);
+            wrapped.forEach(note => note.classList.add('is-compact'));
+            wrapped.filter(wraps).forEach(note => note.classList.remove('is-compact'));
+        };
+
+        const projectionBody = document.getElementById('monthly-projection-body');
+        const canObserveProjectionWidth = typeof ResizeObserver === 'function';
+        if (canObserveProjectionWidth) {
+            let previousWidth = 0;
+            new ResizeObserver(([{ contentRect }]) => {
+                if (contentRect.width === previousWidth) return;
+                previousWidth = contentRect.width;
+                if (previousWidth > 0) {
+                    // Altura muda ao aplicar o rótulo. Agenda a leitura fora da entrega do observador.
+                    requestAnimationFrame(() => fitProjectionLastInstallments(projectionBody.querySelectorAll('.projection-month[open] .projection-last-installment')));
+                }
+            }).observe(projectionBody);
+        }
+
         const renderMonthlyProjection = () => {
-            const body = document.getElementById('monthly-projection-body');
+            const body = projectionBody;
             const openPeriods = new Set(Array.from(body.querySelectorAll('details[open]'), card => card.dataset.period));
             const currentKey = getMonthKey();
             const periods = projectionPeriodKeys(currentKey, projectionMonthCount);
@@ -8226,7 +8264,9 @@
             Array.from(body.children).forEach((card, index) => {
                 const details = card.querySelector('.monthly-snapshot-details');
                 const showDetails = () => {
-                    if (card.open && !details.hasChildNodes()) details.innerHTML = renderProjectionDetails(groupsByMonth[index], reimbursementsByMonth[index]);
+                    if (!card.open) return;
+                    if (!details.hasChildNodes()) details.innerHTML = renderProjectionDetails(groupsByMonth[index], reimbursementsByMonth[index]);
+                    if (canObserveProjectionWidth) fitProjectionLastInstallments(details.querySelectorAll('.projection-last-installment'));
                 };
                 showDetails();
                 card.addEventListener('toggle', showDetails);
