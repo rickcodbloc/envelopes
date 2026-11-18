@@ -2229,9 +2229,9 @@
         }
         .projection-disclosure::-webkit-details-marker { display: none; }
         .projection-disclosure-text { min-width: 0; flex: 1; }
-        .projection-adjustments-mark { flex: 0 0 auto; min-width: 12px; text-align: center; }
-        .projection-adjustments-mark::before { content: '+'; }
-        .projection-scenario-adjustments[open] > summary .projection-adjustments-mark::before { content: '−'; }
+        .projection-scenario-adjustments > summary { color: var(--text-main); font-weight: 500; }
+        .projection-adjustments-optional { color: var(--text-muted); font-weight: 400; }
+        .projection-scenario-adjustments[open] > summary .report-chevron { transform: rotate(180deg); }
         .projection-adjustments-summary {
             display: block;
             margin-top: 2px;
@@ -2260,19 +2260,29 @@
         .projection-reimbursement-editor .form-group { margin-bottom: 8px; }
         .projection-reimbursement-editor .form-group input,
         .projection-reimbursement-editor .form-group select { padding: 8px; }
-        .projection-reimbursement-period {
+        #projection-reimbursement-end:disabled {
+            background-color: var(--bg);
+            border-color: var(--border-color);
+            color: var(--text-muted);
+            -webkit-text-fill-color: currentColor;
+            opacity: 1;
+        }
+        /* Valor e frequência usam a coluna maior. A grade empilha os campos em telas estreitas. */
+        .projection-reimbursement-fields {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr));
+            grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
             gap: 0 8px;
+        }
+        @media (max-width: 23em) {
+            .projection-reimbursement-fields { grid-template-columns: minmax(0, 1fr); }
         }
         .projection-reimbursement-add,
         .projection-reimbursement-remove { min-height: 44px; }
         .projection-reimbursement-remove { color: var(--danger); }
-        /* Os controles recolhidos continuam no formulário e participam de Aplicar. */
-        .projection-filter-overflow { margin-top: 4px; }
-        .projection-filter-overflow:not([open]) .projection-overflow-less,
-        .projection-filter-overflow[open] .projection-overflow-more { display: none; }
-        .projection-filter-overflow[open] > summary .report-chevron { transform: rotate(180deg); }
+        .projection-overflow-toggle { width: 100%; margin-top: 4px; text-align: left; }
+        .projection-overflow-toggle[aria-expanded="false"] .projection-overflow-less,
+        .projection-overflow-toggle[aria-expanded="true"] .projection-overflow-more { display: none; }
+        .projection-overflow-toggle[aria-expanded="true"] .report-chevron { transform: rotate(180deg); }
         .projection-overflow-adjusted { color: var(--text-muted); font-weight: 400; }
         #projection-scenario [hidden] { display: none; }
         .projection-filter-group { min-width: 0; border: 0; margin-bottom: 14px; }
@@ -2814,8 +2824,8 @@
             <form method="dialog" novalidate onsubmit="applyProjectionScenario(event)">
                 <details id="projection-scenario-adjustments" class="projection-scenario-adjustments">
                     <summary class="projection-disclosure">
-                        <span class="projection-adjustments-mark" aria-hidden="true"></span>
-                        <span class="projection-disclosure-text">Limite mensal e reembolso (opcionais)<span id="projection-adjustments-summary" class="projection-adjustments-summary" hidden></span></span>
+                        <span class="projection-disclosure-text">Limite mensal e reembolso <span class="projection-adjustments-optional">(opcionais)</span><span id="projection-adjustments-summary" class="projection-adjustments-summary" hidden></span></span>
+                        <svg class="report-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
                     </summary>
                     <div class="projection-adjustments-body">
                         <div class="form-group">
@@ -2827,11 +2837,11 @@
                             <p id="projection-reimbursements-hint" class="monthly-snapshot-caption">Reduz o custo projetado nos meses escolhidos.</p>
                             <div id="projection-reimbursements-list"></div>
                             <div id="projection-reimbursement-editor" class="projection-reimbursement-editor" hidden>
-                                <div class="form-group">
-                                    <label for="projection-reimbursement-amount">Valor do reembolso</label>
-                                    <input type="text" id="projection-reimbursement-amount" inputmode="decimal" maxlength="15" placeholder="Ex. 100,00" autocomplete="off" aria-describedby="projection-reimbursements-hint">
-                                </div>
-                                <div id="projection-reimbursement-period" class="projection-reimbursement-period" hidden>
+                                <div class="projection-reimbursement-fields">
+                                    <div class="form-group">
+                                        <label for="projection-reimbursement-amount">Valor do reembolso</label>
+                                        <input type="text" id="projection-reimbursement-amount" inputmode="decimal" maxlength="15" placeholder="Ex. 100,00" autocomplete="off" aria-describedby="projection-reimbursements-hint">
+                                    </div>
                                     <div class="form-group">
                                         <label for="projection-reimbursement-start">Mês</label>
                                         <select id="projection-reimbursement-start"></select>
@@ -2840,9 +2850,9 @@
                                         <label for="projection-reimbursement-frequency">Frequência</label>
                                         <select id="projection-reimbursement-frequency"></select>
                                     </div>
-                                    <div id="projection-reimbursement-end-field" class="form-group" hidden>
+                                    <div id="projection-reimbursement-end-field" class="form-group">
                                         <label for="projection-reimbursement-end">Até</label>
-                                        <select id="projection-reimbursement-end"></select>
+                                        <select id="projection-reimbursement-end" disabled><option value="">—</option></select>
                                     </div>
                                 </div>
                                 <button type="button" id="projection-reimbursement-remove" class="projection-action projection-reimbursement-remove" hidden>Remover reembolso</button>
@@ -6793,12 +6803,23 @@
                         amountRow.appendChild(dueSpan);
                     }
                     infoDiv.appendChild(amountRow);
-                    if (!dueThisMonth || getFixedIntervalMonths(item) > 1) {
+                    const repeatsEveryMonth = getFixedIntervalMonths(item) === 1;
+                    if (!dueThisMonth || !repeatsEveryMonth) {
                         const scheduled = document.createElement('span');
                         scheduled.className = 'history-date';
-                        scheduled.textContent = getFixedIntervalMonths(item) > 1
-                            ? `${fixedRecurrenceLabel(item)}${scheduledPeriod ? ` · Próxima cobrança ${displayFirstDueMonth(scheduledPeriod)}` : ''}`
-                            : `Agendada para ${displayFirstDueMonth(scheduledPeriod)}`;
+                        if (repeatsEveryMonth) {
+                            scheduled.textContent = `Agendada para ${displayFirstDueMonth(scheduledPeriod)}`;
+                        } else {
+                            scheduled.textContent = fixedRecurrenceLabel(item);
+                            if (scheduledPeriod) {
+                                // O mês inicial futuro indica a primeira cobrança. O rótulo e a data quebram juntos.
+                                const monthLabel = document.createElement('span');
+                                monthLabel.style.whiteSpace = 'nowrap';
+                                const label = isScheduledForLater(item, currentKey) ? 'Início' : 'Próxima';
+                                monthLabel.textContent = `${label} ${displayFirstDueMonth(scheduledPeriod)}`;
+                                scheduled.append(' · ', monthLabel);
+                            }
+                        }
                         infoDiv.appendChild(scheduled);
                     }
 
@@ -8254,31 +8275,32 @@
             const start = get('start');
             const frequency = get('frequency');
             const end = get('end');
-            const periodFields = get('period');
-            const endField = get('end-field');
             const add = get('add');
             const remove = get('remove');
             let drafts = [];
             let periods = [];
             let monthChoices = [];
+            let lastEndMonth = '';
             // null: só resumos. drafts.length: entrada nova ainda no editor.
             let editing = null;
 
             const frequencyLabel = interval => interval === 0 ? 'Uma vez' : fixedRecurrenceLabel({ intervalMonths: interval });
             const monthOptions = choices => choices.map(key => `<option value="${key}">${formatMonthLabelKey(key)}</option>`).join('');
 
-            const updateEndOptions = (preferred = end.value) => {
+            // Em Uma vez, o campo fica visível com um traço. Uma data válida pode voltar ao reativar a recorrência.
+            const updateEndOptions = (preferred = end.disabled ? lastEndMonth : end.value) => {
                 const choices = monthChoices.filter(key => key >= start.value);
-                end.innerHTML = '<option value="">Selecione</option>' + monthOptions(choices);
-                end.value = choices.includes(preferred) ? preferred : '';
+                lastEndMonth = choices.includes(preferred) ? preferred : '';
+                end.disabled = frequency.value === '0';
+                end.innerHTML = end.disabled
+                    ? '<option value="">—</option>'
+                    : '<option value="">Selecione</option>' + monthOptions(choices);
+                end.value = end.disabled ? '' : lastEndMonth;
                 end.setCustomValidity('');
             };
 
-            const syncFields = () => {
-                const hasAmount = !editor.hidden && !!amount.value.trim();
-                periodFields.hidden = !hasAmount;
-                endField.hidden = !hasAmount || frequency.value === '0';
-                add.hidden = !drafts.length && !hasAmount;
+            const syncAddButton = () => {
+                add.hidden = !drafts.length && (editor.hidden || !amount.value.trim());
             };
 
             const renderDrafts = () => {
@@ -8313,7 +8335,7 @@
                     remove.hidden = !item;
                 }
                 renderDrafts();
-                syncFields();
+                syncAddButton();
             };
 
             const saveCurrent = () => {
@@ -8342,7 +8364,7 @@
 
             amount.addEventListener('input', () => {
                 amount.setCustomValidity('');
-                syncFields();
+                syncAddButton();
             });
             start.addEventListener('change', () => {
                 start.setCustomValidity('');
@@ -8350,8 +8372,7 @@
             });
             frequency.addEventListener('change', () => {
                 frequency.setCustomValidity('');
-                end.setCustomValidity('');
-                syncFields();
+                updateEndOptions();
             });
             end.addEventListener('change', () => end.setCustomValidity(''));
             list.addEventListener('click', event => {
@@ -8396,19 +8417,20 @@
             };
         })();
 
-        // Expande somente os itens depois do quinto, preservando sua ordem e seus campos no DOM.
+        // Os itens depois do quinto continuam no formulário. O mesmo botão fica após o último item visível.
         const renderProjectionScenarioRows = (rows, itemName) => {
             const hiddenCount = rows.length - PROJECTION_FILTER_VISIBLE_ITEMS;
             if (hiddenCount <= 0) return rows.join('');
             const label = `${hiddenCount} ${itemName}${hiddenCount === 1 ? '' : 's'}`;
+            const overflowId = `projection-overflow-${itemName}`;
             return rows.slice(0, PROJECTION_FILTER_VISIBLE_ITEMS).join('') + `
-                <details class="projection-filter-overflow" data-item="${itemName}">
-                    <summary class="projection-disclosure">
-                        <span class="projection-disclosure-text"><span class="projection-overflow-more">Ver mais ${label}</span><span class="projection-overflow-less">Recolher ${label}</span><span class="projection-overflow-adjusted" hidden></span></span>
+                <div class="projection-filter-overflow" data-item="${itemName}">
+                    <div id="${overflowId}" hidden>${rows.slice(PROJECTION_FILTER_VISIBLE_ITEMS).join('')}</div>
+                    <button type="button" class="projection-action projection-disclosure projection-overflow-toggle" aria-expanded="false" aria-controls="${overflowId}">
+                        <span class="projection-disclosure-text"><span class="projection-overflow-more">Ver mais ${label}<span class="projection-overflow-adjusted" hidden></span></span><span class="projection-overflow-less">Recolher</span></span>
                         <svg class="report-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                    </summary>
-                    ${rows.slice(PROJECTION_FILTER_VISIBLE_ITEMS).join('')}
-                </details>`;
+                    </button>
+                </div>`;
         };
 
         const updateProjectionHiddenAdjustments = group => {
@@ -8422,6 +8444,18 @@
         };
 
         const projectionScenarioFilters = document.getElementById('projection-scenario-filters');
+        projectionScenarioFilters.addEventListener('click', event => {
+            const button = event.target.closest('.projection-overflow-toggle');
+            if (!button) return;
+            const overflow = document.getElementById(button.getAttribute('aria-controls'));
+            const expanded = overflow.hidden;
+            overflow.hidden = !expanded;
+            button.setAttribute('aria-expanded', String(expanded));
+            // Pelo teclado, o foco segue para o primeiro campo revelado. Pelo toque, apenas a linha é trazida à vista.
+            const target = expanded ? overflow.querySelector('input, select') : button;
+            if (!expanded || event.detail === 0) target.focus({ preventScroll: true });
+            target.scrollIntoView({ block: 'nearest' });
+        });
         projectionScenarioFilters.addEventListener('change', event => {
             const group = event.target.closest('.projection-filter-overflow');
             if (group) updateProjectionHiddenAdjustments(group);
