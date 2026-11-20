@@ -28,7 +28,6 @@
             --primary: #8A05BE;
             --primary-fill: #8A05BE;
             --primary-chart: #8A05BE;
-            --primary-dark: #690491;
             --primary-light-bg: rgba(138, 5, 190, 0.12);
         }
 
@@ -37,7 +36,6 @@
             --primary-progress: #2466CC;
             --primary-fill: #006CE6;
             --primary-chart: #006CE6;
-            --primary-dark: #0058C2;
             --primary-light-bg: rgba(0, 108, 230, 0.12);
         }
 
@@ -47,7 +45,6 @@
         /* Progresso rosa levemente mais claro na aparência clara. */
         --primary-progress: #CC326A;
         --primary-chart: #DC1B5B;
-        --primary-dark: #BE154F;
         --primary-light-bg: rgba(220, 27, 91, 0.12);
         }
 
@@ -76,7 +73,6 @@
             --text-muted: #6C6C6C;
             --danger: #E31A59;
             --success: #1B8148;
-            --warning: #F4A100;
             --border-color: rgba(0, 0, 0, 0.06);
             --input-border: rgba(0, 0, 0, 0.16);
             --dashed-line: rgba(0, 0, 0, 0.16);
@@ -105,7 +101,6 @@
                 --chart-general-installments: #FFB84D;
                 --chart-general-other: #8ADFFF;
                 --chart-extra-lightness: 68%;
-                --primary-dark: #7C19C3;
                 --primary-light-bg: rgba(193, 117, 255, 0.14);
             }
             body[data-theme="blue"]:not([data-color-mode="light"]) {
@@ -115,7 +110,6 @@
                 --primary-header: #1B6CD5;
                 --primary-progress: #4688E5;
                 --primary-chart: #4C99FF;
-                --primary-dark: #055BC4;
                 --primary-light-bg: rgba(76, 153, 255, 0.14);
             }
             body[data-theme="pink"]:not([data-color-mode="light"]) {
@@ -125,7 +119,6 @@
                 --primary-header: #C72E67;
                 --primary-progress: #E85D91;
                 --primary-chart: #FF6299;
-                --primary-dark: #B71550;
                 --primary-light-bg: rgba(255, 98, 153, 0.14);
             }
 
@@ -136,7 +129,6 @@
                 --text-muted: #8E8E93;
                 --danger: #FF453A;
                 --success: #32D74B;
-                --warning: #FFD60A;
                 --border-color: rgba(255, 255, 255, 0.1);
                 --input-border: rgba(255, 255, 255, 0.28);
                 --dashed-line: rgba(255, 255, 255, 0.25);
@@ -173,7 +165,6 @@
 --chart-general-installments: #FFB84D;
 --chart-general-other: #8ADFFF;
 --chart-extra-lightness: 68%;
-            --primary-dark: #7C19C3;
             --primary-light-bg: rgba(193, 117, 255, 0.14);
             --bg: #000000;
             --card-bg: #1C1C1E;
@@ -181,7 +172,6 @@
             --text-muted: #8E8E93;
             --danger: #FF453A;
             --success: #32D74B;
-            --warning: #FFD60A;
             --border-color: rgba(255, 255, 255, 0.1);
             --input-border: rgba(255, 255, 255, 0.28);
             --dashed-line: rgba(255, 255, 255, 0.25);
@@ -195,7 +185,6 @@
             --primary-header: #1B6CD5;
             --primary-progress: #4688E5;
             --primary-chart: #4C99FF;
-            --primary-dark: #055BC4;
             --primary-light-bg: rgba(76, 153, 255, 0.14);
         }
         body[data-theme="pink"][data-color-mode="dark"] {
@@ -205,7 +194,6 @@
             --primary-header: #C72E67;
             --primary-progress: #E85D91;
             --primary-chart: #FF6299;
-            --primary-dark: #B71550;
             --primary-light-bg: rgba(255, 98, 153, 0.14);
         }
         body[data-color-mode="dark"] .settings-color-swatch {
@@ -323,6 +311,13 @@
             align-items: center;
             justify-content: flex-end;
             position: relative;
+        }
+
+        /* Dá mais espaço entre Menu e Novo Envelope em janelas largas com mouse ou trackpad. */
+        @media (min-width: 900px) and (pointer: fine) {
+            .header-actions {
+                gap: 16px;
+            }
         }
 
         /* Garante que o botão da esquerda fique na primeira coluna */
@@ -705,30 +700,47 @@
             border-radius: 10px;
         }
 
-        /* Totais mensais: uma única linha, superfície neutra e contorno discreto. */
+        /* Em telas estreitas, a contagem pode quebrar antes que o valor precise mudar de linha. */
         .section-total {
             display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 8px;
+            flex-wrap: wrap;
+            align-items: baseline;
+            gap: 4px 8px;
             padding: 10px 12px;
             margin-bottom: 14px;
-            border: 1px solid var(--dashed-line);
+            border: 1px solid var(--border-color);
             border-radius: 11px;
             background: color-mix(in srgb, var(--card-bg) 94%, var(--text-main) 6%);
         }
 
-        .section-total > span {
-            min-width: 0;
-            overflow: hidden;
-            text-overflow: ellipsis;
+        .section-total-label {
+            display: flex;
+            flex: 1 1 min-content;
+            flex-wrap: wrap;
+            gap: 2px 6px;
+            max-width: 100%;
+            color: var(--text-muted);
+            color: color-mix(in srgb, var(--text-muted) 96%, var(--text-main) 4%);
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .section-total-label > span {
             white-space: nowrap;
+        }
+
+        .section-total-count {
+            font-weight: 500;
         }
 
         .section-total > strong {
             flex-shrink: 0;
-            white-space: nowrap;
-            font-size: 1rem !important;
+            max-width: 100%;
+            margin-left: auto;
+            color: var(--text-main);
+            font-size: 1rem;
+            text-align: right;
+            overflow-wrap: anywhere;
         }
 
         /* Proteção responsiva para telas estreitas, como iPhones compactos. */
@@ -738,8 +750,8 @@
             .module-heading h2 { font-size: 1.1rem; }
             .section-header-actions { gap: 8px; }
 
-            .section-total { padding: 10px 9px; gap: 6px; }
-            .section-total > strong { font-size: 0.9rem !important; }
+            .section-total { padding: 10px 9px; gap: 4px 6px; }
+            .section-total > strong { font-size: 0.9rem; }
         }
 
         .envelope-balances {
@@ -785,7 +797,7 @@
             color: var(--text-muted);
             margin-bottom: 12px;
             padding-top: 10px;
-            border-top: 1px dashed var(--dashed-line);
+            border-top: 1px solid var(--border-color);
         }
         
         .envelope-subinfo strong { color: var(--text-main); font-weight: 600; }
@@ -1899,16 +1911,6 @@
             outline-offset: 2px;
         }
 
-        /* Contador Discreto (Já usado em Relatório Financeiro) */
-        .report-item-counter {
-        display: inline-block;
-        margin-left: 6px;
-        font-size: 0.78rem;
-        font-weight: 600;
-        color: var(--text-muted);
-        vertical-align: middle;
-        }
-
         /* Aviso discreto da virada mensal: permanece separado do conteúdo dos envelopes. */
         .cycle-notice[hidden] { display: none !important; }
         .cycle-notice {
@@ -2754,8 +2756,11 @@
                 <p class="modal-subtitle">Registre aluguel, academia, assinaturas e outras despesas fixas.</p>
                 
                 <div class="section-total">
-                    <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">Total Fixo Mensal:</span>
-                    <strong id="fixed-total-value" style="font-size: 1.1rem; color: var(--text-main);">R$ 0,00</strong>
+                    <span class="section-total-label">
+                        <span>Total do mês</span>
+                        <span class="section-total-count"><span aria-hidden="true">·</span> <span id="fixed-active-count">0 fixas</span></span>
+                    </span>
+                    <strong id="fixed-total-value">R$ 0,00</strong>
                 </div>
 
                 <div id="fixed-expenses-list" class="checkbox-list" style="margin-bottom: 0; flex: 1;"></div>
@@ -2782,8 +2787,11 @@
                 <p class="modal-subtitle">Compras parceladas agrupadas por instituição financeira.</p>
                 
                 <div class="section-total">
-                    <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">Total Mês (<span id="credit-active-count">0</span> ativos):</span>
-                    <strong id="credit-total-value" style="font-size: 1.1rem; color: var(--text-main);">R$ 0,00</strong>
+                    <span class="section-total-label">
+                        <span>Total do mês</span>
+                        <span class="section-total-count"><span aria-hidden="true">·</span> <span id="credit-active-count">0 ativos</span></span>
+                    </span>
+                    <strong id="credit-total-value">R$ 0,00</strong>
                 </div>
 
                 <div id="credit-installments-list" class="checkbox-list" style="margin-bottom: 0; flex: 1;"></div>
@@ -2808,8 +2816,11 @@
                 <p class="modal-subtitle">Pagamentos únicos ou parcelados, como financiamentos, empréstimos e consórcios.</p>
                 
                 <div class="section-total">
-                    <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">Total Mês (<span id="other-active-count">0</span> ativos):</span>
-                    <strong id="other-total-value" style="font-size: 1.1rem; color: var(--text-main);">R$ 0,00</strong>
+                    <span class="section-total-label">
+                        <span>Total do mês</span>
+                        <span class="section-total-count"><span aria-hidden="true">·</span> <span id="other-active-count">0 ativos</span></span>
+                    </span>
+                    <strong id="other-total-value">R$ 0,00</strong>
                 </div>
 
                 <div id="other-commitments-list" class="checkbox-list" style="margin-bottom: 0; flex: 1;"></div>
@@ -3662,7 +3673,7 @@
                 </div>
                 <p class="modal-subtitle">Selecione o que deseja recuperar. Registros ausentes serão trazidos, inclusive os apagados. Suas edições atuais serão mantidas.</p>
                 <div id="import-list" class="checkbox-list"></div>
-                <!-- Somente backups completos da versão 9 oferecem restauração integral explícita. -->
+                <!-- A restauração integral exige um backup completo da versão 9 ou posterior. -->
                 <label id="import-restore-option" class="modal-checkbox-label" style="margin-top:12px; display:none; align-items:flex-start;">
                     <input type="checkbox" id="import-restore-cb" style="accent-color:var(--primary-fill); width:19px; height:19px; flex-shrink:0;" onchange="updateImportRestoreView()">
                     <span>Restaurar backup integral (substituir meus dados atuais pelos dados deste arquivo)</span>
@@ -3683,7 +3694,7 @@
         <script>
         /* MANUTENÇÃO — refinamentos do histórico e do consolidado
            - renderMonthlyHistoryView: espaçamento, datas reais de envelopes/avulsos e listas simples de compromissos.
-             Fixas/Outros usam a ordem arquivada; orderHistoricalInstallments reproduz os grupos sem mostrar bancos.
+             Fixas/Outros usam a ordem arquivada; Parcelamentos são agrupados pelos bancos da fotografia consultada.
            - parseEntryDate/compareExpenseDatesNewestFirst: interpretação local e ordem decrescente das datas.
            - appendArchivedEnvelopeExpense: inclusão retroativa atômica, sem alterar orçamento histórico.
            - processInstallmentsAutoUpdate/completedMonth: um mês em Concluídos e retirada posterior do cadastro.
@@ -4639,9 +4650,9 @@
         };
 
         const setAppTheme = (theme) => {
+            writeStoredValue('myAppTheme', theme);
             appTheme = theme;
             document.body.setAttribute('data-theme', theme);
-            writeStoredValue('myAppTheme', theme);
             updateThemeAppearance(); // Atualiza a cor da barra de status com o tema selecionado.
             updateThemeColorButtonsUI(theme);
         };
@@ -5727,13 +5738,16 @@
         const updateApp = (options = {}) => {
             // Envelopes e ledger só são confirmados juntos. Uma falha desfaz também a alteração
             // em memória, evitando apresentar como salvo um lançamento que não entrou no histórico.
-            const previousEnvelopes = readStoredValue('myEnvelopes');
+            // O cadastro entrega uma lista candidata, permitindo reverter sem reler dados locais.
+            const { nextEnvelopes } = options;
+            const previousEnvelopes = nextEnvelopes ? envelopes : readStoredValue('myEnvelopes');
             const previousStandalone = standaloneExpenses;
-            const previousOpen = readStoredValue('myOpenMonthlySnapshot');
+            const previousOpen = nextEnvelopes ? openMonthlySnapshot : readStoredValue('myOpenMonthlySnapshot');
             const previousSnapshots = monthlySnapshots;
             let saved = false;
             try {
                 withStorageTransaction(() => {
+                    if (nextEnvelopes) envelopes = nextEnvelopes;
                     compactArchivedData();
                     writeStoredValue('myEnvelopes', JSON.stringify(envelopes));
                     const retroactive = options.archivedEnvelopeExpense;
@@ -5745,8 +5759,13 @@
                 saved = true;
             } catch (error) {
                 console.error('Alteração não confirmada no armazenamento local:', error);
-                try { envelopes = previousEnvelopes ? JSON.parse(previousEnvelopes) : []; } catch (ignored) { /* Conteúdo ilegível permanece protegido. */ }
-                try { openMonthlySnapshot = previousOpen ? JSON.parse(previousOpen) : null; } catch (ignored) { /* Conteúdo ilegível permanece protegido. */ }
+                if (nextEnvelopes) {
+                    envelopes = previousEnvelopes;
+                    openMonthlySnapshot = previousOpen;
+                } else {
+                    try { envelopes = previousEnvelopes ? JSON.parse(previousEnvelopes) : []; } catch (ignored) { /* Conteúdo ilegível permanece protegido. */ }
+                    try { openMonthlySnapshot = previousOpen ? JSON.parse(previousOpen) : null; } catch (ignored) { /* Conteúdo ilegível permanece protegido. */ }
+                }
                 monthlySnapshots = previousSnapshots;
                 standaloneExpenses = previousStandalone;
                 monthlySnapshotSaveError = true;
@@ -6714,11 +6733,6 @@
                     removeStoredValue(MONTHLY_SNAPSHOTS_KEY);
                     writeStoredValue(MONTH_CYCLE_STATE_KEY, JSON.stringify(restoredCycle));
                     removeStoredValue('myOpenMonthlySnapshot');
-                    removeStoredValue('myAppTheme');
-                    // A redefinição também zera somente as datas informativas do lembrete de backup.
-                    removeStoredValue(BACKUP_REMINDER_START_KEY);
-                    removeStoredValue(BACKUP_LAST_REQUEST_KEY);
-                    removeStoredValue(BACKUP_REMINDER_DISMISSED_KEY);
                 });
                 storageReadProblems.clear();
             } catch (error) {
@@ -6742,12 +6756,24 @@
             tempOtherCommitments = [];
             isOtherAutoSort = true;
             tempIsOtherAutoSort = true;
-            setAppTheme('purple');
+            // Preferências só são redefinidas depois que a gravação financeira é confirmada.
+            let preferencesReset = true;
+            try {
+                removeStoredValue(BACKUP_REMINDER_START_KEY);
+                removeStoredValue(BACKUP_LAST_REQUEST_KEY);
+                removeStoredValue(BACKUP_REMINDER_DISMISSED_KEY);
+                setAppTheme('purple');
+            } catch (error) {
+                preferencesReset = false;
+                console.warn('Não foi possível redefinir todas as preferências:', error);
+            }
             goHome();
             // A restauração efetiva fecha também as Configurações que ficaram sob a confirmação.
             closeModal('modal-settings');
             closeModal('modal-restore');
-            alert('O aplicativo foi restaurado aos padrões com sucesso.');
+            alert(preferencesReset
+                ? 'O aplicativo foi restaurado aos padrões com sucesso.'
+                : 'Os dados financeiros foram redefinidos. Algumas preferências não puderam ser redefinidas.');
         };
 
         const openFixedExpensesScreen = () => {
@@ -6816,6 +6842,7 @@
             sortFixedExpensesIfNeeded();
             const list = document.getElementById('fixed-expenses-list');
             const totalEl = document.getElementById('fixed-total-value');
+            const countEl = document.getElementById('fixed-active-count');
             const currentKey = getMonthKey();
             list.innerHTML = '';
 
@@ -6840,13 +6867,17 @@
             }
 
             let total = 0;
+            let activeCount = 0;
             if (fixedExpenses.length === 0) {
                 list.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding:24px;">Nenhuma despesa fixa cadastrada.</p>';
             } else {
                 fixedExpenses.forEach((item) => {
                     const dueThisMonth = isFixedExpenseDueInPeriod(item, currentKey);
                     const scheduledPeriod = dueThisMonth ? null : nextFixedDueMonth(item, currentKey);
-                    if (dueThisMonth) total += item.amount;
+                    if (dueThisMonth) {
+                        total += item.amount;
+                        activeCount++;
+                    }
                     const div = document.createElement('div');
                     div.className = 'history-item';
                     div.style.padding = '10px 8px';
@@ -6949,6 +6980,7 @@
                 }
 
                 totalEl.innerText = formatCurrency(total);
+                countEl.innerText = `${activeCount} ${activeCount === 1 ? 'fixa' : 'fixas'}`;
                 };
 
         // Preserva o estado anterior se uma gravação de compromisso ou preferência falhar.
@@ -7020,7 +7052,7 @@
             }
 
             // Fecha o período anterior com a regra antiga antes de aplicar a edição no atual.
-            if (!prepareInstallmentSave()) return;
+            if (!prepareMonthlySave()) return;
             const nextFixedExpenses = fixedExpenses.map(item => ({ ...item }));
             if (editId) {
                 const index = nextFixedExpenses.findIndex(i => i.id == editId);
@@ -7218,11 +7250,11 @@
             }
         };
 
-        const prepareInstallmentSave = () => {
+        const prepareMonthlySave = (errorMessage = 'Não foi possível atualizar o ciclo dos compromissos. Verifique o armazenamento e tente novamente.') => {
             if (monthCycleState.lastObservedCycle === getMonthKey() && !monthlySnapshotSaveError) return true;
             const updated = processInstallmentsAutoUpdate(false);
             renderCurrentView();
-            if (!updated) alert('Não foi possível atualizar o ciclo dos compromissos. Verifique o armazenamento e tente novamente.');
+            if (!updated) alert(errorMessage);
             return updated;
         };
 
@@ -7315,7 +7347,7 @@
             if (creditInstallments.length === 0) {
                 list.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding: 24px;">Nenhum parcelamento cadastrado.</p>';
                 totalEl.innerText = formatCurrency(0);
-                if (countEl) countEl.innerText = 0;
+                if (countEl) countEl.innerText = '0 ativos';
                 return;
             }
 
@@ -7559,11 +7591,11 @@
             }
 
             totalEl.innerText = formatCurrency(totalActive);
-            if (countEl) countEl.innerText = activeCount;
+            if (countEl) countEl.innerText = `${activeCount} ${activeCount === 1 ? 'ativo' : 'ativos'}`;
         };
 
         const saveCreditInstallment = () => {
-            if (!prepareInstallmentSave()) return;
+            if (!prepareMonthlySave()) return;
             syncInstallmentEdit('credit', creditInstallments);
             const editId = document.getElementById('edit-credit-id').value;
             const name = document.getElementById('credit-item-name').value.trim();
@@ -7912,7 +7944,7 @@
             }
 
             totalEl.innerText = formatCurrency(totalActive);
-            if (countEl) countEl.innerText = activeItems.length;
+            if (countEl) countEl.innerText = `${activeItems.length} ${activeItems.length === 1 ? 'ativo' : 'ativos'}`;
 
             
             // Agendados: divisor simples, seta animada existente e apresentação igual à dos itens ativos.
@@ -8026,7 +8058,7 @@
         };
 
         const saveOtherCommitment = () => {
-            if (!prepareInstallmentSave()) return;
+            if (!prepareMonthlySave()) return;
             syncInstallmentEdit('other', otherCommitments);
             const editId = document.getElementById('edit-other-id').value;
             const name = document.getElementById('other-item-name').value.trim();
@@ -8679,13 +8711,6 @@
             selectMonthlyView('history', true);
         };
 
-        // Ordenação do Histórico: reproduz a sequência dos grupos do módulo de Parcelamentos.
-        // Usa somente a fotografia consultada; reorganizar os cadastros atuais não altera meses encerrados.
-        // Fixas e Outros já conservam na fotografia sua ordem manual ou automática por vencimento.
-        const orderHistoricalInstallments = (items) => {
-            return groupCreditInstallments(items || []).flatMap(group => group.items);
-        };
-
         // Renderiza o mês corrente (dinâmico) e até 12 fotografias salvas de períodos encerrados.
         const renderMonthlyHistoryView = () => {
             const container = document.getElementById('monthly-history-body');
@@ -8747,11 +8772,11 @@
                 const standaloneTotal = (snapshot.standaloneExpenses || []).reduce((sum, entry) => sum + entry.amount, 0);
                 const standaloneSection = standaloneRows ? `<div class="monthly-snapshot-expense-group"><div class="monthly-snapshot-row"><span class="monthly-snapshot-row-name">${standaloneExpenseIcon} Gastos avulsos</span><span class="monthly-snapshot-row-value monthly-snapshot-pair"><span>${formatCurrency(standaloneTotal)}</span></span></div><div style="padding-left:12px;">${standaloneRows}</div></div>` : '';
                 const fixedRows = renderRows(snapshot.fixedExpenses, 'Nenhuma despesa fixa contabilizada neste mês.');
-                // v62: os títulos pertencem à fotografia consultada; a sequência histórica anterior é mantida.
-                const creditItems = orderHistoricalInstallments(snapshot.creditInstallments);
-                const creditRows = creditItems.length ? groupCreditInstallments(creditItems).map(group =>
+                // Os bancos e a ordem das compras vêm do agrupamento da própria fotografia.
+                const creditGroups = groupCreditInstallments(snapshot.creditInstallments || []);
+                const creditRows = creditGroups.length ? creditGroups.map(group =>
                     `<h4 class="monthly-snapshot-bank-heading">${sanitizeHtml(group.name)}</h4>${renderRows(group.items, '', true)}`
-                ).join('') : renderRows(creditItems, 'Nenhum parcelamento neste mês.');
+                ).join('') : renderRows([], 'Nenhum parcelamento neste mês.');
                 const otherRows = renderRows(snapshot.otherCommitments, 'Nenhum outro compromisso neste mês.', true);
                 const caption = isCurrent ? 'Em andamento' : 'Encerrado';
                 return `
@@ -9275,7 +9300,7 @@
                         </div>
 
                         <div class="action-buttons">
-                            <button class="btn-action" onclick="openExpenseModal(${env.id})">➖ Registrar Gasto</button>
+                            <button class="btn-action" onclick="openExpenseModal(${env.id})">Registrar gasto</button>
                             <button class="btn-reset-icon" onclick="openResetModal(${env.id})" title="Reiniciar envelope">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                                     <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
@@ -10451,6 +10476,10 @@
         };
 
         const saveEnvelope = () => {
+            if (storageReadProblems.size || storageRecoveryPending) {
+                alert('O envelope não pode ser salvo enquanto houver dados locais que não puderam ser lidos ou recuperados.');
+                return;
+            }
             const idField = document.getElementById('edit-env-id').value;
             const iconFieldVal = firstEnvelopeIcon(document.getElementById('env-icon').value);
             const icon = iconFieldVal ? sanitizeHtml(iconFieldVal) : currentSelectedSvg || '📦';
@@ -10464,15 +10493,16 @@
                 return;
             }
 
+            // Fecha a competência anterior antes de aplicar o novo cadastro ou orçamento.
+            if (!prepareMonthlySave('Não foi possível preparar o mês atual. O envelope não foi alterado. Tente novamente.')) return;
+            const nextEnvelopes = [...envelopes];
             if (idField) {
-                const envIndex = envelopes.findIndex(e => e.id === parseInt(idField));
+                const envIndex = nextEnvelopes.findIndex(e => e.id === parseInt(idField));
                 if (envIndex !== -1) {
-                    envelopes[envIndex].icon = icon;
-                    envelopes[envIndex].name = name;
-                    envelopes[envIndex].total = total;
+                    nextEnvelopes[envIndex] = { ...nextEnvelopes[envIndex], icon, name, total };
                 }
             } else {
-                envelopes.push({
+                nextEnvelopes.push({
                     id: Date.now(),
                     icon: icon,
                     name: name,
@@ -10482,7 +10512,7 @@
                 });
             }
             
-            if (!updateApp()) return;
+            if (!updateApp({ nextEnvelopes })) return;
             document.getElementById('edit-env-id').value = '';
             document.getElementById('env-name').value = '';
             document.getElementById('env-total').value = '';
@@ -11043,6 +11073,7 @@
                     let rawOtherAutoSort = null;
                     let rawCycleState = null;
                     let completeBackup = false;
+                    let incompleteBackup = false;
 
                     if (Array.isArray(imported)) {
                         rawEnvelopes = imported;
@@ -11056,7 +11087,15 @@
                         rawOpenSnapshot = normalizeImportedSnapshot(imported.openMonthlySnapshot);
                         rawFixedAutoSort = typeof imported.fixedAutoSort === 'boolean' ? imported.fixedAutoSort : null;
                         rawOtherAutoSort = typeof imported.otherAutoSort === 'boolean' ? imported.otherAutoSort : null;
-                        completeBackup = imported.version >= 9 && imported.completeBackup === true;
+                        if (imported.version >= 9 && imported.completeBackup === true) {
+                            const version = Number(imported.version);
+                            const requiredLists = ['envelopes', 'fixedExpenses', 'creditInstallments', 'otherCommitments', 'monthlySnapshots'];
+                            // A partir da v10, avulsos e o registro do mês aberto têm chaves próprias no backup.
+                            if (version >= 10) requiredLists.push('standaloneExpenses');
+                            completeBackup = Number.isInteger(version) && requiredLists.every(key => Array.isArray(imported[key]))
+                                && (version < 10 || Object.prototype.hasOwnProperty.call(imported, 'openMonthlySnapshot'));
+                            incompleteBackup = !completeBackup;
+                        }
                         if (imported.cycleState && typeof imported.cycleState === 'object' && isValidMonthKey(imported.cycleState.lastObservedCycle)) {
                             rawCycleState = {
                                 lastObservedCycle: imported.cycleState.lastObservedCycle,
@@ -11271,7 +11310,7 @@
                     const restoreCheckbox = document.getElementById('import-restore-cb');
                     restoreOption.style.display = completeBackup ? 'flex' : 'none';
                     restoreCheckbox.checked = false;
-                    updateImportRestoreView();
+                    updateImportRestoreView(incompleteBackup);
                     openModal('modal-import');
                 } catch (err) {
                     pendingImportData = { envelopes: [], fixedExpenses: [], creditInstallments: [], otherCommitments: [], standaloneExpenses: [], monthlySnapshots: [], openMonthlySnapshot: null, fixedAutoSort: null, otherAutoSort: null, completeBackup: false, cycleState: null };
@@ -11285,12 +11324,14 @@
 
         // A seleção recupera registros ausentes. A restauração integral exige escolha expressa
         // e desativa a seleção parcial para impedir substituições acidentais.
-        const updateImportRestoreView = () => {
+        const updateImportRestoreView = (incompleteBackup = false) => {
             const restoring = document.getElementById('import-restore-cb').checked;
             const subtitle = document.querySelector('#modal-import .modal-subtitle');
-            if (subtitle) subtitle.textContent = restoring
-                ? 'Atenção: todos os dados atuais serão substituídos pelo backup completo selecionado.'
-                : 'Selecione o que deseja recuperar. Registros ausentes serão trazidos, inclusive os apagados. Suas edições atuais serão mantidas.';
+            if (subtitle) {
+                if (restoring) subtitle.textContent = 'Atenção: todos os dados atuais serão substituídos pelo backup completo selecionado.';
+                else if (incompleteBackup) subtitle.textContent = 'Faltam dados obrigatórios para a restauração integral. Selecione o que deseja recuperar.';
+                else subtitle.textContent = 'Selecione o que deseja recuperar. Registros ausentes serão trazidos, inclusive os apagados. Suas edições atuais serão mantidas.';
+            }
             document.querySelectorAll('#import-list input[type="checkbox"]').forEach(cb => {
                 cb.disabled = restoring;
                 if (restoring) cb.checked = true;

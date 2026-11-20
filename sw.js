@@ -1,3 +1,5 @@
+// v79: Refina os totais dos módulos, o registro de gasto e o espaçamento do cabeçalho em janelas largas.
+// v78: Valida backups integrais, protege o cadastro e a redefinição e simplifica o agrupamento no Histórico.
 // v77: Centraliza o tamanho do fundo dos botões em --action-background-size e aplica a mesma medida às lupas ativas dos dois históricos.
 // v76: Fundo de 38 px e área clicável de 44 px nas ações dos módulos, nos botões de voltar do relatório e no + de Gastos avulsos, cujo desenho passa a 18 px.
 // v75: Respiro nos detalhes da Projeção, título do cenário e referência de última parcela.
@@ -19,7 +21,7 @@
 // v56: Organização de parcelamentos por banco e despesas, com rascunho e controles compartilhados.
 // v55: Refinamentos visuais do Histórico mensal, seletor de envelope e nomes da Projeção.
 // v54: Mantém retenção de 12 meses e legenda refinada; restaura a abertura e a navegação originais.
-const CACHE_NAME = 'envelopes-cache-v77';
+const CACHE_NAME = 'envelopes-cache-v79';
 
 const ASSETS_TO_CACHE = [
   './',
