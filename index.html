@@ -2969,7 +2969,7 @@
             </div>
         </div>
 
-        <!-- Os campos do cenário são um rascunho. Aplicar altera apenas a consulta em memória. -->
+        <!-- Os campos são um rascunho. Aplicar salva apenas os ajustes da projeção. -->
         <dialog id="projection-scenario" class="modal-content projection-dialog" aria-labelledby="projection-scenario-title">
             <h2 id="projection-scenario-title" tabindex="-1" autofocus>Ajustar cenário</h2>
             <form method="dialog" novalidate onsubmit="applyProjectionScenario(event)">
@@ -3015,7 +3015,7 @@
                 <div id="projection-scenario-filters"></div>
                 <button type="button" id="projection-scenario-restore" class="projection-action" onclick="restoreProjectionScenario(event)" hidden>Restaurar cenário</button>
                 <div class="modal-buttons">
-                    <button type="button" class="btn btn-cancel" onclick="this.closest('dialog').close()">Cancelar</button>
+                    <button type="button" class="btn btn-cancel" onclick="closeProjectionScenario(event.detail > 0 || event.pointerType === 'touch')">Cancelar</button>
                     <button type="submit" class="btn btn-confirm" onclick="this.toggleAttribute('data-pointer-apply', event.detail > 0 || event.pointerType === 'touch')">Aplicar</button>
                 </div>
             </form>
@@ -3279,7 +3279,7 @@
                     <div style="width:20px; height:20px; display:flex; align-items:center; justify-content:center; color:var(--danger);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg></div>
                     <h2 style="margin:0;">Redefinir aplicativo</h2>
                 </div>
-                <p class="modal-subtitle" style="color: var(--danger); font-weight: 600;">Atenção: Esta ação apagará envelopes, gastos, despesas fixas, parcelamentos, outros compromissos e históricos, além de redefinir o tema e as ordenações.</p>
+                <p class="modal-subtitle" style="color: var(--danger); font-weight: 600;">Atenção: Esta ação apagará envelopes, gastos, despesas fixas, parcelamentos, outros compromissos e históricos, além de redefinir o tema, as ordenações e o cenário da projeção.</p>
                 <div class="modal-buttons">
                     <button class="btn btn-cancel" onclick="closeModal('modal-restore')">Cancelar</button>
                     <button class="btn btn-danger" onclick="confirmRestoreApp()">Redefinir</button>
@@ -3775,13 +3775,14 @@
         // Ícone do acesso a Gastos avulsos; não altera a grade de ícones dos envelopes.
         const standaloneExpenseIcon = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 3l2 1 2-1 2 1 2-1 2 1 2-1 2 1 2-1v18l-2-1-2 1-2-1-2 1-2-1-2 1-2-1-2 1z"/><path d="M8 8h8M8 12h8M8 16h4"/></svg>';
 
+        const PROJECTION_SCENARIO_KEY = 'myProjectionScenario';
         // Integridade local: gravações financeiras relacionadas usam um registro de recuperação.
         // O registro de recuperação não altera as coleções de negócio; guarda apenas
         // os valores anteriores até que todas as chaves tenham sido gravadas com sucesso.
         const FINANCIAL_STORAGE_KEYS = [
             'myEnvelopes', 'myFixedExpenses', 'myFixedAutoSort', 'myCreditInstallments',
             'myOtherCommitments', 'myOtherAutoSort', 'myMonthlySnapshots',
-            'myOpenMonthlySnapshot', 'myCycleState', 'myStandaloneExpenses'
+            'myOpenMonthlySnapshot', 'myCycleState', 'myStandaloneExpenses', PROJECTION_SCENARIO_KEY
         ];
         const FINANCIAL_RECOVERY_KEY = 'myPendingFinancialWrite';
         const storageReadProblems = new Set();
@@ -4546,7 +4547,7 @@
         const APP_LOCAL_STORAGE_KEYS = [
             'myEnvelopes', 'myFixedExpenses', 'myFixedAutoSort',
             'myCreditInstallments', 'myOtherCommitments', 'myOtherAutoSort', 'myStandaloneExpenses',
-            'myMonthlySnapshots', 'myOpenMonthlySnapshot', 'myCycleState',
+            'myMonthlySnapshots', 'myOpenMonthlySnapshot', 'myCycleState', PROJECTION_SCENARIO_KEY,
             'myAppTheme', 'myColorMode', 'myAllowZoom', SCROLLBAR_PREF_KEY,
             'myBackupReminderStart', 'myBackupLastRequestedAt', 'myBackupReminderDismissedAt', FINANCIAL_RECOVERY_KEY
         ];
@@ -5625,6 +5626,7 @@
                 // O processamento já verifica o ciclo e grava o registro aberto. Aqui só redesenha a tela.
                 const updated = processInstallmentsAutoUpdate();
                 renderCurrentView();
+                highlightProjectionScenario();
                 if (updated) {
                     if (document.getElementById('modal-credit-installment').classList.contains('active-modal')) {
                         syncInstallmentEdit('credit', creditInstallments);
@@ -6835,6 +6837,7 @@
                     removeStoredValue(MONTHLY_SNAPSHOTS_KEY);
                     writeStoredValue(MONTH_CYCLE_STATE_KEY, JSON.stringify(restoredCycle));
                     removeStoredValue('myOpenMonthlySnapshot');
+                    removeStoredValue(PROJECTION_SCENARIO_KEY);
                 });
                 storageReadProblems.clear();
             } catch (error) {
@@ -6843,6 +6846,7 @@
                 return;
             } finally { allowUnreadableReplacement = false; }
             clearEnvelopeUndo();
+            projectionScenario = createProjectionScenario();
             monthlySnapshots = [];
             openMonthlySnapshot = null;
             monthlySnapshotSaveError = false;
@@ -8307,7 +8311,7 @@
         };
 
         // Visão mensal — altere aqui o horizonte inicial e o máximo da projeção.
-        // A janela começa no próximo mês. O cenário é recriado a cada entrada pelo Consolidado.
+        // A janela começa no próximo mês. A consulta usa os ajustes salvos com os cadastros atuais.
         const PROJECTION_INITIAL_MONTHS = 6;
         const PROJECTION_MAX_MONTHS = 12;
         const PROJECTION_FILTER_VISIBLE_ITEMS = 5;
@@ -8319,6 +8323,64 @@
             limit: null,
             reimbursements: []
         });
+        const hasProjectionScenarioAdjustments = ({ excludedEnvelopeIds, fixedLastMonths, limit, reimbursements }) =>
+            excludedEnvelopeIds.size > 0 || fixedLastMonths.size > 0 || limit !== null || reimbursements.length > 0;
+
+        const loadProjectionScenario = () => {
+            const raw = readStoredValue(PROJECTION_SCENARIO_KEY);
+            if (raw === null) return createProjectionScenario();
+            try {
+                const saved = JSON.parse(raw);
+                const validId = id => Number.isSafeInteger(id) && id > 0;
+                const validAmount = amount => Number.isFinite(amount) && parseBrNumber(String(amount).replace('.', ',')) === amount;
+                const validReimbursement = item => item && Number.isSafeInteger(item.amountCents)
+                    && item.amountCents > 0 && validAmount(item.amountCents / 100)
+                    && isValidMonthKey(item.startMonth) && isValidMonthKey(item.endMonth) && item.endMonth >= item.startMonth
+                    && Number.isInteger(item.intervalMonths) && item.intervalMonths >= 0 && item.intervalMonths <= PROJECTION_MAX_MONTHS
+                    && (item.intervalMonths > 0 || item.startMonth === item.endMonth);
+                if (saved?.version !== 1 || !Array.isArray(saved.excludedEnvelopeIds) || !saved.excludedEnvelopeIds.every(validId)
+                    || !Array.isArray(saved.fixedLastMonths)
+                    || !saved.fixedLastMonths.every(entry => Array.isArray(entry) && entry.length === 2 && validId(entry[0])
+                        && (entry[1] === null || isValidMonthKey(entry[1])))
+                    || (saved.limit !== null && !validAmount(saved.limit))
+                    || !Array.isArray(saved.reimbursements) || !saved.reimbursements.every(validReimbursement)) {
+                    throw new Error('Formato de cenário inválido.');
+                }
+                return {
+                    excludedEnvelopeIds: new Set(saved.excludedEnvelopeIds),
+                    fixedLastMonths: new Map(saved.fixedLastMonths),
+                    limit: saved.limit,
+                    reimbursements: saved.reimbursements
+                };
+            } catch (error) {
+                console.warn('Não foi possível ler o cenário de projeção:', error);
+                return createProjectionScenario();
+            }
+        };
+
+        const saveProjectionScenario = (nextScenario) => {
+            try {
+                if (hasProjectionScenarioAdjustments(nextScenario)) {
+                    const { excludedEnvelopeIds, fixedLastMonths, limit, reimbursements } = nextScenario;
+                    writeStoredValue(PROJECTION_SCENARIO_KEY, JSON.stringify({
+                        version: 1,
+                        excludedEnvelopeIds: [...excludedEnvelopeIds],
+                        fixedLastMonths: [...fixedLastMonths],
+                        limit,
+                        reimbursements
+                    }));
+                } else {
+                    removeStoredValue(PROJECTION_SCENARIO_KEY);
+                }
+            } catch (error) {
+                console.error('Não foi possível gravar o cenário de projeção:', error);
+                alert('Não foi possível salvar a alteração do cenário. Verifique o armazenamento e tente novamente.');
+                return false;
+            }
+            projectionScenario = nextScenario;
+            return true;
+        };
+
         const projectionPeriodKeys = (currentKey, count) =>
             Array.from({ length: count }, (_, index) => shiftMonthKey(currentKey, index + 1));
 
@@ -8415,6 +8477,7 @@
         };
 
         const projectionBody = document.getElementById('monthly-projection-body');
+        const projectionStatus = document.getElementById('monthly-projection-status');
         const canObserveProjectionWidth = typeof ResizeObserver === 'function';
         if (canObserveProjectionWidth) {
             let previousWidth = 0;
@@ -8474,23 +8537,37 @@
                 card.addEventListener('toggle', showDetails);
             });
 
-            const fixedLastMonths = [...projectionScenario.fixedLastMonths.values()];
+            const fixedLastMonths = fixedExpenses.filter(item => projectionScenario.fixedLastMonths.has(item.id))
+                .map(item => projectionScenario.fixedLastMonths.get(item.id));
             const fixedOutside = fixedLastMonths.filter(month => month === null || month < periods[0]).length;
-            const outside = projectionScenario.excludedEnvelopeIds.size + fixedOutside;
+            const outside = envelopes.length - variableRows.length + fixedOutside;
             const endings = fixedLastMonths.length - fixedOutside;
-            const status = [];
+            const status = hasProjectionScenarioAdjustments(projectionScenario) ? ['Cenário ajustado'] : [];
             if (outside) status.push(outside === 1 ? '1 item fora' : `${outside} itens fora`);
             if (endings) status.push(endings === 1 ? '1 última cobrança ajustada' : `${endings} últimas cobranças ajustadas`);
             if (projectionScenario.limit !== null) status.push(`Limite de ${formatCurrency(projectionScenario.limit)}`);
-            const statusEl = document.getElementById('monthly-projection-status');
-            statusEl.textContent = status.join(' · ');
-            statusEl.hidden = !status.length;
+            const statusText = status.join(' · ');
+            if (projectionStatus.textContent !== statusText) projectionStatus.textContent = statusText;
+            projectionStatus.hidden = !status.length;
 
             const more = document.getElementById('monthly-projection-more');
             const expanded = projectionMonthCount === PROJECTION_MAX_MONTHS;
             more.setAttribute('aria-expanded', String(expanded));
             more.textContent = expanded ? `Mostrar só ${PROJECTION_INITIAL_MONTHS} meses`
                 : `Ver mais ${PROJECTION_MAX_MONTHS - PROJECTION_INITIAL_MONTHS} meses`;
+        };
+
+        // Ao entrar na Projeção ou retomar o app, realça brevemente o cenário que já estava aplicado.
+        const highlightProjectionScenario = () => {
+            if (currentView !== 'historico-mensal' || projectionStatus.hidden || document.hidden
+                || document.getElementById('monthly-projection-panel').hidden || getTopModal()
+                || document.getElementById('projection-scenario').open
+                || document.getElementById('options-drawer').classList.contains('active')) return;
+            playLocalFeedback(projectionStatus, [
+                { color: 'var(--primary)' },
+                { color: 'var(--primary)', offset: 0.6, easing: 'ease-out' },
+                { color: 'var(--text-muted)' }
+            ], { duration: 1600 });
         };
 
         const toggleProjectionHorizon = () => {
@@ -8580,11 +8657,11 @@
                 syncAddButton();
             };
 
-            const saveCurrent = () => {
+            const saveCurrent = (items = drafts) => {
                 if (editing === null) return true;
                 const raw = amount.value.trim();
                 if (!raw) {
-                    if (editing < drafts.length) drafts.splice(editing, 1);
+                    if (editing < items.length) items.splice(editing, 1);
                     return true;
                 }
 
@@ -8600,7 +8677,7 @@
                 if (!monthChoices.includes(endMonth) || endMonth < startMonth) {
                     return showProjectionScenarioError(end, 'Escolha até que mês o reembolso vale.');
                 }
-                drafts[editing] = { amountCents: Math.round(value * 100), startMonth, endMonth, intervalMonths };
+                items[editing] = { amountCents: Math.round(value * 100), startMonth, endMonth, intervalMonths };
                 return true;
             };
 
@@ -8654,7 +8731,9 @@
                     showEditor(drafts.length ? null : 0);
                 },
                 read() {
-                    return saveCurrent() ? drafts.slice() : null;
+                    // Prepara o envio em uma cópia para permitir nova tentativa se a gravação falhar.
+                    const items = drafts.slice();
+                    return saveCurrent(items) ? items : null;
                 }
             };
         })();
@@ -8705,26 +8784,27 @@
 
         const openProjectionScenario = (trigger) => {
             const periods = projectionPeriodKeys(getMonthKey(), PROJECTION_MAX_MONTHS);
-            // "Até" inclui a última cobrança; o mês final equivale a "Manter" e não precisa de opção.
-            const lastProjectionPeriod = periods[periods.length - 1];
             const envelopeRows = envelopes.map(item => `<label class="checkbox-item">
                 <input type="checkbox" name="projection-envelope" value="${item.id}"${projectionScenario.excludedEnvelopeIds.has(item.id) ? '' : ' checked'}>
                 <span class="projection-filter-name">${sanitizeHtml(item.name)}</span>
                 <strong class="monthly-snapshot-row-value">${formatCurrency(item.total)}</strong>
             </label>`);
             const fixedRows = fixedExpenses.map(item => {
-                const eligiblePeriods = periods.filter(period => isFixedExpenseDueInPeriod(item, period));
-                if (!eligiblePeriods.length) return '';
+                const choices = periods.filter(period => isFixedExpenseDueInPeriod(item, period));
                 const lastMonth = projectionScenario.fixedLastMonths.get(item.id);
-                const lastEligible = typeof lastMonth === 'string' ? eligiblePeriods.filter(period => period <= lastMonth).pop() : null;
-                const outside = lastMonth === null || (lastMonth && !lastEligible);
-                const options = eligiblePeriods.filter(period => period < lastProjectionPeriod).map(period =>
-                    `<option value="${period}"${period === lastEligible ? ' selected' : ''}>Até ${formatMonthLabelKey(period)}</option>`).join('');
+                if (!choices.length && lastMonth === undefined) return '';
+                // Mantém o corte salvo mesmo se a competência sair da janela ou deixar de ter cobrança.
+                if (typeof lastMonth === 'string' && !choices.includes(lastMonth)) {
+                    choices.push(lastMonth);
+                    choices.sort();
+                }
+                const options = choices.map(period =>
+                    `<option value="${period}"${period === lastMonth ? ' selected' : ''}>Até ${formatMonthLabelKey(period)}</option>`).join('');
                 return `<label class="checkbox-item projection-fixed-filter">
                     <span class="projection-filter-name">${sanitizeHtml(item.name)}<span class="monthly-snapshot-caption">${formatCurrency(item.amount)}${getFixedIntervalMonths(item) === 1 ? '/mês' : `/cobrança · ${fixedRecurrenceLabel(item)}`}</span></span>
                     <select name="projection-fixed" data-id="${item.id}">
                         <option value="">Manter</option>
-                        <option value="exclude"${outside ? ' selected' : ''}>Não incluir</option>
+                        <option value="exclude"${lastMonth === null ? ' selected' : ''}>Não incluir</option>
                         ${options}
                     </select>
                 </label>`;
@@ -8752,11 +8832,11 @@
             adjustmentSummary.hidden = !summary.length;
             projectionScenarioAdjustments.open = false;
             projectionReimbursementEditor.load(periods, reimbursements);
-            document.getElementById('projection-scenario-restore').hidden = limit === null && !reimbursements.length
-                && !projectionScenario.excludedEnvelopeIds.size && !projectionScenario.fixedLastMonths.size;
+            document.getElementById('projection-scenario-restore').hidden = !hasProjectionScenarioAdjustments(projectionScenario);
             const dialog = document.getElementById('projection-scenario');
             // Foca o acionador antes de abrir para o diálogo devolver o foco a ele também no Safari.
             trigger.focus({ preventScroll: true });
+            stopLocalFeedback(projectionStatus);
             dialog.showModal();
             dialog.scrollTop = 0;
         };
@@ -8782,14 +8862,21 @@
             const form = event.currentTarget;
             const excludedEnvelopeIds = new Set(Array.from(form.querySelectorAll('[name="projection-envelope"]:not(:checked)'),
                 checkbox => Number(checkbox.value)));
+            // Preserva a escolha dos envelopes ausentes do formulário enquanto a exclusão pode ser desfeita.
+            getActiveEnvelopeUndo()?.batches.flat().forEach(({ envelope }) => {
+                if (projectionScenario.excludedEnvelopeIds.has(envelope.id)) excludedEnvelopeIds.add(envelope.id);
+            });
             const fixedLastMonths = new Map();
             form.querySelectorAll('[name="projection-fixed"]').forEach(select => {
                 if (select.value) fixedLastMonths.set(Number(select.dataset.id), select.value === 'exclude' ? null : select.value);
             });
-            projectionScenario = { excludedEnvelopeIds, fixedLastMonths, limit, reimbursements };
+            if (!saveProjectionScenario({ excludedEnvelopeIds, fixedLastMonths, limit, reimbursements })) {
+                event.preventDefault();
+                return;
+            }
             renderMonthlyProjection();
 
-               if (pointerApply) {
+            if (pointerApply) {
                 event.preventDefault();
                 closeProjectionScenario(true);
             }
@@ -8805,7 +8892,7 @@
 
         const restoreProjectionScenario = (event) => {
             const pointerRestore = event.detail > 0 || event.pointerType === 'touch';
-            projectionScenario = createProjectionScenario();
+            if (!saveProjectionScenario(createProjectionScenario())) return;
             closeProjectionScenario(pointerRestore);
             renderMonthlyProjection();
         };
@@ -8822,11 +8909,12 @@
             setViewSelectorSelection(selected);
             document.getElementById('view-monthly-history').scrollTop = 0;
             renderMonthlyView();
+            if (name === 'projection') highlightProjectionScenario();
         };
 
         const openMonthlyView = () => {
             projectionMonthCount = PROJECTION_INITIAL_MONTHS;
-            projectionScenario = createProjectionScenario();
+            projectionScenario = loadProjectionScenario();
             document.getElementById('monthly-projection-body').replaceChildren();
             selectMonthlyView('history', true);
         };
@@ -11613,7 +11701,7 @@
             const importHistory = historyCb ? historyCb.checked : false;
             const importStandalone = document.getElementById('import-standalone-cb')?.checked === true;
             const restoreComplete = document.getElementById('import-restore-cb').checked && pendingImportData.completeBackup;
-            if (restoreComplete && !confirm('Restaurar este backup substituirá todos os dados atuais, incluindo o histórico mensal. Deseja continuar?')) return;
+            if (restoreComplete && !confirm('Restaurar este backup substituirá os dados atuais, incluindo o histórico mensal, e redefinirá o cenário da projeção. Deseja continuar?')) return;
 
             if (selectedIndices.length === 0 && !importFixed && !importCredit && !importOther && !importHistory && !importStandalone) {
                 alert('Selecione pelo menos um item para importar.');
@@ -11679,6 +11767,7 @@
                 ].forEach(([key, value]) => writeStoredValue(key, JSON.stringify(value)));
                 writeStoredValue('myFixedAutoSort', String(isFixedAutoSort));
                 writeStoredValue('myOtherAutoSort', String(isOtherAutoSort));
+                removeStoredValue(PROJECTION_SCENARIO_KEY);
                 // Se o backup foi feito em mês anterior, fecha-o antes de avançar parcelas.
                 checkMonthCycleBoundary();
                 if (monthlySnapshotSaveError) throw new Error('Não foi possível restaurar as fotografias mensais.');
@@ -11687,6 +11776,7 @@
                 if (!updateApp({ suppressSaveAlert: true }) || !updateOpenMonthlySnapshot()) throw new Error('Não foi possível concluir a restauração.');
                 activeStorageTransaction = null;
                 commitStoredChanges(importTransaction);
+                projectionScenario = createProjectionScenario();
                 clearEnvelopeUndo();
                 storageReadProblems.clear();
                 allowUnreadableReplacement = false;

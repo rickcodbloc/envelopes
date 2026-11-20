@@ -1,3 +1,4 @@
+// v82: Salva o cenário aplicado e recalcula a projeção com os cadastros atuais.
 // v81: Exibe o guia de instalação na tela sem envelopes também em navegadores com mouse ou trackpad.
 // v80: Refina os botões de backup e ajusta a seleção de envelopes no reinício manual, na virada do mês e na exclusão em lote.
 // v79: Refina os totais dos módulos, o registro de gasto e o espaçamento do cabeçalho em janelas largas.
@@ -23,7 +24,7 @@
 // v56: Organização de parcelamentos por banco e despesas, com rascunho e controles compartilhados.
 // v55: Refinamentos visuais do Histórico mensal, seletor de envelope e nomes da Projeção.
 // v54: Mantém retenção de 12 meses e legenda refinada; restaura a abertura e a navegação originais.
-const CACHE_NAME = 'envelopes-cache-v80';
+const CACHE_NAME = 'envelopes-cache-v82';
 
 const ASSETS_TO_CACHE = [
   './',
