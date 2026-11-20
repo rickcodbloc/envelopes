@@ -2290,7 +2290,7 @@
         .projection-reimbursement-editor .form-group input,
         .projection-reimbursement-editor .form-group select { padding: 8px; }
         #projection-reimbursement-end:disabled {
-            background-color: var(--bg);
+            background-color: color-mix(in srgb, var(--card-bg) 96%, var(--text-main) 4%);
             border-color: var(--border-color);
             color: var(--text-muted);
             -webkit-text-fill-color: currentColor;
@@ -2874,7 +2874,7 @@
                         <span class="view-selector-indicator" aria-hidden="true"></span>
                     </div>
                     <button class="card-btn section-action-button" onclick="showFullView('relatorio')" title="Voltar ao relatório financeiro" aria-label="Voltar ao relatório financeiro" style="--action-background:var(--primary-light-bg); padding:7px; color:var(--primary); display:flex; align-items:center; justify-content:center;">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
                     </button>
                 </div>
                 <div id="monthly-history-panel" role="tabpanel" aria-labelledby="monthly-tab-history" tabindex="0">
