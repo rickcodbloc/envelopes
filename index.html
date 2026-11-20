@@ -3012,7 +3012,7 @@
                     </div>
                 </details>
                 <div id="projection-scenario-filters"></div>
-                <button type="button" id="projection-scenario-restore" class="projection-action" onclick="restoreProjectionScenario()" hidden>Restaurar cenário</button>
+                <button type="button" id="projection-scenario-restore" class="projection-action" onclick="restoreProjectionScenario(event)" hidden>Restaurar cenário</button>
                 <div class="modal-buttons">
                     <button type="button" class="btn btn-cancel" onclick="this.closest('dialog').close()">Cancelar</button>
                     <button type="submit" class="btn btn-confirm" onclick="this.toggleAttribute('data-pointer-apply', event.detail > 0 || event.pointerType === 'touch')">Aplicar</button>
@@ -8788,17 +8788,24 @@
             projectionScenario = { excludedEnvelopeIds, fixedLastMonths, limit, reimbursements };
             renderMonthlyProjection();
 
-            if (pointerApply) {
-                // O diálogo devolve o foco ao botão ao fechar. Por isso o título recebe o foco depois.
+               if (pointerApply) {
                 event.preventDefault();
-                form.closest('dialog').close();
+                closeProjectionScenario(true);
+            }
+        };
+
+        const closeProjectionScenario = (focusTitle) => {
+            document.getElementById('projection-scenario').close();
+            if (focusTitle) {
+                // O diálogo devolve o foco ao botão ao fechar. Por isso o título recebe o foco depois.
                 document.getElementById('monthly-projection-title').focus({ preventScroll: true });
             }
         };
 
-        const restoreProjectionScenario = () => {
+        const restoreProjectionScenario = (event) => {
+            const pointerRestore = event.detail > 0 || event.pointerType === 'touch';
             projectionScenario = createProjectionScenario();
-            document.getElementById('projection-scenario').close();
+            closeProjectionScenario(pointerRestore);
             renderMonthlyProjection();
         };
 
