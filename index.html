@@ -1160,6 +1160,12 @@
         .btn-cancel { background-color: var(--border-color); color: var(--text-main); }
         .btn-confirm { background-color: var(--primary-fill); color: white; }
         .btn-danger { background-color: var(--danger); color: white; }
+        #multi-reset-confirm:disabled,
+        #multi-delete-confirm:disabled {
+            opacity: 0.5;
+            cursor: default;
+            transform: none;
+        }
 
         #history-list, #standalone-history-list {
             overflow-y: auto;
@@ -3195,13 +3201,13 @@
             <div class="modal-content">
                 <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
                     <div style="width:20px; height:20px; display:flex; align-items:center; justify-content:center; color:var(--primary);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg></div>
-                    <h2 style="margin:0;">Reiniciar envelopes</h2>
+                    <h2 id="multi-reset-title" style="margin:0;">Reiniciar envelopes</h2>
                 </div>
                 <p class="modal-subtitle">Selecione os envelopes para reiniciar. Toque na tag "Histórico: S/N" para alternar a preservação do histórico.</p>
                 <div id="multi-reset-list" class="checkbox-list"></div>
                 <div class="modal-buttons">
                     <button class="btn btn-cancel" onclick="closeModal('modal-multi-reset')">Cancelar</button>
-                    <button class="btn btn-confirm" onclick="confirmMultiReset()">Confirmar</button>
+                    <button id="multi-reset-confirm" class="btn btn-confirm" onclick="confirmMultiReset()" disabled>Confirmar</button>
                 </div>
             </div>
         </div>
@@ -3212,11 +3218,11 @@
                     <div style="width:20px; height:20px; display:flex; align-items:center; justify-content:center; color:var(--danger);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg></div>
                     <h2 style="margin:0;">Excluir envelopes</h2>
                 </div>
-                <p class="modal-subtitle">Selecione os envelopes que deseja excluir permanentemente:</p>
+                <p class="modal-subtitle">Selecione os envelopes que deseja excluir.</p>
                 <div id="multi-delete-list" class="checkbox-list"></div>
                 <div class="modal-buttons">
                     <button class="btn btn-cancel" onclick="closeModal('modal-multi-delete')">Cancelar</button>
-                    <button class="btn btn-danger" onclick="confirmMultiDelete()">Excluir</button>
+                    <button id="multi-delete-confirm" class="btn btn-danger" onclick="confirmMultiDelete()" disabled>Excluir</button>
                 </div>
             </div>
         </div>
@@ -6540,11 +6546,22 @@
             closeModal('modal-reorder');
         };
 
-        const openMultiResetModal = () => {
-            // A redefinição manual também pode ser o primeiro acesso após a virada do mês.
-            checkMonthCycleBoundary();
-            renderCycleNotice();
+        // A seleção vale para o mês e os ciclos pendentes no momento em que a lista foi montada.
+        const getMultiResetCycleKey = () => [getMonthKey(), ...monthCycleState.pendingCycles].join(',');
+
+        const renderMultiResetList = () => {
             const list = document.getElementById('multi-reset-list');
+            const confirmButton = document.getElementById('multi-reset-confirm');
+            const reviewingCycle = monthCycleState.pendingCycles.length > 0;
+            const keepActionLabel = envelopes.length ? 'Manter todos' : 'Concluir revisão';
+            list.dataset.cycleKey = getMultiResetCycleKey();
+            document.getElementById('multi-reset-title').textContent = reviewingCycle ? 'Revisar virada do mês' : 'Reiniciar envelopes';
+            const updateAction = () => {
+                const hasSelection = !!list.querySelector('.multi-reset-cb:checked');
+                confirmButton.disabled = !reviewingCycle && !hasSelection;
+                confirmButton.textContent = reviewingCycle && !hasSelection ? keepActionLabel : 'Confirmar';
+            };
+            list.onchange = updateAction;
             list.innerHTML = '';
             if (envelopes.length === 0) {
                 list.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding: 16px;">Nenhum envelope disponível.</p>';
@@ -6553,12 +6570,6 @@
                     const item = document.createElement('div');
                     item.className = 'checkbox-item';
                     item.style.cssText = 'display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 12px 8px; cursor: pointer;';
-                    item.onclick = (e) => {
-                        if (!e.target.closest('.multi-reset-hist-tag') && e.target.tagName !== 'INPUT') {
-                            const cb = item.querySelector('.multi-reset-cb');
-                            if (cb) cb.checked = !cb.checked;
-                        }
-                    };
                     
                     const leftDiv = document.createElement('div');
                     leftDiv.style.cssText = 'display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1;';
@@ -6566,10 +6577,11 @@
                     const cb = document.createElement('input');
                     cb.type = 'checkbox';
                     cb.value = env.id;
-                    cb.checked = true;
+                    cb.checked = reviewingCycle;
                     cb.className = 'multi-reset-cb';
                     cb.setAttribute('aria-label', `Redefinir ${env.name}`);
                     cb.onclick = (e) => e.stopPropagation();
+                    item.onclick = () => cb.click();
 
                     const iconWrap = document.createElement('div');
                     iconWrap.className = 'envelope-icon-wrap';
@@ -6602,6 +6614,14 @@
                     list.appendChild(item);
                 });
             }
+            updateAction();
+        };
+
+        const openMultiResetModal = () => {
+            // A redefinição manual também pode ser o primeiro acesso após a virada do mês.
+            checkMonthCycleBoundary();
+            renderCycleNotice();
+            renderMultiResetList();
             openModal('modal-multi-reset');
         };
 
@@ -6630,7 +6650,15 @@
                 alert('Não foi possível fechar o mês anterior. Nenhum envelope foi redefinido. Faça um backup e tente novamente.');
                 return;
             }
-            const checkboxes = document.querySelectorAll('.multi-reset-cb:checked');
+            const list = document.getElementById('multi-reset-list');
+            if (list.dataset.cycleKey !== getMultiResetCycleKey()) {
+                renderCycleNotice();
+                renderMultiResetList();
+                focusModalTitle(document.getElementById('modal-multi-reset'));
+                alert('O ciclo dos envelopes mudou. Revise a seleção antes de confirmar.');
+                return;
+            }
+            const checkboxes = list.querySelectorAll('.multi-reset-cb:checked');
             const selectedIds = Array.from(checkboxes).map(cb => parseInt(cb.value));
             // Em uma regularização mensal, também é válido manter todos os envelopes sem zerá-los.
             // Fora de uma pendência de ciclo, preserva-se a exigência de selecionar ao menos um.
@@ -6676,6 +6704,11 @@
 
         const openMultiDeleteModal = () => {
             const list = document.getElementById('multi-delete-list');
+            const deleteButton = document.getElementById('multi-delete-confirm');
+            const updateAction = () => {
+                deleteButton.disabled = !list.querySelector('.multi-delete-cb:checked');
+            };
+            list.onchange = updateAction;
             list.innerHTML = '';
             if (envelopes.length === 0) {
                 list.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding: 16px;">Nenhum envelope para excluir.</p>';
@@ -6687,7 +6720,6 @@
                     const cb = document.createElement('input');
                     cb.type = 'checkbox';
                     cb.value = env.id;
-                    cb.checked = true;
                     cb.className = 'multi-delete-cb';
 
                     const innerDiv = document.createElement('div');
@@ -6709,6 +6741,7 @@
                     list.appendChild(item);
                 });
             }
+            updateAction();
             openModal('modal-multi-delete');
         };
 
@@ -6720,8 +6753,18 @@
                 return;
             }
 
-            showCustomConfirm('Excluir Envelopes', `Deseja realmente excluir os ${selectedIds.length} envelope(s) selecionado(s)? Os históricos associados serão removidos.`, () => {
-                                if (deleteEnvelopesWithUndo(selectedIds)) closeModal('modal-multi-delete');
+            const count = selectedIds.length;
+            let message = `Excluir os ${count} envelopes selecionados e seus históricos?`;
+
+            if (count === 1) {
+                const name = envelopes.find(env => env.id === selectedIds[0])?.name;
+                message = name
+                    ? `Excluir o envelope “${name}” e seu histórico?`
+                    : 'Excluir o envelope selecionado e seu histórico?';
+            }
+
+            showCustomConfirm('Excluir Envelopes', message, () => {
+                if (deleteEnvelopesWithUndo(selectedIds)) closeModal('modal-multi-delete');
             });
         };
 
