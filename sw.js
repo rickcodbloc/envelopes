@@ -1,3 +1,4 @@
+// v81: Exibe o guia de instalação na tela sem envelopes também em navegadores com mouse ou trackpad.
 // v80: Refina os botões de backup e ajusta a seleção de envelopes no reinício manual, na virada do mês e na exclusão em lote.
 // v79: Refina os totais dos módulos, o registro de gasto e o espaçamento do cabeçalho em janelas largas.
 // v78: Valida backups integrais, protege o cadastro e a redefinição e simplifica o agrupamento no Histórico.

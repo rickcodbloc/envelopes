@@ -2253,8 +2253,9 @@
             color: var(--text-main);
         }
         .projection-dialog:not([open]) { display: none; }
-        /* O título recebe o foco inicial para leitura. O destaque visual fica nos controles. */
-        #projection-scenario-title:focus { outline: none; }
+        /* Os títulos recebem foco para orientar a leitura. O destaque visual fica nos controles. */
+        #projection-scenario-title:focus,
+        #monthly-projection-title:focus { outline: none; }
         .projection-dialog::backdrop {
             background: rgba(0,0,0,0.55);
             backdrop-filter: blur(8px);
@@ -2648,6 +2649,50 @@
             line-height: 1.45;
         }
 
+                .home-install-guide {
+            padding: 0 12px;
+            border: 1px solid transparent;
+            border-radius: 10px;
+        }
+
+        /* Reserva o espaço do contorno para o título não se mover ao expandir. */
+        .home-install-guide[open] {
+            border-color: var(--input-border);
+            padding-bottom: 12px;
+        }
+
+        .home-install-guide > summary {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            min-height: 44px;
+            list-style: none;
+            font-weight: 400;
+            color: var(--primary);
+            color: color-mix(in srgb, var(--primary) 65%, var(--text-muted));
+            cursor: pointer;
+        }
+
+        .home-install-guide > summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .home-install-guide[open] .report-chevron {
+            transform: rotate(180deg);
+        }
+
+        .home-install-guide p + p {
+            margin-top: 8px;
+        }
+
+        /* Oculta a orientação quando o app já está aberto em modo instalado. */
+        @media (display-mode: standalone) {
+            .home-install-guide {
+                display: none;
+            }
+        }
+
     </style>
 </head>
 <body data-theme="purple">
@@ -2913,7 +2958,7 @@
                 </div>
                 <div id="monthly-projection-panel" role="tabpanel" aria-labelledby="monthly-tab-projection" hidden>
                     <div class="projection-toolbar">
-                        <h2>Despesas previstas</h2>
+                        <h2 id="monthly-projection-title" tabindex="-1">Despesas previstas</h2>
                         <button type="button" class="projection-action" aria-haspopup="dialog" onclick="openProjectionScenario(this)">Ajustar cenário</button>
                     </div>
                     <p id="monthly-projection-status" class="monthly-history-intro" role="status" hidden></p>
@@ -2970,7 +3015,7 @@
                 <button type="button" id="projection-scenario-restore" class="projection-action" onclick="restoreProjectionScenario()" hidden>Restaurar cenário</button>
                 <div class="modal-buttons">
                     <button type="button" class="btn btn-cancel" onclick="this.closest('dialog').close()">Cancelar</button>
-                    <button type="submit" class="btn btn-confirm">Aplicar</button>
+                    <button type="submit" class="btn btn-confirm" onclick="this.toggleAttribute('data-pointer-apply', event.detail > 0 || event.pointerType === 'touch')">Aplicar</button>
                 </div>
             </form>
         </dialog>
@@ -6753,7 +6798,7 @@
                 return;
             }
 
-            const count = selectedIds.length;
+        const count = selectedIds.length;
             let message = `Excluir os ${count} envelopes selecionados e seus históricos?`;
 
             if (count === 1) {
@@ -8716,6 +8761,10 @@
         };
 
         const applyProjectionScenario = (event) => {
+            const submitter = event.submitter;
+            const pointerApply = submitter?.hasAttribute('data-pointer-apply');
+            if (pointerApply) submitter.removeAttribute('data-pointer-apply');
+
             const input = document.getElementById('projection-limit');
             const limit = input.value.trim() ? parseBrNumber(input.value) : null;
             if (Number.isNaN(limit)) {
@@ -8738,6 +8787,13 @@
             });
             projectionScenario = { excludedEnvelopeIds, fixedLastMonths, limit, reimbursements };
             renderMonthlyProjection();
+
+            if (pointerApply) {
+                // O diálogo devolve o foco ao botão ao fechar. Por isso o título recebe o foco depois.
+                event.preventDefault();
+                form.closest('dialog').close();
+                document.getElementById('monthly-projection-title').focus({ preventScroll: true });
+            }
         };
 
         const restoreProjectionScenario = () => {
@@ -9280,16 +9336,36 @@
                         <div style="display: flex; flex-direction: column; gap: 8px;">
                             <div style="display: flex; gap: 8px; align-items: flex-start;">
                                 <span style="font-weight: 600; color: var(--text-muted); flex-shrink: 0;">1.</span>
-                                <span>Crie envelopes virtuais para separar seu orçamento e registrar gastos diários (dinheiro, cartão, Pix).</span>
+                                <span>Separe seu orçamento em envelopes e registre os gastos do dia a dia.</span>
                             </div>
                             <div style="display: flex; gap: 8px; align-items: flex-start;">
                                 <span style="font-weight: 600; color: var(--text-muted); flex-shrink: 0;">2.</span>
-                                <span>Controle despesas fixas, compras parceladas e faça backups por exportação/importação.</span>
+                                <span>Organize despesas fixas, compras parceladas e outros compromissos.</span>
                             </div>
                             <div style="display: flex; gap: 8px; align-items: flex-start;">
                                 <span style="font-weight: 600; color: var(--text-muted); flex-shrink: 0;">3.</span>
-                                <span>Acompanhe insights financeiros e o término automático de parcelamentos.</span>
+                                <span>Consulte o histórico e veja a previsão dos próximos meses.</span>
                             </div>
+                               <details class="home-install-guide">
+                                <summary>
+                            <span>Como instalar no celular</span>
+                            <svg class="report-chevron" width="14" height="14" viewBox="0 0 24 24"
+                                 fill="none" stroke="currentColor" stroke-width="2"
+                                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                            </summary>
+                                <p><strong>iPhone (Safari)</strong><br>
+                                    Toque em <strong>Compartilhar</strong>. Se o botão estiver oculto,
+                                    abra o menu <strong>Mais</strong>. Escolha <strong>Adicionar à Tela de Início</strong>.
+                                    Se aparecer <strong>Abrir como App da Web</strong>, deixe a opção ativada.
+                                    Toque em <strong>Adicionar</strong>.
+                                </p>
+                                <p><strong>Android (Chrome)</strong><br>
+                                    Abra o menu de três pontos, toque em <strong>Instalar e criar atalho</strong>
+                                    e escolha <strong>Instalar</strong>.
+                                </p>
+                            </details>
                         </div>
                     </div>
                     <div class="home-empty-message">
